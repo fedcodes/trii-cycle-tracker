@@ -2,9 +2,8 @@ name: Auto Commit Changes
 
 on:
   schedule:
-    # Runs every Friday at 9:10 AM UTC
-    # Adjust timezone as needed (UTC is default for GitHub Actions)
-    - cron: '10 9 * * 5'
+    # Runs every Friday at 9:10 AM Colombia time (UTC-5 = 14:10 UTC)
+    - cron: '10 14 * * 5'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab
 
 jobs:
