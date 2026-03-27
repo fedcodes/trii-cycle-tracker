@@ -18,6 +18,12 @@ export interface DiscoveryObjective {
   context?: string;
 }
 
+export interface Release {
+  version: string;
+  tag?: string; // e.g. "QA", "🌲"
+  items: string[];
+}
+
 export interface CycleData {
   cycleName: string;
   dates: string;
@@ -28,6 +34,7 @@ export interface CycleData {
   bets: Bet[];
   discovery: DiscoveryObjective[];
   weeklyLog: { week: string; items: string[] }[];
+  releases: Release[];
 }
 
 export const cycleData: CycleData = {
@@ -321,6 +328,92 @@ export const cycleData: CycleData = {
         "Inicio del ciclo",
         "Órdenes completado por Alan",
         "Update iOS/Android avanzando rápido (Jorge)",
+      ],
+    },
+  ],
+  releases: [
+    {
+      version: "3.0.X",
+      tag: "QA",
+      items: ["iOS SDK 26"],
+    },
+    {
+      version: "3.0.54",
+      items: [
+        "Optimización pantalla de stock (soluciona efecto de carga que muestra valor -1)",
+        "Movimientos de dividendos",
+        "Opción de ocultar saldo se conserva al cerrar sesión",
+        "Elección de moneda local o US se conserva al navegar por la aplicación",
+        "Carrusel de banner para acciones locales y EE. UU",
+        "Sección CDT en descubre",
+        "Market hold para cambios en US Stocks Chile",
+      ],
+    },
+    {
+      version: "3.0.51",
+      items: [
+        "SDK Meta",
+        "Conservar estado al ocultar saldo",
+        "Lista de acciones sube en prioridad en vista de invertir",
+        "Vuelve favoritos a la pantalla de inicio",
+        "Lista de movimientos individual para US Stocks",
+        "Filtros para ordenar acciones locales",
+        "Corrección de estilos en los banners",
+        "Corrección logos estirados al inicializar la app y actualizar slides de bienvenida",
+      ],
+    },
+    {
+      version: "3.0.46",
+      items: [
+        "CDTs Tuya",
+        "Integración PostHog",
+        "Cartola de movimientos en Chile",
+        "Onboarding US Stocks",
+        "Correcciones validaciones de ordenes en US Stocks",
+        "Corrección problemas carga portafolio usuarios Perú",
+        "Corrección validaciones para términos y condiciones",
+      ],
+    },
+    {
+      version: "3.0.36",
+      items: [
+        "Horarios de mercado para Fix 5.0",
+        "Actualización términos y condiciones Perú",
+        "Mejoras animación pantalla login",
+        "Mejoras en diseño de trii 3.0",
+      ],
+    },
+    {
+      version: "3.0.31",
+      tag: "🌲",
+      items: [
+        "Home completamente nuevo",
+        "Pantalla de inversiones rediseñada",
+        "Nuevo diseño en toda la app",
+      ],
+    },
+    {
+      version: "2.72.51",
+      items: [
+        "Icono de navidad",
+        "Actualización de direcciones de Perú para fondos Blum",
+        "Se corrige validación de precios límites",
+      ],
+    },
+    {
+      version: "2.72.38",
+      items: [
+        "Se elimina en los fondos en la tabla de rentabilidad los elementos duplicados",
+        "Se corrige el error del calculo de min y max para la cantidad de acciones en ordenes a mercado",
+      ],
+    },
+    {
+      version: "2.72.37",
+      items: [
+        "Se arregla la pantalla de videos",
+        "Se pone en más información del saldo el valor del marketHold",
+        "Se corrige el error que no dejaba poner ninguna orden en cualquier tipo de subasta",
+        "Se corrige el currency que se usa para el input y las validaciones",
       ],
     },
   ],
