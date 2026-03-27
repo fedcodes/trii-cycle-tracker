@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { cycleData } from "@/data/cycle";
 
 function getObjectiveColor(id: number): string {
@@ -11,8 +10,6 @@ function getObjectiveColor(id: number): string {
 }
 
 export default function DiscoveryTab() {
-  const [expandedObj, setExpandedObj] = useState<number | null>(null);
-
   return (
     <div>
       <p
@@ -35,8 +32,8 @@ export default function DiscoveryTab() {
         }}
       >
         {cycleData.discovery.map((obj) => {
-          const isExpanded = expandedObj === obj.id;
           const objColor = getObjectiveColor(obj.id);
+          const hasTasks = obj.tasks.length > 0;
 
           return (
             <div
@@ -45,10 +42,8 @@ export default function DiscoveryTab() {
                 background: "rgb(38 38 38)",
                 borderRadius: "0.5rem",
                 overflow: "hidden",
-                cursor: "pointer",
-                transition: "transform 0.1s",
+                opacity: hasTasks ? 1 : 0.7,
               }}
-              onClick={() => setExpandedObj(isExpanded ? null : obj.id)}
             >
               {/* Color accent bar */}
               <div style={{ height: "3px", background: objColor }} />
@@ -66,131 +61,109 @@ export default function DiscoveryTab() {
                   {obj.name}
                 </h3>
 
-                {/* Assignments */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "1rem",
-                    marginBottom: "1rem",
-                    flexWrap: "wrap",
-                  }}
-                >
+                {/* Assignments — full names */}
+                {(obj.po || obj.designer) && (
                   <div
                     style={{
                       display: "flex",
-                      alignItems: "center",
-                      gap: "0.375rem",
+                      gap: "1rem",
+                      marginBottom: "1rem",
+                      flexWrap: "wrap",
                     }}
                   >
-                    <span
-                      style={{
-                        fontSize: "0.6875rem",
-                        fontWeight: 600,
-                        color: "rgb(163 163 163)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                      }}
-                    >
-                      PO
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "0.75rem",
-                        fontWeight: 600,
-                        padding: "0.125rem 0.5rem",
-                        borderRadius: "1rem",
-                        background: "rgb(51 51 51)",
-                        color: "rgb(227 227 227)",
-                      }}
-                    >
-                      {obj.po.initials}
-                    </span>
+                    {obj.po && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.375rem",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "0.6875rem",
+                            fontWeight: 600,
+                            color: "rgb(163 163 163)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
+                          PO
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            padding: "0.125rem 0.5rem",
+                            borderRadius: "1rem",
+                            background: "rgb(51 51 51)",
+                            color: "rgb(227 227 227)",
+                          }}
+                        >
+                          {obj.po.name}
+                        </span>
+                      </div>
+                    )}
+                    {obj.designer && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.375rem",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "0.6875rem",
+                            fontWeight: 600,
+                            color: "rgb(163 163 163)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
+                          Diseño
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: 600,
+                            padding: "0.125rem 0.5rem",
+                            borderRadius: "1rem",
+                            background: "rgb(51 51 51)",
+                            color: "rgb(227 227 227)",
+                          }}
+                        >
+                          {obj.designer.name}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  {obj.designer && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.375rem",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "0.6875rem",
-                          fontWeight: 600,
-                          color: "rgb(163 163 163)",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
-                        Diseño
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "0.75rem",
-                          fontWeight: 600,
-                          padding: "0.125rem 0.5rem",
-                          borderRadius: "1rem",
-                          background: "rgb(51 51 51)",
-                          color: "rgb(227 227 227)",
-                        }}
-                      >
-                        {obj.designer.initials}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                )}
 
-                {/* Task count badge */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    marginBottom: "0.75rem",
-                  }}
-                >
-                  <span
+                {/* No assignments notice */}
+                {!obj.po && !obj.designer && (
+                  <p
                     style={{
                       fontSize: "0.75rem",
-                      fontWeight: 600,
-                      color: objColor,
+                      color: "rgb(163 163 163)",
+                      marginBottom: "0.75rem",
+                      fontStyle: "italic",
                     }}
                   >
-                    {obj.tasks.length} items en discovery
-                  </span>
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                    style={{
-                      transform: isExpanded
-                        ? "rotate(180deg)"
-                        : "rotate(0deg)",
-                      transition: "transform 0.2s",
-                    }}
-                  >
-                    <path
-                      d="M3 4.5L6 7.5L9 4.5"
-                      stroke="rgb(163,163,163)"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
+                    Sin asignación de discovery este ciclo
+                  </p>
+                )}
 
                 {/* Context alert if exists */}
                 {obj.context && (
                   <div
                     style={{
-                      background: "rgb(57 47 23)",
+                      background: hasTasks ? "rgb(57 47 23)" : "rgb(45 45 45)",
                       borderRadius: "0.375rem",
                       padding: "0.625rem 0.75rem",
-                      marginBottom: "0.75rem",
+                      marginBottom: hasTasks ? "0.75rem" : "0",
                       fontSize: "0.75rem",
-                      color: "rgb(247 199 55)",
+                      color: hasTasks ? "rgb(247 199 55)" : "rgb(163 163 163)",
                       lineHeight: 1.5,
                     }}
                   >
@@ -198,8 +171,22 @@ export default function DiscoveryTab() {
                   </div>
                 )}
 
-                {/* Expanded tasks */}
-                {isExpanded && (
+                {/* Task count */}
+                {hasTasks && (
+                  <p
+                    style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      color: objColor,
+                      marginBottom: "0.625rem",
+                    }}
+                  >
+                    {obj.tasks.length} items en discovery
+                  </p>
+                )}
+
+                {/* Tasks — always visible */}
+                {hasTasks && (
                   <div
                     style={{
                       display: "flex",

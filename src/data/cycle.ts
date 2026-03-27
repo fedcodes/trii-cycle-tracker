@@ -12,7 +12,7 @@ export interface Bet {
 export interface DiscoveryObjective {
   id: number;
   name: string;
-  po: { name: string; initials: string };
+  po: { name: string; initials: string } | null;
   designer: { name: string; initials: string } | null;
   tasks: { name: string; status: string; notes: string }[];
   context?: string;
@@ -208,7 +208,7 @@ export const cycleData: CycleData = {
   discovery: [
     {
       id: 1,
-      name: "Obj. 1 — Incrementar usuarios pro",
+      name: "Obj. 1 — Escalar trii pro al 10% de penetración",
       po: { name: "Juanita", initials: "JP" },
       designer: { name: "Jael", initials: "JA" },
       tasks: [
@@ -236,14 +236,14 @@ export const cycleData: CycleData = {
     },
     {
       id: 2,
-      name: "Obj. 2 — Crecer US Stocks",
+      name: "Obj. 2 — Lanzar US Stocks en Colombia y Perú",
       po: { name: "Juanita", initials: "JP" },
       designer: { name: "Jael", initials: "JA" },
       tasks: [
         {
           name: "Lanzar Colombia",
           status: "En curso",
-          notes: "Asignado a Federico (FG), no a Juanita",
+          notes: "Asignado a Federico, no a Juanita",
         },
         {
           name: "Análisis fundamental y técnico de US Stocks",
@@ -258,8 +258,24 @@ export const cycleData: CycleData = {
       ],
     },
     {
+      id: 3,
+      name: "Obj. 3 — Expandir y mejorar producto en Chile",
+      po: null,
+      designer: null,
+      tasks: [],
+      context: "Sin items en discovery este ciclo. Build activo: Dividendos Chile y Retiros Express Chile.",
+    },
+    {
+      id: 4,
+      name: "Obj. 4 — Aumentar activación a 50%",
+      po: null,
+      designer: null,
+      tasks: [],
+      context: "Sin items en discovery este ciclo. Build activo: Retiros fondos MM, Mejoras transf. Peru, TC en depósitos.",
+    },
+    {
       id: 5,
-      name: "Obj. 5 — Crecer AUMs fondos Perú",
+      name: "Obj. 5 — Crecer AUMs de fondos en Perú",
       po: { name: "Felipe", initials: "FA" },
       designer: { name: "Ange", initials: "AN" },
       tasks: [
