@@ -4,9 +4,10 @@ import { useState } from "react";
 import { cycleData } from "@/data/cycle";
 import GanttTab from "@/components/GanttTab";
 import DiscoveryTab from "@/components/DiscoveryTab";
+import ReleasesTab from "@/components/ReleasesTab";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"gantt" | "discovery">("gantt");
+  const [activeTab, setActiveTab] = useState<"gantt" | "discovery" | "releases">("gantt");
 
   const statusCounts = {
     onTrack: cycleData.bets.filter((b) => b.status === "On track").length,
@@ -178,11 +179,28 @@ export default function Home() {
         >
           Discovery
         </button>
+        <button
+          onClick={() => setActiveTab("releases")}
+          className={activeTab === "releases" ? "tab-active" : "tab-inactive"}
+          style={{
+            background: "none",
+            border: "none",
+            fontSize: "0.9375rem",
+            fontWeight: activeTab === "releases" ? 700 : 400,
+            padding: "0.75rem 0",
+            cursor: "pointer",
+            fontFamily: "DM Sans, sans-serif",
+          }}
+        >
+          Releases
+        </button>
       </nav>
 
       {/* Tab content */}
       <main style={{ padding: "1.5rem 2rem 3rem" }}>
-        {activeTab === "gantt" ? <GanttTab /> : <DiscoveryTab />}
+        {activeTab === "gantt" && <GanttTab />}
+        {activeTab === "discovery" && <DiscoveryTab />}
+        {activeTab === "releases" && <ReleasesTab />}
       </main>
     </div>
   );
