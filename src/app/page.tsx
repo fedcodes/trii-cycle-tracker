@@ -12,8 +12,10 @@ export default function Home() {
   const statusCounts = {
     onTrack: cycleData.bets.filter((b) => b.status === "On track").length,
     update: cycleData.bets.filter((b) => b.status === "Update").length,
+    blocked: cycleData.bets.filter((b) => b.status === "Blocked").length,
     listo: cycleData.bets.filter((b) => b.status === "Listo").length,
-    notStarted: cycleData.bets.filter((b) => b.status === "Not started").length,
+    notStarted: cycleData.bets.filter((b) => b.status === "Not started" && !b.dropped).length,
+    dropped: cycleData.bets.filter((b) => b.dropped).length,
   };
 
   return (
@@ -126,6 +128,14 @@ export default function Home() {
           bg="rgb(57 47 23)"
           color="rgb(247 199 55)"
         />
+        {statusCounts.blocked > 0 && (
+          <SummaryBadge
+            label="Blocked"
+            count={statusCounts.blocked}
+            bg="rgb(64 28 38)"
+            color="rgb(255 112 150)"
+          />
+        )}
         <SummaryBadge
           label="Listo"
           count={statusCounts.listo}

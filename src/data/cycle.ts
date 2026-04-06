@@ -3,10 +3,11 @@ export interface Bet {
   objective: string;
   objectiveNum: number;
   team: string[];
-  status: "On track" | "Update" | "Not started" | "Listo";
+  status: "On track" | "Update" | "Not started" | "Listo" | "Blocked";
   weeks: [number, number]; // start week, end week (1-6)
   lastUpdate: string;
   updates: string[];
+  dropped?: boolean;
 }
 
 export interface DiscoveryObjective {
@@ -41,9 +42,9 @@ export const cycleData: CycleData = {
   cycleName: "Ciclo 2 — 2026",
   dates: "Mar 16 → Abr 24, 2026",
   cooldown: "Abr 27 → May 8, 2026",
-  currentWeek: 2,
+  currentWeek: 4,
   totalWeeks: 6,
-  lastUpdated: "2026-03-27",
+  lastUpdated: "2026-04-06",
   bets: [
     {
       name: "Demo trii Pro",
@@ -52,9 +53,12 @@ export const cycleData: CycleData = {
       team: ["SB", "JR"],
       status: "On track",
       weeks: [2, 6],
-      lastUpdate: "Jorge terminó Update iOS/Android y se movió a este proyecto",
+      lastUpdate:
+        "Sergio arranca backend. Jorge adelantó FE, esta semana tech debt, termina demo S5",
       updates: [
-        "Jorge terminó Update iOS/Android temprano, se movió a Demo trii Pro",
+        "Sergio se mueve a backend Demo trii Pro (S4)",
+        "Jorge adelantó FE, esta semana en tech debt",
+        "Jorge termina Demo trii Pro en S5",
       ],
     },
     {
@@ -72,27 +76,28 @@ export const cycleData: CycleData = {
       objective: "Obj. 1 — Escalar trii pro",
       objectiveNum: 1,
       team: ["CA"],
-      status: "Update",
-      weeks: [4, 6],
+      status: "Not started",
+      weeks: [6, 6],
       lastUpdate:
-        "Pushed por ausencia de Carlos. Jorge puede absorber si termina Demo trii Pro antes",
+        "Carlos lo toma última semana del ciclo y cooldown",
       updates: [
         "Pushed por ausencia de Carlos (emergencia familiar)",
-        "Jorge puede absorber si termina Demo trii Pro antes",
+        "Carlos regresó — lo toma en S6 y cooldown",
       ],
     },
     {
       name: "Vinculación Completa",
       objective: "Obj. 2 — US Stocks CO",
       objectiveNum: 2,
-      team: ["KA", "ET"],
+      team: ["KA", "ET", "GM"],
       status: "On track",
       weeks: [1, 6],
       lastUpdate:
-        "Definiciones recibidas de Acciones y Valores. Sin bloqueos",
+        "Estefa terminó testing AyV, trabaja en FE. Gafe y Kai arrancan BE esta semana",
       updates: [
-        "Estefa recibió definiciones de Acciones y Valores",
-        "Sin bloqueos",
+        "Estefa terminó testing de servicios Acciones y Valores",
+        "Estefa trabaja en frontend",
+        "Gafe y Kai arrancan integración backend esta semana (S4)",
       ],
     },
     {
@@ -121,38 +126,45 @@ export const cycleData: CycleData = {
       objective: "Obj. 3 — Chile",
       objectiveNum: 3,
       team: ["KA"],
-      status: "Update",
+      status: "Blocked",
       weeks: [1, 3],
       lastUpdate:
-        "Event BUS de Vector Capital no tiene evento de dividendos. Kai usa workaround con flujo actual mejorado",
+        "Bloqueado. Fix nuestro no cambia experiencia. Se pushea a Vector para fix con BUS Event. Se trabaja en cooldown",
       updates: [
-        "Event BUS de Vector Capital no incluye evento de dividendos",
-        "Kai implementa workaround con flujo actual mejorado",
-        "No es ideal pero mejora la experiencia del usuario",
+        "Fix nuestro no cambia fundamentalmente la experiencia",
+        "Se pushea a Vector Capital para fix con servicio BUS Event",
+        "Se continúa trabajando en cooldown",
+        "Kai se mueve a Vinculación Completa",
       ],
     },
     {
       name: "Retiros Express Chile",
       objective: "Obj. 3 — Chile",
       objectiveNum: 3,
-      team: ["KA"],
+      team: [],
       status: "Not started",
       weeks: [2, 3],
-      lastUpdate: "Pendiente",
-      updates: ["Pendiente"],
+      lastUpdate:
+        "Descartado del ciclo — se evalúa en próximo ciclo",
+      updates: [
+        "Descartado por restricciones de tiempo",
+        "Se evalúa como bet para el próximo ciclo",
+      ],
+      dropped: true,
     },
     {
       name: "Retiros fondos MM",
       objective: "Obj. 4 — Activación",
       objectiveNum: 4,
       team: ["SB", "CA"],
-      status: "Update",
-      weeks: [1, 4],
+      status: "On track",
+      weeks: [1, 5],
       lastUpdate:
-        "Sergio en backend sin bloqueos. Frontend pushed por ausencia de Carlos",
+        "Carlos regresó, arranca frontend. Backend listo (Sergio). 2 semanas de FE",
       updates: [
-        "Sergio avanza backend sin bloqueos",
-        "Frontend pushed por ausencia de Carlos",
+        "Backend completado por Sergio",
+        "Carlos regresó, arranca frontend esta semana (S4)",
+        "Frontend estimado en 2 semanas (S4-S5)",
       ],
     },
     {
@@ -170,23 +182,24 @@ export const cycleData: CycleData = {
       objective: "Obj. 4 — Activación",
       objectiveNum: 4,
       team: ["CA"],
-      status: "Update",
-      weeks: [1, 2],
+      status: "On track",
+      weeks: [1, 4],
       lastUpdate:
-        "Carlos intentando terminar antes de su ausencia",
+        "Carlos regresó, terminando esta semana",
       updates: [
-        "Carlos intentando terminar antes de su ausencia por emergencia familiar",
+        "Pushed por ausencia de Carlos",
+        "Carlos regresó, cierra esta semana (S4)",
       ],
     },
     {
       name: "Fix 5.0 Peru Orders",
       objective: "Regulatorio",
       objectiveNum: 99,
-      team: ["AV"],
+      team: ["AV", "DC"],
       status: "On track",
       weeks: [2, 6],
-      lastUpdate: "Alan 100% dedicado. Deadline BVL Abr 24",
-      updates: ["Alan 100% dedicado", "Deadline BVL: Abril 24"],
+      lastUpdate: "Alan y David 100% dedicados. Deadline BVL Abr 24",
+      updates: ["Alan y David 100% dedicados", "Deadline BVL: Abril 24"],
     },
     {
       name: "Fix 5.0 Peru Market",
@@ -222,17 +235,17 @@ export const cycleData: CycleData = {
         {
           name: "Modificación de órdenes — web/app",
           status: "En curso",
-          notes: "",
+          notes: "Juanita y Jael arrancan diseño esta semana",
         },
         {
           name: "Take Profit Colombia — web/app",
           status: "En curso",
-          notes: "",
+          notes: "Juanita y Jael arrancan diseño esta semana",
         },
         {
           name: "Poder cambiar el default de órdenes en el app",
           status: "En curso",
-          notes: "",
+          notes: "Juanita y Jael arrancan diseño esta semana",
         },
         {
           name: "Historial de órdenes de bolsa — web/app",
@@ -255,7 +268,7 @@ export const cycleData: CycleData = {
         {
           name: "Análisis fundamental y técnico de US Stocks",
           status: "En curso",
-          notes: "",
+          notes: "Juanita y Fede evaluando proveedores y viabilidad financiera",
         },
         {
           name: "Diferencial de spreads y comisiones para usuarios pro",
@@ -263,22 +276,6 @@ export const cycleData: CycleData = {
           notes: "",
         },
       ],
-    },
-    {
-      id: 3,
-      name: "Obj. 3 — Expandir y mejorar producto en Chile",
-      po: null,
-      designer: null,
-      tasks: [],
-      context: "Sin items en discovery este ciclo. Build activo: Dividendos Chile y Retiros Express Chile.",
-    },
-    {
-      id: 4,
-      name: "Obj. 4 — Aumentar activación a 50%",
-      po: null,
-      designer: null,
-      tasks: [],
-      context: "Sin items en discovery este ciclo. Build activo: Retiros fondos MM, Mejoras transf. Peru, TC en depósitos.",
     },
     {
       id: 5,
@@ -289,7 +286,7 @@ export const cycleData: CycleData = {
         {
           name: "Cambiar flujo de inscripción para fondos Blum",
           status: "En curso",
-          notes: "",
+          notes: "Felipe A y Angelica ya arrancaron diseño del nuevo onboarding",
         },
         {
           name: "Rentabilidad de fondos de inversión desde Back",
@@ -299,12 +296,14 @@ export const cycleData: CycleData = {
         {
           name: "Retiros directo a la cuenta del usuario",
           status: "En curso",
-          notes: "",
+          notes:
+            "Felipe A en reuniones con AyV y Blum — viabilidad financiera y operativa",
         },
         {
           name: "Traslados entre fondos",
           status: "En curso",
-          notes: "",
+          notes:
+            "Felipe A en reuniones con AyV y Blum — viabilidad financiera y operativa",
         },
       ],
       context:
@@ -312,6 +311,28 @@ export const cycleData: CycleData = {
     },
   ],
   weeklyLog: [
+    {
+      week: "Semana 4 (Abr 6-10)",
+      items: [
+        "Carlos regresó — terminando TC en depósitos, arranca FE retiros fondos MM",
+        "Sergio se mueve a backend Demo trii Pro",
+        "Jorge en tech debt esta semana, termina Demo trii Pro S5",
+        "Estefa terminó testing servicios AyV, trabaja en FE Vinculación Completa",
+        "Gafe y Kai arrancan backend Vinculación Completa",
+        "Decisión: Retiros Inmediatos Chile descartado del ciclo",
+        "Dividendos Chile bloqueado — se pushea a Vector para fix con BUS Event",
+        "Kai se mueve de Dividendos a Vinculación Completa",
+      ],
+    },
+    {
+      week: "Semana 3 (Mar 30 - Abr 3)",
+      items: [
+        "Jorge corrigió varios bugs en la app",
+        "Jorge movió sección 'Movimientos' al menú principal (ask de usuarios)",
+        "Estefa avanzó testing de servicios Acciones y Valores",
+        "Sergio continuó backend retiros fondos MM",
+      ],
+    },
     {
       week: "Semana 2 (Mar 23-27)",
       items: [
@@ -335,7 +356,12 @@ export const cycleData: CycleData = {
     {
       version: "3.0.X",
       tag: "QA",
-      items: ["iOS SDK 26"],
+      items: [
+        "iOS SDK 26",
+        "Vuelven los tags en las listas de stocks",
+        "Corrección valores de acciones con delay para usuarios sin trii pro",
+        "Actualización versiones de GitHub Actions",
+      ],
     },
     {
       version: "3.0.54",

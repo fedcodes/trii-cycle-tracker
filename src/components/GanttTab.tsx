@@ -26,6 +26,8 @@ function getStatusBadgeStyle(status: Bet["status"]) {
       return { bg: "rgb(2 76 37)", color: "rgb(2 251 126)" };
     case "Update":
       return { bg: "rgb(57 47 23)", color: "rgb(247 199 55)" };
+    case "Blocked":
+      return { bg: "rgb(64 28 38)", color: "rgb(255 112 150)" };
     case "Listo":
       return { bg: "rgb(2 76 37)", color: "rgb(2 251 126)" };
     case "Not started":
@@ -33,7 +35,23 @@ function getStatusBadgeStyle(status: Bet["status"]) {
   }
 }
 
-function StatusIcon({ status }: { status: Bet["status"] }) {
+function StatusIcon({ status, dropped }: { status: Bet["status"]; dropped?: boolean }) {
+  if (dropped) {
+    return (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="7" stroke="rgb(163,163,163)" strokeWidth="1.5" />
+        <path d="M5 5l6 6M11 5l-6 6" stroke="rgb(163,163,163)" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (status === "Blocked") {
+    return (
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="7" stroke="rgb(255,112,150)" strokeWidth="1.5" />
+        <path d="M5 8h6" stroke="rgb(255,112,150)" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    );
+  }
   if (status === "Listo" || status === "On track") {
     return (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -189,15 +207,15 @@ export default function GanttTab() {
                     gap: "0.5rem",
                   }}
                 >
-                  <StatusIcon status={bet.status} />
+                  <StatusIcon status={bet.status} dropped={bet.dropped} />
                   <span
                     style={{
                       fontWeight: 600,
                       fontSize: "0.8125rem",
                       color: "rgb(227 227 227)",
                       textDecoration:
-                        bet.status === "Listo" ? "line-through" : "none",
-                      opacity: bet.status === "Listo" ? 0.7 : 1,
+                        bet.status === "Listo" || bet.dropped ? "line-through" : "none",
+                      opacity: bet.status === "Listo" || bet.dropped ? 0.5 : 1,
                     }}
                   >
                     {bet.name}
