@@ -42,9 +42,9 @@ export const cycleData: CycleData = {
   cycleName: "Ciclo 2 — 2026",
   dates: "Mar 16 → Abr 24, 2026",
   cooldown: "Abr 27 → May 8, 2026",
-  currentWeek: 4,
+  currentWeek: 5,
   totalWeeks: 6,
-  lastUpdated: "2026-04-06",
+  lastUpdated: "2026-04-13",
   bets: [
     {
       name: "Demo trii Pro",
@@ -54,11 +54,11 @@ export const cycleData: CycleData = {
       status: "On track",
       weeks: [2, 6],
       lastUpdate:
-        "Sergio arranca backend. Jorge adelantó FE, esta semana tech debt, termina demo S5",
+        "Jorge arrancó S5. Sergio en backend.",
       updates: [
         "Sergio se mueve a backend Demo trii Pro (S4)",
         "Jorge adelantó FE, esta semana en tech debt",
-        "Jorge termina Demo trii Pro en S5",
+        "Jorge arrancó Demo trii Pro esta semana (S5)",
       ],
     },
     {
@@ -93,11 +93,14 @@ export const cycleData: CycleData = {
       status: "On track",
       weeks: [1, 6],
       lastUpdate:
-        "Estefa terminó testing AyV, trabaja en FE. Gafe y Kai arrancan BE esta semana",
+        "Document reader terminado. FE y BE sin bloqueos. Esperando declaraciones de renta de AyV",
       updates: [
         "Estefa terminó testing de servicios Acciones y Valores",
         "Estefa trabaja en frontend",
-        "Gafe y Kai arrancan integración backend esta semana (S4)",
+        "Gafe y Kai arrancan integración backend (S4)",
+        "Document reader terminado (S5)",
+        "FE y BE trabajando sin bloqueos",
+        "Se pidió a AyV deck de 10-15 declaraciones de renta para testing — esperando respuesta",
       ],
     },
     {
@@ -126,10 +129,10 @@ export const cycleData: CycleData = {
       objective: "Obj. 3 — Chile",
       objectiveNum: 3,
       team: ["KA"],
-      status: "Blocked",
+      status: "Update",
       weeks: [1, 3],
       lastUpdate:
-        "Bloqueado. Fix nuestro no cambia experiencia. Se pushea a Vector para fix con BUS Event. Se trabaja en cooldown",
+        "Bloqueado. Fix nuestro no cambia experiencia. Se pushea a Vector para fix con BUS Event. Se trabaja en cooldown. Kai pasa a Vinculación Completa",
       updates: [
         "Fix nuestro no cambia fundamentalmente la experiencia",
         "Se pushea a Vector Capital para fix con servicio BUS Event",
@@ -160,11 +163,11 @@ export const cycleData: CycleData = {
       status: "On track",
       weeks: [1, 5],
       lastUpdate:
-        "Carlos regresó, arranca frontend. Backend listo (Sergio). 2 semanas de FE",
+        "Carlos arrancó FE, se espera cerrar esta semana (S5). Backend listo (Sergio)",
       updates: [
         "Backend completado por Sergio",
-        "Carlos regresó, arranca frontend esta semana (S4)",
-        "Frontend estimado en 2 semanas (S4-S5)",
+        "Carlos regresó, arranca frontend (S4)",
+        "Carlos en FE, se espera terminar esta semana (S5)",
       ],
     },
     {
@@ -172,23 +175,28 @@ export const cycleData: CycleData = {
       objective: "Obj. 4 — Activación",
       objectiveNum: 4,
       team: ["GM"],
-      status: "On track",
+      status: "Listo",
       weeks: [2, 4],
-      lastUpdate: "Gafe ejecuta en paralelo con Soporte US Stocks",
-      updates: ["Gafe ejecuta en paralelo con Soporte US Stocks"],
+      lastUpdate: "Live. Ops Perú testeando — si funciona bien se automatiza completamente",
+      updates: [
+        "Gafe ejecuta en paralelo con Soporte US Stocks",
+        "Proyecto live (S5)",
+        "Ops Perú testeando — si funciona bien esta semana se automatiza completamente",
+      ],
     },
     {
       name: "TC en depósitos",
       objective: "Obj. 4 — Activación",
       objectiveNum: 4,
       team: ["CA"],
-      status: "On track",
+      status: "Listo",
       weeks: [1, 4],
       lastUpdate:
-        "Carlos regresó, terminando esta semana",
+        "Completado. Fede testeando (S5)",
       updates: [
         "Pushed por ausencia de Carlos",
         "Carlos regresó, cierra esta semana (S4)",
+        "Completado por Carlos (S5). Fede testeando",
       ],
     },
     {
@@ -198,8 +206,13 @@ export const cycleData: CycleData = {
       team: ["AV", "DC"],
       status: "On track",
       weeks: [2, 6],
-      lastUpdate: "Alan y David 100% dedicados. Deadline BVL Abr 24",
-      updates: ["Alan y David 100% dedicados", "Deadline BVL: Abril 24"],
+      lastUpdate: "Certificados en order entry. Fase de testing extensivo antes de go-live",
+      updates: [
+        "Alan y David 100% dedicados",
+        "Deadline BVL: Abril 24",
+        "Certificados en order entry (S5)",
+        "Ahora en fase de testing extensivo antes de go-live",
+      ],
     },
     {
       name: "Fix 5.0 Peru Market",
@@ -208,8 +221,12 @@ export const cycleData: CycleData = {
       team: ["DC"],
       status: "On track",
       weeks: [1, 5],
-      lastUpdate: "David dedicado junto con Orders",
-      updates: ["David dedicado junto con Orders"],
+      lastUpdate: "Certificados en market data. Fase de testing extensivo antes de go-live",
+      updates: [
+        "David dedicado junto con Orders",
+        "Certificados en market data (S5)",
+        "Ahora en fase de testing extensivo antes de go-live",
+      ],
     },
     {
       name: "Update iOS/Android",
@@ -278,6 +295,26 @@ export const cycleData: CycleData = {
       ],
     },
     {
+      id: 3,
+      name: "Obj. 3 — Expandir y mejorar producto en Chile",
+      po: null,
+      designer: null,
+      tasks: [],
+    },
+    {
+      id: 4,
+      name: "Obj. 4 — Aumentar activación a 50%",
+      po: null,
+      designer: { name: "James Alonso", initials: "JA" },
+      tasks: [
+        {
+          name: "Mejorar flujo de onboarding (activación)",
+          status: "Nuevo",
+          notes: "James Alonso se unió al equipo de diseño. Se verá un proyecto para mejorar el onboarding enfocado en activación",
+        },
+      ],
+    },
+    {
       id: 5,
       name: "Obj. 5 — Crecer AUMs de fondos en Perú",
       po: { name: "Felipe", initials: "FA" },
@@ -286,7 +323,7 @@ export const cycleData: CycleData = {
         {
           name: "Cambiar flujo de inscripción para fondos Blum",
           status: "En curso",
-          notes: "Felipe A y Angelica ya arrancaron diseño del nuevo onboarding",
+          notes: "Felipe A y Angelica ya arrancaron diseño. Se verá el diseño del nuevo flujo esta semana (S5)",
         },
         {
           name: "Rentabilidad de fondos de inversión desde Back",
@@ -305,12 +342,32 @@ export const cycleData: CycleData = {
           notes:
             "Felipe A en reuniones con AyV y Blum — viabilidad financiera y operativa",
         },
+        {
+          name: "Mejoras en movimientos de transacciones de fondos",
+          status: "Nuevo",
+          notes: "Agregado para próxima betting table — varias áreas de mejora identificadas",
+        },
       ],
       context:
         "Blum pidió alcanzar USD 10M en AUMs en Perú antes de fin de año. Si no se cumple, cierran los fondos.",
     },
   ],
   weeklyLog: [
+    {
+      week: "Semana 5 (Abr 13-17)",
+      items: [
+        "TC en depósitos completado por Carlos — Fede testeando",
+        "Carlos arrancó FE de retiros fondos MM, se espera terminar esta semana",
+        "Mejoras transf. Peru live — Ops Perú testeando; si todo ok se automatiza",
+        "Jorge arrancó Demo trii Pro",
+        "Vinculación Completa: document reader terminado, FE y BE sin bloqueos. Se pidió a AyV declaraciones de renta para testing",
+        "Fix 5.0 Peru: certificados en order entry y market data. Fase de testing extensivo",
+        "James Alonso se unió al equipo de diseño",
+        "Discovery: se verá diseño del nuevo onboarding Perú esta semana",
+        "Discovery: nuevo proyecto de mejora de movimientos de fondos (Obj. 5)",
+        "Discovery: nuevo proyecto de mejora de onboarding para activación con James Alonso (Obj. 4)",
+      ],
+    },
     {
       week: "Semana 4 (Abr 6-10)",
       items: [
@@ -322,6 +379,7 @@ export const cycleData: CycleData = {
         "Decisión: Retiros Inmediatos Chile descartado del ciclo",
         "Dividendos Chile bloqueado — se pushea a Vector para fix con BUS Event",
         "Kai se mueve de Dividendos a Vinculación Completa",
+        "Alan y David siguen enfocados en Fix 5.0 Peru",
       ],
     },
     {
@@ -354,12 +412,26 @@ export const cycleData: CycleData = {
   ],
   releases: [
     {
-      version: "3.0.X",
+      version: "X",
       tag: "QA",
       items: [
+        "Tags para listas de stocks locales (Tag comisión cero y top)",
+        "Ocultamiento condicional de información sensible (montos y descripciones) en la tabla de inversiones",
+        "Permite simular CDTs en Tuya sin tener el monto mínimo",
+        "Eliminación de opción \"Saldo en caja\" para retiros de CDT de Mibanco",
+        "Si estás bloqueado en Mibanco, permitir sacar CDTs de Tuya",
+      ],
+    },
+    {
+      version: "3.0.56",
+      tag: "Live",
+      items: [
         "iOS SDK 26",
-        "Vuelven los tags en las listas de stocks",
+        "Android min version SDK 24, Android 7 (Nougat)",
+        "Actualización de navegación en home. Vuelve movimientos a navegación principal",
+        "Tag Subasta en las listas de stocks locales",
         "Corrección valores de acciones con delay para usuarios sin trii pro",
+        "Estados finalizado para CDTs",
         "Actualización versiones de GitHub Actions",
       ],
     },
