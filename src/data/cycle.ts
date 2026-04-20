@@ -42,9 +42,9 @@ export const cycleData: CycleData = {
   cycleName: "Ciclo 2 — 2026",
   dates: "Mar 16 → Abr 24, 2026",
   cooldown: "Abr 27 → May 8, 2026",
-  currentWeek: 5,
+  currentWeek: 6,
   totalWeeks: 6,
-  lastUpdated: "2026-04-13",
+  lastUpdated: "2026-04-20",
   bets: [
     {
       name: "Demo trii Pro",
@@ -54,11 +54,12 @@ export const cycleData: CycleData = {
       status: "On track",
       weeks: [2, 6],
       lastUpdate:
-        "Jorge arrancó S5. Sergio en backend.",
+        "Terminando desarrollo. Jorge cierra FE, Sergio en backend. Entrega esperada esta semana (S6).",
       updates: [
         "Sergio se mueve a backend Demo trii Pro (S4)",
         "Jorge adelantó FE, esta semana en tech debt",
         "Jorge arrancó Demo trii Pro esta semana (S5)",
+        "Terminando desarrollo — entrega esperada esta semana (S6)",
       ],
     },
     {
@@ -75,14 +76,15 @@ export const cycleData: CycleData = {
       name: "Mejoras trii web",
       objective: "Obj. 1 — Escalar trii pro",
       objectiveNum: 1,
-      team: ["CA"],
+      team: ["CA", "JR"],
       status: "Not started",
       weeks: [6, 6],
       lastUpdate:
-        "Carlos lo toma última semana del ciclo y cooldown",
+        "Jorge arranca esta semana (S6) después de terminar Demo trii Pro. Carlos retoma en cooldown.",
       updates: [
         "Pushed por ausencia de Carlos (emergencia familiar)",
         "Carlos regresó — lo toma en S6 y cooldown",
+        "Jorge se suma esta semana (S6) al cerrar Demo trii Pro",
       ],
     },
     {
@@ -93,7 +95,7 @@ export const cycleData: CycleData = {
       status: "On track",
       weeks: [1, 6],
       lastUpdate:
-        "Document reader terminado. FE y BE sin bloqueos. Esperando declaraciones de renta de AyV",
+        "Preguntas sobre funcionamiento de la API con AyV. Resolución esperada esta semana (S6). Desarrollo continúa en paralelo.",
       updates: [
         "Estefa terminó testing de servicios Acciones y Valores",
         "Estefa trabaja en frontend",
@@ -101,6 +103,7 @@ export const cycleData: CycleData = {
         "Document reader terminado (S5)",
         "FE y BE trabajando sin bloqueos",
         "Se pidió a AyV deck de 10-15 declaraciones de renta para testing — esperando respuesta",
+        "Surgieron preguntas sobre funcionamiento de la API con AyV (S6) — resolución esperada esta semana",
       ],
     },
     {
@@ -161,13 +164,14 @@ export const cycleData: CycleData = {
       objectiveNum: 4,
       team: ["SB", "CA"],
       status: "On track",
-      weeks: [1, 5],
+      weeks: [1, 6],
       lastUpdate:
-        "Carlos arrancó FE, se espera cerrar esta semana (S5). Backend listo (Sergio)",
+        "Terminando desarrollo FE (Carlos). Backend listo (Sergio). Entrega esperada esta semana (S6).",
       updates: [
         "Backend completado por Sergio",
         "Carlos regresó, arranca frontend (S4)",
         "Carlos en FE, se espera terminar esta semana (S5)",
+        "Terminando FE — entrega esperada esta semana (S6)",
       ],
     },
     {
@@ -206,12 +210,13 @@ export const cycleData: CycleData = {
       team: ["AV", "DC"],
       status: "On track",
       weeks: [2, 6],
-      lastUpdate: "Certificados en order entry. Fase de testing extensivo antes de go-live",
+      lastUpdate: "Go-live sábado Abr 25. Operación arranca lunes Abr 27.",
       updates: [
         "Alan y David 100% dedicados",
         "Deadline BVL: Abril 24",
         "Certificados en order entry (S5)",
         "Ahora en fase de testing extensivo antes de go-live",
+        "Go-live sábado Abr 25 — operación arranca lunes Abr 27 (S6)",
       ],
     },
     {
@@ -220,12 +225,13 @@ export const cycleData: CycleData = {
       objectiveNum: 99,
       team: ["DC"],
       status: "On track",
-      weeks: [1, 5],
-      lastUpdate: "Certificados en market data. Fase de testing extensivo antes de go-live",
+      weeks: [1, 6],
+      lastUpdate: "Go-live sábado Abr 25. Operación arranca lunes Abr 27.",
       updates: [
         "David dedicado junto con Orders",
         "Certificados en market data (S5)",
         "Ahora en fase de testing extensivo antes de go-live",
+        "Go-live sábado Abr 25 — operación arranca lunes Abr 27 (S6)",
       ],
     },
     {
@@ -257,7 +263,7 @@ export const cycleData: CycleData = {
         {
           name: "Take Profit Colombia — web/app",
           status: "En curso",
-          notes: "Juanita y Jael arrancan diseño esta semana",
+          notes: "Diseño arrancó (S6)",
         },
         {
           name: "Poder cambiar el default de órdenes en el app",
@@ -309,8 +315,8 @@ export const cycleData: CycleData = {
       tasks: [
         {
           name: "Mejorar flujo de onboarding (activación)",
-          status: "Nuevo",
-          notes: "James Alonso se unió al equipo de diseño. Se verá un proyecto para mejorar el onboarding enfocado en activación",
+          status: "En curso",
+          notes: "Wireframes de nueva experiencia de onboarding para Colombia en proceso (S6)",
         },
       ],
     },
@@ -323,7 +329,7 @@ export const cycleData: CycleData = {
         {
           name: "Cambiar flujo de inscripción para fondos Blum",
           status: "En curso",
-          notes: "Felipe A y Angelica ya arrancaron diseño. Se verá el diseño del nuevo flujo esta semana (S5)",
+          notes: "Wireframes aprobados (S6). Avanzando a diseño de UI.",
         },
         {
           name: "Rentabilidad de fondos de inversión desde Back",
@@ -339,13 +345,17 @@ export const cycleData: CycleData = {
         {
           name: "Traslados entre fondos",
           status: "En curso",
-          notes:
-            "Felipe A en reuniones con AyV y Blum — viabilidad financiera y operativa",
+          notes: "Decisión (S6): solo viable en Colombia. No factible técnicamente en Perú por ahora.",
         },
         {
           name: "Mejoras en movimientos de transacciones de fondos",
+          status: "En curso",
+          notes: "",
+        },
+        {
+          name: "Rediseño depósito, retiros y movimientos de fondos (3 países)",
           status: "Nuevo",
-          notes: "Agregado para próxima betting table — varias áreas de mejora identificadas",
+          notes: "Nuevo pitch incluido en S6 — mejoras de diseño para Colombia, Chile y Perú.",
         },
       ],
       context:
@@ -353,6 +363,20 @@ export const cycleData: CycleData = {
     },
   ],
   weeklyLog: [
+    {
+      week: "Semana 6 (Abr 20-24)",
+      items: [
+        "Retiros fondos MM y Demo trii Pro terminando desarrollo — entrega esperada esta semana",
+        "Fix 5.0 Peru: go-live sábado Abr 25, operación arranca lunes Abr 27",
+        "Vinculación Completa: preguntas sobre API con AyV — resolución esperada esta semana",
+        "Mejoras trii web: Jorge arranca esta semana después de terminar Demo trii Pro",
+        "Discovery Obj. 5: wireframes onboarding fondos Blum aprobados — avanzando a UI design",
+        "Discovery Obj. 1: Take Profit arrancó diseño",
+        "Discovery Obj. 4: wireframes nuevo onboarding Colombia en proceso",
+        "Discovery Obj. 5: traslados entre fondos — decisión: solo Colombia (no viable en Perú aún)",
+        "Discovery Obj. 5: nuevo pitch — rediseño depósito, retiros y movimientos fondos (3 países)",
+      ],
+    },
     {
       week: "Semana 5 (Abr 13-17)",
       items: [
@@ -415,11 +439,26 @@ export const cycleData: CycleData = {
       version: "X",
       tag: "QA",
       items: [
-        "Tags para listas de stocks locales (Tag comisión cero y top)",
-        "Ocultamiento condicional de información sensible (montos y descripciones) en la tabla de inversiones",
+        "Cash in tarjeta de crédito",
+        "Corrección texto de tiempo de espera para retiros en Nequi",
+      ],
+    },
+    {
+      version: "3.1.4",
+      tag: "Live",
+      items: [
         "Permite simular CDTs en Tuya sin tener el monto mínimo",
         "Eliminación de opción \"Saldo en caja\" para retiros de CDT de Mibanco",
         "Si estás bloqueado en Mibanco, permitir sacar CDTs de Tuya",
+        "Lista de movimientos de operaciones especiales de mercado",
+      ],
+    },
+    {
+      version: "3.1.2",
+      items: [
+        "Tags para listas de stocks locales (Tag comisión cero y top)",
+        "Ocultamiento condicional de información sensible (montos y descripciones) en la tabla de inversiones",
+        "Evento especial de mercado tipo recompra",
       ],
     },
     {
