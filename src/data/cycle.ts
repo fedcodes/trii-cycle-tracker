@@ -120,10 +120,10 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Juanita",
     designer: "Jael",
     tasks: [
-      { name: "Modificación de órdenes — web/app", stage: "research", owner: "Juanita", designer: "Jael", priority: "high", figma: "#", notes: "Arrancan diseño esta semana" },
-      { name: "Take Profit Colombia — web/app", stage: "design", owner: "Juanita", designer: "Jael", priority: "high", figma: "#", notes: "Diseño arrancó (S6)" },
-      { name: "Cambiar default de órdenes en el app", stage: "research", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Arrancan esta semana" },
-      { name: "Historial de órdenes de bolsa", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "low", figma: null, notes: "" },
+      { name: "Take Profit Colombia — web/app", stage: "design", owner: "Juanita", designer: "Jael", priority: "high", figma: "https://www.figma.com/design/zhhQv5ScB8SBoxeOLaBtcz/CO_%C3%93rdenes?m=auto&node-id=7834-34277&t=CpSRppUDDyV3efS5-1", notes: "Diseño en curso (S6)." },
+      { name: "Modificación de órdenes — web/app", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "high", figma: null, notes: "Priorizado para próximo ciclo." },
+      { name: "Cambiar default de órdenes en el app", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "" },
+      { name: "Historial de órdenes de bolsa — web/app", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "low", figma: null, notes: "" },
     ],
   },
   {
@@ -136,9 +136,9 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Juanita",
     designer: "Jael",
     tasks: [
-      { name: "Lanzar Colombia", stage: "research", owner: "Federico", designer: "Jael", priority: "high", figma: null, notes: "Asignado a Federico" },
-      { name: "Análisis fundamental y técnico de US Stocks", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Evaluando proveedores" },
-      { name: "Spreads y comisiones para usuarios pro", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "" },
+      { name: "Lanzar Colombia", stage: "ready", owner: "Federico", designer: "Jael", priority: "high", figma: null, notes: "Listo para entrar a build. Owner: Federico." },
+      { name: "Análisis fundamental y técnico de US Stocks", stage: "research", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Evaluando proveedores y viabilidad financiera." },
+      { name: "Diferencial de spreads y comisiones para usuarios pro (US Stocks)", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "" },
     ],
   },
   {
@@ -162,7 +162,7 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: null,
     designer: "James Alonso",
     tasks: [
-      { name: "Mejorar flujo de onboarding", stage: "design", owner: null, designer: "James Alonso", priority: "high", figma: "#", notes: "Wireframes nueva experiencia Colombia (S6)" },
+      { name: "Nuevo flujo de onboarding (Colombia)", stage: "research", owner: null, designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Wireframes de nueva experiencia en proceso (S6)." },
     ],
   },
   {
@@ -175,12 +175,11 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Felipe",
     designer: "Ange",
     tasks: [
-      { name: "Cambiar flujo de inscripción fondos Blum", stage: "design", owner: "Felipe", designer: "Ange", priority: "high", figma: "#", notes: "Wireframes aprobados. Avanzando a UI." },
-      { name: "Rentabilidad de fondos desde Back", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "" },
-      { name: "Retiros directo a cuenta del usuario", stage: "research", owner: "Felipe", designer: "Ange", priority: "high", figma: null, notes: "Felipe en reuniones con AyV y Blum" },
-      { name: "Traslados entre fondos", stage: "ready", owner: "Felipe", designer: "Ange", priority: "med", figma: "#", notes: "Solo viable en Colombia. No factible en Perú aún." },
-      { name: "Mejoras en movimientos de fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "low", figma: null, notes: "" },
-      { name: "Rediseño depósito/retiros/movimientos fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "high", figma: null, notes: "Nuevo pitch S6 — 3 países." },
+      { name: "Nuevo onboarding fondos Blum", stage: "design", owner: "Felipe", designer: "Ange", priority: "high", figma: "https://www.figma.com/design/LMHcQiNUjiuk53aD9DHkB8/PE_Fondos?node-id=6-9&t=A318m31A7bDZMYUr-1", notes: "Wireframes aprobados. Avanzando a UI." },
+      { name: "Traslados entre fondos", stage: "research", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Solo viable en Colombia. No factible técnicamente en Perú por ahora." },
+      { name: "Rentabilidad de fondos de inversión desde Back", stage: "research", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "" },
+      { name: "Rediseño depósito, retiros y movimientos de fondos (3 países)", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "high", figma: null, notes: "Nuevo pitch incluido en S6 — mejoras de diseño para Colombia, Chile y Perú." },
+      { name: "Mejoras en movimientos de transacciones y fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "low", figma: null, notes: "" },
     ],
     context: "Blum pidió USD 10M en AUMs en Perú antes de fin de año. Si no, cierran fondos.",
   },
