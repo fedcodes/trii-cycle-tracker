@@ -5,6 +5,7 @@ import Shell, { TabKey } from "@/components/Shell";
 import EstadoDelCiclo from "@/components/EstadoDelCiclo";
 import DiscoveryTab from "@/components/DiscoveryTab";
 import ReleasesTab from "@/components/ReleasesTab";
+import CooldownTab from "@/components/CooldownTab";
 
 export default function Home() {
   const [active, setActive] = useState<TabKey>("Estado del ciclo");
@@ -14,6 +15,7 @@ export default function Home() {
       {active === "Estado del ciclo" && <EstadoDelCiclo />}
       {active === "Discovery" && <DiscoveryTab />}
       {active === "Releases" && <ReleasesTab />}
+      {active === "Cooldown" && <CooldownTab />}
     </Shell>
   );
 }

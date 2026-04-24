@@ -333,3 +333,140 @@ export const getKPIs = () => {
     dropped: BETS.filter((b) => b.dropped).length,
   };
 };
+
+// ── Cooldown ───────────────────────────────────────────────
+export type CooldownKindId = "carryover" | "debt" | "bug";
+export type CooldownStatus = "doing" | "done" | "todo";
+
+export interface CooldownMeta {
+  name: string;
+  dates: string;
+  startDate: string;
+  endDate: string;
+  currentDate: string;
+  totalDays: number;
+  currentDay: number;
+  nextCycleStart: string;
+  nextCycleName: string;
+}
+
+export interface CooldownDev {
+  code: string;
+  name: string;
+  role: string;
+  capacity: number;
+}
+
+export interface CooldownTask {
+  id: string;
+  title: string;
+  kind: CooldownKindId;
+  betId?: string;
+  dev: string;
+  status: CooldownStatus;
+  note?: string;
+  priority: "high" | "med" | "low";
+  effort?: string;
+  // 0-indexed workday positions (Mon=0..Fri=4, Mon=5..Fri=9). Both inclusive.
+  startDay?: number;
+  endDay?: number;
+}
+
+export interface CooldownKind {
+  id: CooldownKindId;
+  label: string;
+  desc: string;
+  colorVar: string;
+  dimVar: string;
+}
+
+export const COOLDOWN: CooldownMeta = {
+  name: "Cooldown · Ciclo 2 → 3",
+  dates: "Abr 27 → May 8, 2026",
+  startDate: "2026-04-27",
+  endDate: "2026-05-08",
+  currentDate: "2026-04-30",
+  totalDays: 10,
+  currentDay: 4,
+  nextCycleStart: "2026-05-11",
+  nextCycleName: "Ciclo 3 — 2026",
+};
+
+// Mon-Fri workdays between cooldown start and today. Returns null when today
+// is outside the window or falls on a weekend.
+export const getCurrentCooldownDay = (
+  startDate: string,
+  endDate: string,
+  now: Date = new Date(),
+): number | null => {
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const start = new Date(`${startDate}T00:00:00`);
+  const end = new Date(`${endDate}T00:00:00`);
+  if (today < start || today > end) return null;
+  const dow = today.getDay();
+  if (dow === 0 || dow === 6) return null;
+  let count = 0;
+  const cursor = new Date(start);
+  while (cursor < today) {
+    const d = cursor.getDay();
+    if (d >= 1 && d <= 5) count++;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return count;
+};
+
+export const COOLDOWN_DEVS: CooldownDev[] = [
+  { code: "SB", name: "Sergio", role: "Backend", capacity: 4 },
+  { code: "JR", name: "Jorge", role: "Frontend", capacity: 3 },
+  { code: "CA", name: "Carlos", role: "Frontend", capacity: 3 },
+  { code: "KA", name: "Kai", role: "Full-stack", capacity: 3 },
+  { code: "GM", name: "Gafe", role: "Backend", capacity: 3 },
+  { code: "AV", name: "Alan", role: "Backend", capacity: 2 },
+  { code: "DC", name: "David", role: "Backend", capacity: 2 },
+  { code: "ET", name: "Estefa", role: "QA", capacity: 3 },
+];
+
+export const COOLDOWN_TASKS: CooldownTask[] = [
+  { id: "c-retiros-mm", title: "Retiros money market", kind: "carryover", betId: "retiros-mm", dev: "CA", status: "todo", note: "Cerrando FE. Backend ya listo desde el ciclo (SB).", priority: "high", startDay: 0, endDay: 2 },
+  { id: "c-demo-pro", title: "Demo trii Pro", kind: "carryover", betId: "demo-pro", dev: "JR", status: "todo", note: "Cierre final de FE post-entrega del ciclo.", priority: "high", effort: "3d" },
+  { id: "c-mejoras-web", title: "Mejoras trii web", kind: "carryover", betId: "mejoras-web", dev: "JR", status: "todo", note: "Jorge arrancó en S6; continúa en cooldown.", priority: "med", startDay: 3, endDay: 9 },
+  { id: "c-vinculacion-doc", title: "Vinculación Completa — Gestión documental", kind: "carryover", betId: "vinculacion", dev: "GM", status: "todo", note: "Componente de gestión documental dentro de Vinculación Completa.", priority: "high", startDay: 0, endDay: 9 },
+  { id: "c-vector-co", title: "Crear cuentas de colombianos en Vector Capital", kind: "carryover", dev: "KA", status: "todo", note: "Carryover operativo / integración.", priority: "med", startDay: 2, endDay: 9 },
+  { id: "c-form-vinc", title: "Formulario Vinculación Completa", kind: "carryover", betId: "vinculacion", dev: "ET", status: "todo", note: "FE del formulario dentro del flujo de Vinculación Completa.", priority: "high", startDay: 0, endDay: 9 },
+
+  { id: "d-blum-onb", title: "Fixes + tech debt onboarding fondos Blum Perú", kind: "debt", dev: "SB", status: "todo", note: "Limpieza previa al push de AUMs de Obj. 5.", priority: "high", effort: "6d" },
+  { id: "d-webhook-tc", title: "Webhook Prod para Depósitos de Tarjeta", kind: "debt", dev: "KA", status: "todo", note: "Mover webhook de staging a producción.", priority: "high", startDay: 0, endDay: 2 },
+
+  { id: "b-fix50-fe", title: "Soporte FIX 5.0 Perú", kind: "bug", dev: "DC", status: "todo", note: "Go-live sábado Abr 25, operación arranca lunes Abr 27. Soporte prioritario.", priority: "high", effort: "10d" },
+  { id: "b-fix50-be", title: "Soporte FIX 5.0 Perú", kind: "bug", dev: "AV", status: "todo", note: "Go-live sábado Abr 25, operación arranca lunes Abr 27. Soporte prioritario.", priority: "high", effort: "10d" },
+];
+
+export const COOLDOWN_KINDS: CooldownKind[] = [
+  { id: "carryover", label: "Carryover", desc: "No entró en el ciclo", colorVar: "yellow", dimVar: "yellow-dim" },
+  { id: "debt", label: "Tech debt", desc: "Limpieza y refactor", colorVar: "obj-2", dimVar: "obj-2-dim" },
+  { id: "bug", label: "Bugs", desc: "Reportes y fixes pequeños", colorVar: "error", dimVar: "error-dim" },
+];
+
+export const kindToken = (kind: CooldownKindId): CooldownKind =>
+  COOLDOWN_KINDS.find((k) => k.id === kind) || COOLDOWN_KINDS[0];
+
+export const devTasks = (devCode: string): CooldownTask[] =>
+  COOLDOWN_TASKS.filter((t) => t.dev === devCode);
+
+export const getCooldownKPIs = () => {
+  const t = COOLDOWN_TASKS;
+  const done = t.filter((x) => x.status === "done").length;
+  const doing = t.filter((x) => x.status === "doing").length;
+  const todo = t.filter((x) => x.status === "todo").length;
+  return {
+    total: t.length,
+    done,
+    doing,
+    todo,
+    daysLeft: COOLDOWN.totalDays - COOLDOWN.currentDay,
+    carryover: t.filter((x) => x.kind === "carryover").length,
+    debt: t.filter((x) => x.kind === "debt").length,
+    bug: t.filter((x) => x.kind === "bug").length,
+  };
+};
