@@ -420,11 +420,11 @@ export const COOLDOWN_DEVS: CooldownDev[] = [
   { code: "SB", name: "Sergio", role: "Backend", capacity: 4 },
   { code: "JR", name: "Jorge", role: "Frontend", capacity: 3 },
   { code: "CA", name: "Carlos", role: "Frontend", capacity: 3 },
-  { code: "KA", name: "Kai", role: "Full-stack", capacity: 3 },
+  { code: "KA", name: "Kai", role: "Backend", capacity: 3 },
   { code: "GM", name: "Gafe", role: "Backend", capacity: 3 },
   { code: "AV", name: "Alan", role: "Backend", capacity: 2 },
-  { code: "DC", name: "David", role: "Backend", capacity: 2 },
-  { code: "ET", name: "Estefa", role: "QA", capacity: 3 },
+  { code: "DC", name: "David", role: "Frontend", capacity: 2 },
+  { code: "ET", name: "Estefa", role: "Frontend", capacity: 3 },
 ];
 
 export const COOLDOWN_TASKS: CooldownTask[] = [
