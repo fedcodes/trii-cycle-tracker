@@ -117,7 +117,8 @@ function TaskCard({
 }) {
   const c = objColor(objId);
   const pri = PRIORITY[task.priority] || PRIORITY.med;
-  const hasFigma = !!task.figma;
+  const figmaUrl = task.figma && task.figma !== "#" ? task.figma : null;
+  const hasFigma = !!figmaUrl;
 
   return (
     <div
@@ -200,9 +201,9 @@ function TaskCard({
           <Avatar name={task.designer} label="Des" />
         </div>
         <a
-          href={task.figma || undefined}
+          href={figmaUrl || undefined}
           target={hasFigma ? "_blank" : undefined}
-          rel="noreferrer"
+          rel="noopener noreferrer"
           onClick={(e) => !hasFigma && e.preventDefault()}
           title={hasFigma ? "Abrir en Figma" : "Sin archivo de Figma"}
           style={{
