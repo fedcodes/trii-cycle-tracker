@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CYCLE } from "@/data/cycle";
 import {
-  supabase,
+  getSupabase,
   type BacklogIdeaRow,
   type BacklogSize,
   type BacklogStatus,
@@ -83,7 +83,7 @@ export default function BacklogTab() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from("backlog_ideas")
         .select("*")
         .order("position", { ascending: true });
@@ -102,13 +102,13 @@ export default function BacklogTab() {
 
   const update = async (id: string, patch: Partial<BacklogIdeaRow>) => {
     setItems((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
-    const { error } = await supabase.from("backlog_ideas").update(patch).eq("id", id);
+    const { error } = await getSupabase().from("backlog_ideas").update(patch).eq("id", id);
     if (error) setError(error.message);
   };
 
   const del = async (id: string) => {
     setItems((prev) => prev.filter((x) => x.id !== id));
-    const { error } = await supabase.from("backlog_ideas").delete().eq("id", id);
+    const { error } = await getSupabase().from("backlog_ideas").delete().eq("id", id);
     if (error) setError(error.message);
   };
 
@@ -125,7 +125,7 @@ export default function BacklogTab() {
       status: "Pending" as BacklogStatus,
       position: minPos - 1,
     };
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from("backlog_ideas")
       .insert(insertRow)
       .select()
