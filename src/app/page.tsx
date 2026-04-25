@@ -6,6 +6,7 @@ import EstadoDelCiclo from "@/components/EstadoDelCiclo";
 import DiscoveryTab from "@/components/DiscoveryTab";
 import ReleasesTab from "@/components/ReleasesTab";
 import CooldownTab from "@/components/CooldownTab";
+import BacklogTab from "@/components/BacklogTab";
 
 export default function Home() {
   const [active, setActive] = useState<TabKey>("Estado del ciclo");
@@ -16,6 +17,7 @@ export default function Home() {
       {active === "Discovery" && <DiscoveryTab />}
       {active === "Releases" && <ReleasesTab />}
       {active === "Cooldown" && <CooldownTab />}
+      {active === "Backlog" && <BacklogTab />}
     </Shell>
   );
 }
