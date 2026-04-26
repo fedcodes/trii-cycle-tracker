@@ -1,6 +1,22 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { CYCLE } from "@/data/cycle";
 import {
   getSupabase,
@@ -104,6 +120,36 @@ export default function BacklogTab() {
     setItems((prev) => prev.map((x) => (x.id === id ? { ...x, ...patch } : x)));
     const { error } = await getSupabase().from("backlog_ideas").update(patch).eq("id", id);
     if (error) setError(error.message);
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const prevItems = items;
+    const fromIdx = prevItems.findIndex((x) => x.id === active.id);
+    const toIdx = prevItems.findIndex((x) => x.id === over.id);
+    if (fromIdx < 0 || toIdx < 0) return;
+
+    const next = [...prevItems];
+    const [moved] = next.splice(fromIdx, 1);
+    next.splice(toIdx, 0, moved);
+    const renumbered = next.map((x, i) => ({ ...x, position: i }));
+    setItems(renumbered);
+
+    const payload = renumbered.map(({ id, position }) => ({ id, position }));
+    const { error } = await getSupabase()
+      .from("backlog_ideas")
+      .upsert(payload, { onConflict: "id" });
+    if (error) {
+      setError(error.message);
+      setItems(prevItems);
+    }
   };
 
   const del = async (id: string) => {
@@ -324,19 +370,30 @@ export default function BacklogTab() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((it) => {
-                  const realIdx = items.findIndex((x) => x.id === it.id);
-                  return (
-                    <BacklogRow
-                      key={it.id}
-                      item={it}
-                      idx={realIdx}
-                      onUpdate={update}
-                      onDelete={del}
-                      isNew={newRowIds.has(it.id)}
-                    />
-                  );
-                })
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={filtered.map((it) => it.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {filtered.map((it) => {
+                      const realIdx = items.findIndex((x) => x.id === it.id);
+                      return (
+                        <BacklogRow
+                          key={it.id}
+                          item={it}
+                          idx={realIdx}
+                          onUpdate={update}
+                          onDelete={del}
+                          isNew={newRowIds.has(it.id)}
+                        />
+                      );
+                    })}
+                  </SortableContext>
+                </DndContext>
               )}
             </tbody>
           </table>
@@ -679,6 +736,9 @@ function BacklogRow({
   onDelete: (id: string) => void;
   isNew: boolean;
 }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
   const prio = calcPrio(item.impact, item.effort);
   const dimmed = item.status === "Not Doing" || item.status === "Completed";
   const cellStyle: React.CSSProperties = {
@@ -690,22 +750,32 @@ function BacklogRow({
 
   return (
     <tr
+      ref={setNodeRef}
+      {...attributes}
       style={{
         borderBottom: "1px solid rgb(var(--surface-2))",
         background: isNew ? "rgb(var(--primary-dim))" : "transparent",
-        transition: "background 600ms ease",
+        transition: transition ?? "background 600ms ease",
+        transform: CSS.Transform.toString(transform),
+        opacity: isDragging ? 0.6 : 1,
+        position: isDragging ? "relative" : undefined,
+        zIndex: isDragging ? 10 : undefined,
+        boxShadow: isDragging ? "0 6px 18px rgba(0,0,0,0.35)" : undefined,
       }}
     >
       <td style={{ ...cellStyle, padding: "6px 8px 6px 10px", opacity: 1, width: 50 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6, color: "rgb(var(--fg-4))" }}>
           <span
+            {...listeners}
+            aria-label="Arrastrar para reordenar"
             title="Arrastrar para reordenar"
             style={{
-              cursor: "grab",
+              cursor: isDragging ? "grabbing" : "grab",
               padding: "2px 1px",
               display: "inline-flex",
               alignItems: "center",
               color: "rgb(var(--fg-4))",
+              touchAction: "none",
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = "rgb(var(--fg-2))")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "rgb(var(--fg-4))")}
