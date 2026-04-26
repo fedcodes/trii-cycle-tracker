@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CYCLE } from "@/data/cycle";
 import {
   getSupabase,
@@ -244,11 +244,12 @@ export default function BacklogTab() {
           margin: "10px 28px 28px",
           border: "1px solid rgb(var(--surface-2))",
           borderRadius: 8,
-          overflow: "hidden",
+          overflowX: "clip",
+          overflowY: "visible",
           background: "rgb(var(--surface-0))",
         }}
       >
-        <div style={{ overflowX: "auto" }}>
+        <div>
           <table
             style={{
               width: "100%",
@@ -260,14 +261,14 @@ export default function BacklogTab() {
             <thead>
               <tr>
                 <HeaderCell width={50}>#</HeaderCell>
-                <HeaderCell width={110}>Vertical</HeaderCell>
+                <HeaderCell width={140}>Vertical</HeaderCell>
                 <HeaderCell>Idea</HeaderCell>
-                <HeaderCell>Objetivo</HeaderCell>
+                <HeaderCell width={140}>Objetivo</HeaderCell>
                 <HeaderCell width={140}>Responsable</HeaderCell>
                 <HeaderCell width={170}>País / Equipo</HeaderCell>
                 <HeaderCell width={70} align="center">Impact</HeaderCell>
                 <HeaderCell width={70} align="center">Effort</HeaderCell>
-                <HeaderCell width={170}>Prioritization</HeaderCell>
+                <HeaderCell width={125}>Prioritization</HeaderCell>
                 <HeaderCell width={150}>Status</HeaderCell>
                 <th
                   style={{
@@ -731,7 +732,7 @@ function BacklogRow({
         </div>
       </td>
 
-      <td style={{ ...cellStyle, width: 110 }}>
+      <td style={{ ...cellStyle, width: 140 }}>
         <InlineText
           value={item.vertical}
           onChange={(v) => onUpdate(item.id, { vertical: v })}
@@ -749,10 +750,11 @@ function BacklogRow({
           placeholder="Nueva idea…"
           fontSize={11.5}
           weight={600}
+          multiline
         />
       </td>
 
-      <td style={{ ...cellStyle, minWidth: 200 }}>
+      <td style={{ ...cellStyle, width: 140 }}>
         <InlineText
           value={item.objective}
           onChange={(v) => onUpdate(item.id, { objective: v })}
@@ -760,6 +762,7 @@ function BacklogRow({
           fontSize={11}
           weight={400}
           color="rgb(var(--fg-2))"
+          multiline
         />
       </td>
 
@@ -799,7 +802,7 @@ function BacklogRow({
         />
       </td>
 
-      <td style={{ ...cellStyle, width: 170 }}>
+      <td style={{ ...cellStyle, width: 125 }}>
         <PrioBadge prio={prio} />
       </td>
 
@@ -824,6 +827,7 @@ function InlineText({
   fontSize = 11.5,
   weight = 500,
   color = "rgb(var(--fg))",
+  multiline = false,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -831,11 +835,63 @@ function InlineText({
   fontSize?: number;
   weight?: number;
   color?: string;
+  multiline?: boolean;
 }) {
   const [local, setLocal] = useState(value);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     setLocal(value);
   }, [value]);
+
+  const baseStyle: React.CSSProperties = {
+    background: "transparent",
+    border: "1px solid transparent",
+    color,
+    fontFamily: "inherit",
+    fontSize,
+    fontWeight: weight,
+    letterSpacing: "-0.003em",
+    padding: "4px 6px",
+    borderRadius: 3,
+    width: "100%",
+    outline: "none",
+    lineHeight: 1.4,
+  };
+
+  useLayoutEffect(() => {
+    if (!multiline) return;
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [local, multiline]);
+
+  if (multiline) {
+    return (
+      <textarea
+        ref={textareaRef}
+        rows={1}
+        value={local || ""}
+        onChange={(e) => setLocal(e.target.value)}
+        onBlur={(e) => {
+          e.currentTarget.style.background = "transparent";
+          if (local !== value) onChange(local);
+        }}
+        onFocus={(e) => (e.currentTarget.style.background = "rgb(var(--surface-2))")}
+        placeholder={placeholder}
+        style={{
+          ...baseStyle,
+          display: "block",
+          resize: "none",
+          overflow: "hidden",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
+          overflowWrap: "anywhere",
+        }}
+      />
+    );
+  }
+
   return (
     <input
       value={local || ""}
@@ -849,20 +905,7 @@ function InlineText({
       }}
       onFocus={(e) => (e.currentTarget.style.background = "rgb(var(--surface-2))")}
       placeholder={placeholder}
-      style={{
-        background: "transparent",
-        border: "1px solid transparent",
-        color,
-        fontFamily: "inherit",
-        fontSize,
-        fontWeight: weight,
-        letterSpacing: "-0.003em",
-        padding: "4px 6px",
-        borderRadius: 3,
-        width: "100%",
-        outline: "none",
-        lineHeight: 1.4,
-      }}
+      style={baseStyle}
     />
   );
 }
