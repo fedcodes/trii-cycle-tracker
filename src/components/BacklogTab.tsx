@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -17,7 +17,6 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { CYCLE } from "@/data/cycle";
 import {
   getSupabase,
