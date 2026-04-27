@@ -94,15 +94,14 @@ const ObjChip = ({ num }: { num: number }) => {
 function KPIStrip() {
   const k = getKPIs();
   const completedPct = Math.round((k.listo / k.total) * 100);
-  const atRiskCount = k.update + BETS.filter((b) => b.status === "Blocked").length;
 
   const items = [
-    { label: "Bets activas", value: k.total, sub: `${k.dropped} descartadas`, accent: "rgb(var(--fg))" },
-    { label: "On track", value: k.onTrack, sub: `${Math.round((k.onTrack / k.total) * 100)}% del ciclo`, accent: "rgb(var(--primary))" },
-    { label: "Listas", value: k.listo, sub: `${completedPct}% completado`, accent: "rgb(var(--primary))" },
-    { label: "Necesita atención", value: atRiskCount, sub: "Updates + blockers", accent: "rgb(var(--yellow))" },
-    { label: "Sin arrancar", value: k.notStarted, sub: "Pendientes", accent: "rgb(var(--fg-2))" },
-    { label: "Releases en QA", value: 1, sub: "v3.2.1 · hoy", accent: "rgb(var(--yellow))" },
+    { label: "Bets activas", value: k.total, sub: `${k.dropped} descartada${k.dropped === 1 ? "" : "s"}`, accent: "rgb(var(--fg))" },
+    { label: "Listo", value: k.listo, sub: `${completedPct}% del ciclo`, accent: "rgb(var(--primary))" },
+    { label: "En cooldown", value: k.cooldown, sub: "Cierran Abr 27 – May 8", accent: "rgb(var(--primary))" },
+    { label: "Pushed", value: k.pushed, sub: "Pasa a Ciclo 3", accent: "rgb(var(--fg-3))" },
+    { label: "Descartado", value: k.dropped, sub: "Fuera del ciclo", accent: "rgb(var(--fg-3))" },
+    { label: "Cooldown S1", value: "Abr 27", sub: "Día 1 · 10 días totales", accent: "rgb(var(--yellow))" },
   ];
 
   return (
@@ -320,14 +319,18 @@ function GanttRow({
     ? "rgb(var(--surface-2))"
     : bet.status === "Listo"
       ? obj
-      : bet.status === "Update"
-        ? "rgb(var(--yellow-dim))"
-        : bet.status === "Not started"
+      : bet.status === "Cooldown"
+        ? `color-mix(in oklab, ${obj} 35%, transparent)`
+        : bet.status === "Pushed"
           ? "rgb(var(--surface-2))"
-          : `color-mix(in oklab, ${obj} 20%, transparent)`;
+          : bet.status === "Update"
+            ? "rgb(var(--yellow-dim))"
+            : bet.status === "Not started"
+              ? "rgb(var(--surface-2))"
+              : `color-mix(in oklab, ${obj} 20%, transparent)`;
 
   const barBorder =
-    bet.status === "Not started" || bet.dropped
+    bet.status === "Not started" || bet.status === "Pushed" || bet.dropped
       ? "1px dashed rgb(var(--fg-4))"
       : `1px solid ${obj}`;
 
@@ -479,8 +482,12 @@ function GanttRow({
               zIndex: 2,
             }}
           >
-            {!bet.dropped && bet.status !== "Not started" && (
-              <span>{Math.round((bet.progress || 0) * 100)}%</span>
+            {bet.status === "Pushed" ? (
+              <span style={{ color: "rgb(var(--fg-3))", fontStyle: "italic" }}>Pushed →</span>
+            ) : (
+              !bet.dropped && bet.status !== "Not started" && (
+                <span>{Math.round((bet.progress || 0) * 100)}%</span>
+              )
             )}
           </div>
         </div>
