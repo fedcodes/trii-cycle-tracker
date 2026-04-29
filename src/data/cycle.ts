@@ -480,18 +480,18 @@ export const COOLDOWN_DEVS: CooldownDev[] = [
 ];
 
 export const COOLDOWN_TASKS: CooldownTask[] = [
-  { id: "c-retiros-mm", title: "Retiros money market", kind: "carryover", betId: "retiros-mm", dev: "CA", status: "todo", note: "Cerrando FE. Backend ya listo desde el ciclo (SB).", priority: "high", startDay: 0, endDay: 2 },
-  { id: "c-demo-pro", title: "Demo trii Pro", kind: "carryover", betId: "demo-pro", dev: "JR", status: "todo", note: "Cierre final de FE post-entrega del ciclo.", priority: "high", effort: "3d" },
+  { id: "c-retiros-mm", title: "Retiros money market", kind: "carryover", betId: "retiros-mm", dev: "CA", status: "doing", note: "Cerrando FE. Backend ya listo desde el ciclo (SB).", priority: "high", startDay: 0, endDay: 2 },
+  { id: "c-demo-pro", title: "Demo trii Pro", kind: "carryover", betId: "demo-pro", dev: "JR", status: "doing", note: "Cierre final de FE post-entrega del ciclo.", priority: "high", effort: "3d", startDay: 0, endDay: 2 },
   { id: "c-mejoras-web", title: "Mejoras trii web", kind: "carryover", betId: "mejoras-web", dev: "JR", status: "todo", note: "Jorge arrancó en S6; continúa en cooldown.", priority: "med", startDay: 3, endDay: 9 },
-  { id: "c-vinculacion-doc", title: "Vinculación Completa — Gestión documental", kind: "carryover", betId: "vinculacion", dev: "GM", status: "todo", note: "Componente de gestión documental dentro de Vinculación Completa.", priority: "high", startDay: 0, endDay: 9 },
+  { id: "c-vinculacion-doc", title: "Vinculación Completa — Gestión documental", kind: "carryover", betId: "vinculacion", dev: "GM", status: "doing", note: "Componente de gestión documental dentro de Vinculación Completa.", priority: "high", startDay: 0, endDay: 9 },
   { id: "c-vector-co", title: "Crear cuentas de colombianos en Vector Capital", kind: "carryover", dev: "KA", status: "todo", note: "Carryover operativo / integración.", priority: "med", startDay: 2, endDay: 9 },
-  { id: "c-form-vinc", title: "Formulario Vinculación Completa", kind: "carryover", betId: "vinculacion", dev: "ET", status: "todo", note: "FE del formulario dentro del flujo de Vinculación Completa.", priority: "high", startDay: 0, endDay: 9 },
+  { id: "c-form-vinc", title: "Formulario Vinculación Completa", kind: "carryover", betId: "vinculacion", dev: "ET", status: "doing", note: "FE del formulario dentro del flujo de Vinculación Completa.", priority: "high", startDay: 0, endDay: 9 },
 
-  { id: "d-blum-onb", title: "Fixes + tech debt onboarding fondos Blum Perú", kind: "debt", dev: "SB", status: "todo", note: "Limpieza previa al push de AUMs de Obj. 5.", priority: "high", effort: "6d" },
+  { id: "d-blum-onb", title: "Fixes + tech debt onboarding fondos Blum Perú", kind: "debt", dev: "SB", status: "doing", note: "Limpieza previa al push de AUMs de Obj. 5.", priority: "high", effort: "6d", startDay: 0, endDay: 5 },
   { id: "d-webhook-tc", title: "Webhook Prod para Depósitos de Tarjeta", kind: "debt", dev: "KA", status: "todo", note: "Mover webhook de staging a producción.", priority: "high", startDay: 0, endDay: 2 },
 
-  { id: "b-fix50-fe", title: "Soporte FIX 5.0 Perú", kind: "bug", dev: "DC", status: "todo", note: "Go-live sábado Abr 25, operación arranca lunes Abr 27. Soporte prioritario.", priority: "high", effort: "10d" },
-  { id: "b-fix50-be", title: "Soporte FIX 5.0 Perú", kind: "bug", dev: "AV", status: "todo", note: "Go-live sábado Abr 25, operación arranca lunes Abr 27. Soporte prioritario.", priority: "high", effort: "10d" },
+  { id: "b-fix50-fe", title: "Soporte FIX 5.0 Perú", kind: "bug", dev: "DC", status: "doing", note: "Go-live sábado Abr 25, operación arranca lunes Abr 27. Soporte prioritario.", priority: "high", effort: "10d", startDay: 0, endDay: 9 },
+  { id: "b-fix50-be", title: "Soporte FIX 5.0 Perú", kind: "bug", dev: "AV", status: "doing", note: "Go-live sábado Abr 25, operación arranca lunes Abr 27. Soporte prioritario.", priority: "high", effort: "10d", startDay: 0, endDay: 9 },
 ];
 
 export const COOLDOWN_KINDS: CooldownKind[] = [

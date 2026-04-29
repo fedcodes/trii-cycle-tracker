@@ -21,7 +21,7 @@ const DATE_LABELS = [
 
 type Placed = { task: CooldownTask; start: number; end: number };
 
-function layoutTasks(tasks: CooldownTask[], currentDay: number | null): Placed[] {
+function layoutTasks(tasks: CooldownTask[]): Placed[] {
   const widthFor = (t: CooldownTask): number => {
     if (t.effort) {
       const m = /^(\d+)d$/.exec(t.effort);
@@ -32,7 +32,6 @@ function layoutTasks(tasks: CooldownTask[], currentDay: number | null): Placed[]
 
   const order: Record<CooldownTask["status"], number> = { done: 0, doing: 1, todo: 2 };
   const sorted = [...tasks].sort((a, b) => order[a.status] - order[b.status]);
-  const anchor = currentDay ?? 0;
   let cursor = 0;
   const placed: Placed[] = [];
   for (const t of sorted) {
@@ -44,10 +43,7 @@ function layoutTasks(tasks: CooldownTask[], currentDay: number | null): Placed[]
       continue;
     }
     const w = widthFor(t);
-    let start = cursor;
-    if (t.status === "done") start = Math.max(0, Math.min(cursor, anchor - w));
-    if (t.status === "doing") start = Math.max(0, Math.min(anchor - 1, CD_DAYS - w));
-    if (t.status === "todo") start = Math.max(anchor, cursor);
+    const start = Math.max(0, Math.min(cursor, CD_DAYS - w));
     const end = Math.min(CD_DAYS, start + w);
     placed.push({ task: t, start, end });
     cursor = end;
@@ -55,7 +51,7 @@ function layoutTasks(tasks: CooldownTask[], currentDay: number | null): Placed[]
   return placed;
 }
 
-function DayGrid({ currentDay }: { currentDay: number | null }) {
+function DayGrid() {
   return (
     <>
       {Array.from({ length: CD_DAYS - 1 }).map((_, i) => (
@@ -74,35 +70,19 @@ function DayGrid({ currentDay }: { currentDay: number | null }) {
           }}
         />
       ))}
-      {currentDay !== null && (
-        <div
-          style={{
-            position: "absolute",
-            left: `${(currentDay / CD_DAYS) * 100}%`,
-            top: 0,
-            bottom: 0,
-            width: 2,
-            background: "rgb(var(--yellow))",
-            boxShadow: "0 0 12px rgb(var(--yellow) / 0.45)",
-            pointerEvents: "none",
-          }}
-        />
-      )}
     </>
   );
 }
 
 function DevTimelineRow({
   dev,
-  currentDay,
   isLast,
 }: {
   dev: CooldownDev;
-  currentDay: number | null;
   isLast: boolean;
 }) {
   const tasks = devTasks(dev.code);
-  const placed = layoutTasks(tasks, currentDay);
+  const placed = layoutTasks(tasks);
   const barHeight = 22;
   const rowGap = 5;
   const topPad = 12;
@@ -169,7 +149,7 @@ function DevTimelineRow({
           background: "rgb(var(--surface-0) / 0.4)",
         }}
       >
-        <DayGrid currentDay={currentDay} />
+        <DayGrid />
         {placed.map(({ task, start, end }, i) => {
           const k = kindToken(task.kind);
           const kColor = `rgb(var(--${k.colorVar}))`;
@@ -445,6 +425,7 @@ export default function CooldownTab() {
             border: "1px solid rgb(var(--surface-2))",
             borderRadius: 10,
             overflow: "hidden",
+            position: "relative",
           }}
         >
           <div
@@ -556,7 +537,7 @@ export default function CooldownTab() {
                   </div>
                 </div>
               ))}
-              <DayGrid currentDay={currentDay} />
+              <DayGrid />
             </div>
           </div>
 
@@ -564,10 +545,25 @@ export default function CooldownTab() {
             <DevTimelineRow
               key={dev.code}
               dev={dev}
-              currentDay={currentDay}
               isLast={i === COOLDOWN_DEVS.length - 1}
             />
           ))}
+
+          {currentDay !== null && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: `calc(220px + (100% - 220px) * ${currentDay / CD_DAYS})`,
+                width: 2,
+                background: "rgb(var(--yellow))",
+                boxShadow: "0 0 12px rgb(var(--yellow) / 0.45)",
+                zIndex: 5,
+                pointerEvents: "none",
+              }}
+            />
+          )}
         </div>
       </div>
     </>
