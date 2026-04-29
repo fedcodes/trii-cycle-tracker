@@ -93,17 +93,17 @@ export const TOTAL_DAYS = 42;
 export const weekToDays = (w: number) => ({ start: (w - 1) * 7, end: (w - 1) * 7 + 4 });
 
 export const BETS: Bet[] = [
-  { id: "demo-pro", name: "Demo trii Pro", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["SB", "JR"], status: "Cooldown", weeks: [2, 6], lastUpdate: "Desbloqueado tras caída de servicios BE de la semana pasada. Cierre final de FE en cooldown (JR).", progress: 0.95 },
+  { id: "demo-pro", name: "Demo trii Pro", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["SB", "JR"], status: "Listo", weeks: [2, 6], lastUpdate: "Cerrado en cooldown S1 (JR).", progress: 1 },
   { id: "ordenes", name: "Órdenes", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["AV"], status: "Listo", weeks: [1, 1], lastUpdate: "Completado en S1", progress: 1 },
   { id: "mejoras-web", name: "Mejoras trii web", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["CA", "JR"], status: "Cooldown", weeks: [6, 6], lastUpdate: "JR avanzó en paralelo a Demo trii Pro. Cierre final en cooldown.", progress: 0.1 },
   { id: "vinculacion", name: "Vinculación Completa", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["KA", "ET", "GM"], status: "Cooldown", weeks: [1, 6], lastUpdate: "Kai cierra BE en cooldown. Gafe en gestión documental, Estefa en formulario. Kai pasa a habilitadores de US Stocks CO (cuentas Vector).", progress: 0.85 },
-  { id: "cambios-co", name: "Cambios Colombia", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["GM"], status: "Pushed", weeks: [5, 6], lastUpdate: "No iniciado en el ciclo. Se pushea a Ciclo 3. Kai habilita en cooldown creando cuentas colombianas en Vector Capital.", progress: 0 },
+  { id: "cambios-co", name: "Cambios Colombia", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["GM", "KA"], status: "Pushed", weeks: [5, 6], lastUpdate: "No iniciado en el ciclo. Se pushea a Ciclo 3. Kai creando cuentas colombianas en Vector Capital (en curso, cooldown S1).", progress: 0 },
   { id: "soporte-us", name: "Soporte US Stocks", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["GM"], status: "Listo", weeks: [1, 5], lastUpdate: "Cerrado.", progress: 1 },
   { id: "dividendos-cl", name: "Dividendos Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: ["KA", "AV"], status: "Listo", weeks: [1, 6], lastUpdate: "Alan tomó el relevo de Kai y resolvió los issues pendientes. Cerrado en S6.", progress: 1 },
   { id: "retiros-cl", name: "Retiros Express Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: [], status: "Not started", weeks: [2, 3], lastUpdate: "Descartado por restricciones de tiempo. Se evalúa en próximo ciclo.", dropped: true, progress: 0 },
-  { id: "retiros-mm", name: "Retiros fondos MM", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["SB", "CA"], status: "Cooldown", weeks: [1, 6], lastUpdate: "Carlos cierra el FE el martes Abr 28 (primer día de cooldown). BE listo (Sergio) desde el ciclo.", progress: 0.95 },
+  { id: "retiros-mm", name: "Retiros fondos MM", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["SB", "CA"], status: "Listo", weeks: [1, 6], lastUpdate: "Cerrado en cooldown S1. Carlos cerró el FE el Abr 28.", progress: 1 },
   { id: "transf-pe", name: "Mejoras transf. Perú", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["GM"], status: "Listo", weeks: [2, 4], lastUpdate: "Live y operando.", progress: 1 },
-  { id: "tc-depositos", name: "TC en depósitos", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["CA", "KA"], status: "Cooldown", weeks: [1, 4], lastUpdate: "Desarrollo cerrado. Kai configura webhook de producción esta semana en cooldown — gate de lanzamiento.", progress: 0.95 },
+  { id: "tc-depositos", name: "TC en depósitos", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["CA", "KA"], status: "Listo", weeks: [1, 4], lastUpdate: "Webhook de producción configurado por Kai en cooldown S1. Bet cerrado.", progress: 1 },
   { id: "fix-orders", name: "Fix 5.0 Perú Orders", objective: "Regulatorio", objectiveNum: 99, team: ["AV", "DC"], status: "Listo", weeks: [2, 6], lastUpdate: "Live sábado Abr 25. Operación arrancó lunes Abr 27. DC y AV en soporte operativo durante cooldown.", progress: 1 },
   { id: "fix-market", name: "Fix 5.0 Perú Market", objective: "Regulatorio", objectiveNum: 99, team: ["DC"], status: "Listo", weeks: [1, 6], lastUpdate: "Live sábado Abr 25. Operación arrancó lunes Abr 27.", progress: 1 },
   { id: "update-os", name: "Update iOS/Android", objective: "Regulatorio", objectiveNum: 99, team: ["JR"], status: "Listo", weeks: [1, 2], lastUpdate: "Cerrado temprano en S2.", progress: 1 },
@@ -193,6 +193,17 @@ export const DISCOVERY: DiscoveryObjective[] = [
 ];
 
 export const WEEKLY_LOG: WeeklyLogEntry[] = [
+  {
+    week: "Cooldown S1", dates: "Abr 27 → May 1", items: [
+      "TC en depósitos: Kai configuró webhook de producción. Cerrado.",
+      "Demo trii Pro: Cerrado (JR).",
+      "Retiros fondos MM: Carlos cerró el FE el Abr 28. Cerrado.",
+      "Mejoras trii web: Jorge trabajando — en curso.",
+      "Crear cuentas colombianas en Vector Capital: Kai arrancó — en curso.",
+      "Sergio: Fixes and tech debt (Abr 27 → Abr 29) · Mejoras onboarding Blum arranca Abr 29.",
+      "Carlos: Mejoras onboarding Blum arranca Abr 29.",
+    ]
+  },
   {
     week: "Semana 6", dates: "Abr 20-24", items: [
       "Cierre del ciclo: 12 de 14 bets cerradas. 1 pushed, 1 descartada.",
@@ -480,16 +491,18 @@ export const COOLDOWN_DEVS: CooldownDev[] = [
 ];
 
 export const COOLDOWN_TASKS: CooldownTask[] = [
-  { id: "c-retiros-mm", title: "Retiros money market", kind: "carryover", betId: "retiros-mm", dev: "CA", status: "doing", note: "Cerrando FE. Backend ya listo desde el ciclo (SB).", priority: "high", startDay: 0, endDay: 2 },
-  { id: "c-demo-pro", title: "Demo trii Pro", kind: "carryover", betId: "demo-pro", dev: "JR", status: "doing", note: "Cierre final de FE post-entrega del ciclo.", priority: "high", effort: "3d", startDay: 0, endDay: 2 },
-  { id: "c-mejoras-web", title: "Mejoras trii web", kind: "carryover", betId: "mejoras-web", dev: "JR", status: "todo", note: "Jorge arrancó en S6; continúa en cooldown.", priority: "med", startDay: 3, endDay: 9 },
+  { id: "c-retiros-mm", title: "Retiros money market", kind: "carryover", betId: "retiros-mm", dev: "CA", status: "done", note: "Cerrado en cooldown S1. Carlos cerró FE el Abr 28.", priority: "high", startDay: 0, endDay: 2 },
+  { id: "c-demo-pro", title: "Demo trii Pro", kind: "carryover", betId: "demo-pro", dev: "JR", status: "done", note: "Cerrado en cooldown S1.", priority: "high", effort: "3d", startDay: 0, endDay: 2 },
+  { id: "c-mejoras-web", title: "Mejoras trii web", kind: "carryover", betId: "mejoras-web", dev: "JR", status: "doing", note: "Jorge arrancó en S6 (Abr 25); continúa en cooldown.", priority: "med", startDay: 0, endDay: 9 },
   { id: "c-vinculacion-doc", title: "Vinculación Completa — Gestión documental", kind: "carryover", betId: "vinculacion", dev: "GM", status: "doing", note: "Componente de gestión documental dentro de Vinculación Completa.", priority: "high", startDay: 0, endDay: 9 },
-  { id: "c-vector-co", title: "Crear cuentas de colombianos en Vector Capital", kind: "carryover", dev: "KA", status: "todo", note: "Carryover operativo / integración.", priority: "med", startDay: 2, endDay: 9 },
+  { id: "c-vector-co", title: "Crear cuentas de colombianos en Vector Capital", kind: "carryover", dev: "KA", status: "doing", note: "Carryover operativo / integración.", priority: "med", startDay: 2, endDay: 9 },
   { id: "c-form-vinc", title: "Formulario Vinculación Completa", kind: "carryover", betId: "vinculacion", dev: "ET", status: "doing", note: "FE del formulario dentro del flujo de Vinculación Completa.", priority: "high", startDay: 0, endDay: 9 },
 
-  { id: "d-blum-onb", title: "Fixes + tech debt onboarding fondos Blum Perú", kind: "debt", dev: "SB", status: "doing", note: "Limpieza previa al push de AUMs de Obj. 5.", priority: "high", effort: "6d", startDay: 0, endDay: 5 },
-  { id: "d-webhook-tc", title: "Webhook Prod para Depósitos de Tarjeta", kind: "debt", dev: "KA", status: "todo", note: "Mover webhook de staging a producción.", priority: "high", startDay: 0, endDay: 2 },
+  { id: "d-blum-onb", title: "Fixes and tech debt", kind: "debt", dev: "SB", status: "doing", note: "Limpieza previa al push de AUMs de Obj. 5.", priority: "high", startDay: 0, endDay: 2 },
+  { id: "d-blum-sb", title: "Mejoras onboarding Blum", kind: "bug", dev: "SB", status: "doing", note: "Mejoras de bugs en onboarding fondos Blum Perú.", priority: "high", startDay: 2, endDay: 9 },
+  { id: "d-webhook-tc", title: "Webhook Prod para Depósitos de Tarjeta", kind: "debt", dev: "KA", status: "done", note: "Webhook movido a producción por Kai en cooldown S1.", priority: "high", startDay: 0, endDay: 2 },
 
+  { id: "b-blum-ca", title: "Mejoras onboarding Blum", kind: "bug", dev: "CA", status: "doing", note: "Mejoras de bugs en onboarding fondos Blum Perú.", priority: "high", startDay: 2, endDay: 9 },
   { id: "b-fix50-fe", title: "Soporte FIX 5.0 Perú", kind: "bug", dev: "DC", status: "doing", note: "Go-live sábado Abr 25, operación arranca lunes Abr 27. Soporte prioritario.", priority: "high", effort: "10d", startDay: 0, endDay: 9 },
   { id: "b-fix50-be", title: "Soporte FIX 5.0 Perú", kind: "bug", dev: "AV", status: "doing", note: "Go-live sábado Abr 25, operación arranca lunes Abr 27. Soporte prioritario.", priority: "high", effort: "10d", startDay: 0, endDay: 9 },
 ];
