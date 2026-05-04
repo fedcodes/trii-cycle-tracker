@@ -125,7 +125,7 @@ function ReleaseCard({
               fontVariantNumeric: "tabular-nums",
             }}
           >
-            {release.date} · 2026
+            {release.date}
           </div>
         </div>
       </div>
@@ -190,14 +190,13 @@ function ReleasesSummary() {
   const total = RELEASES.length;
   const qa = RELEASES.filter((r) => r.tag === "QA").length;
   const itemsThisCycle = RELEASES.slice(0, 3).reduce((s, r) => s + r.items.length, 0);
-  const qaVersion = RELEASES.find((r) => r.tag === "QA")?.version || "—";
-  const nextRelease = qaVersion;
+  const nextRelease = RELEASES.find((r) => r.tag === "QA")?.version || "—";
 
   const items = [
-    { label: "Releases totales", value: total, sub: "últimos 6 meses", accent: "rgb(var(--fg))", isText: false },
-    { label: "En QA hoy", value: qa, sub: qa === 0 ? "ninguno" : `v${qaVersion}`, accent: "rgb(var(--yellow))", isText: false },
+    { label: "Releases totales", value: total, sub: "Nov 2025 → hoy", accent: "rgb(var(--fg))", isText: false },
+    { label: "En QA hoy", value: qa, sub: qa === 0 ? "ninguno" : `v${nextRelease}`, accent: "rgb(var(--yellow))", isText: false },
     { label: "Cambios en el ciclo", value: itemsThisCycle, sub: "últimas 3 versiones", accent: "rgb(var(--primary))", isText: false },
-    { label: "Próximo release", value: `v${nextRelease}`, sub: "esperado S6-S7", accent: "rgb(var(--fg-2))", isText: true },
+    { label: "Próximo release", value: `v${nextRelease}`, sub: "esperado en cooldown", accent: "rgb(var(--fg-2))", isText: true },
   ];
 
   return (
@@ -279,7 +278,7 @@ export default function ReleasesTab() {
           <div>
             <div style={{ fontSize: 13, fontWeight: 700 }}>Historial de releases</div>
             <div style={{ fontSize: 11, color: "rgb(var(--fg-3))", marginTop: 2 }}>
-              Versiones publicadas desde Feb 2026 · mobile + web
+              Versiones publicadas desde Nov 2025 · mobile + web
             </div>
           </div>
           <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>

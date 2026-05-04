@@ -2,7 +2,7 @@
 
 import { CYCLE } from "@/data/cycle";
 
-export type TabKey = "Estado del ciclo" | "Discovery" | "Backlog" | "Releases" | "Cooldown";
+export type TabKey = "Estado del ciclo" | "Discovery" | "Releases" | "Cooldown" | "Backlog";
 export const TABS: TabKey[] = ["Estado del ciclo", "Discovery", "Backlog", "Releases", "Cooldown"];
 
 export default function Shell({

@@ -1,4 +1,11 @@
-export type BetStatus = "On track" | "Update" | "Not started" | "Listo" | "Blocked";
+export type BetStatus =
+  | "On track"
+  | "Update"
+  | "Not started"
+  | "Listo"
+  | "Blocked"
+  | "Cooldown"
+  | "Pushed";
 
 export interface Bet {
   id: string;
@@ -76,30 +83,30 @@ export const CYCLE: CycleMeta = {
   cooldown: "Abr 27 → May 8, 2026",
   startDate: "2026-03-16",
   endDate: "2026-04-24",
-  currentDate: "2026-05-04",
+  currentDate: "2026-04-27",
   currentWeek: 6,
   totalWeeks: 6,
-  lastUpdated: "2026-05-04",
+  lastUpdated: "2026-04-27",
 };
 
 export const TOTAL_DAYS = 42;
 export const weekToDays = (w: number) => ({ start: (w - 1) * 7, end: (w - 1) * 7 + 4 });
 
 export const BETS: Bet[] = [
-  { id: "demo-pro", name: "Demo trii Pro", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["SB", "JR"], status: "On track", weeks: [2, 6], lastUpdate: "En QA. Lanzamiento esperado en app esta semana (CD2).", progress: 0.95 },
+  { id: "demo-pro", name: "Demo trii Pro", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["SB", "JR"], status: "Listo", weeks: [2, 6], lastUpdate: "Cerrado en cooldown S1 (JR).", progress: 1 },
   { id: "ordenes", name: "Órdenes", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["AV"], status: "Listo", weeks: [1, 1], lastUpdate: "Completado en S1", progress: 1 },
-  { id: "mejoras-web", name: "Mejoras trii web", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR"], status: "On track", weeks: [6, 6], lastUpdate: "Jorge en cierre. 70% completado — finaliza esta semana (CD2).", progress: 0.7 },
-  { id: "vinculacion", name: "Vinculación Completa", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["KA", "ET", "GM"], status: "On track", weeks: [1, 6], lastUpdate: "90% — Estefa y Kai en formulario. QA jueves May 7. Producción la próxima semana. Gafe terminó modelo Declaraciones de renta, sigue con otros modelos documentales.", progress: 0.9 },
-  { id: "cambios-co", name: "Cambios Colombia", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["GM"], status: "Not started", weeks: [5, 6], lastUpdate: "Pushed a Ciclo 3. Kai habilita cuentas Vector Capital en cooldown.", progress: 0.1 },
-  { id: "soporte-us", name: "Soporte US Stocks", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["GM"], status: "Listo", weeks: [1, 5], lastUpdate: "Cerrado en S5.", progress: 1 },
-  { id: "dividendos-cl", name: "Dividendos Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: ["KA", "AV"], status: "Listo", weeks: [1, 6], lastUpdate: "Alan tomó el relevo de Kai y resolvió issues. Cerrado en S6.", progress: 1 },
-  { id: "retiros-cl", name: "Retiros Express Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: [], status: "Not started", weeks: [2, 3], lastUpdate: "Descartado del ciclo — se evalúa en próximo ciclo.", dropped: true, progress: 0 },
-  { id: "retiros-mm", name: "Retiros fondos MM", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["SB", "CA"], status: "On track", weeks: [1, 6], lastUpdate: "En QA. Lanzamiento esperado en app esta semana (CD2).", progress: 0.95 },
-  { id: "transf-pe", name: "Mejoras transf. Perú", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["GM"], status: "Listo", weeks: [2, 4], lastUpdate: "Live. Operando.", progress: 1 },
+  { id: "mejoras-web", name: "Mejoras trii web", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["CA", "JR"], status: "Cooldown", weeks: [6, 6], lastUpdate: "JR avanzó en paralelo a Demo trii Pro. Cierre final en cooldown.", progress: 0.1 },
+  { id: "vinculacion", name: "Vinculación Completa", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["KA", "ET", "GM"], status: "Cooldown", weeks: [1, 6], lastUpdate: "Kai cierra BE en cooldown. Gafe en gestión documental, Estefa en formulario. Kai pasa a habilitadores de US Stocks CO (cuentas Vector).", progress: 0.85 },
+  { id: "cambios-co", name: "Cambios Colombia", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["GM", "KA"], status: "Pushed", weeks: [5, 6], lastUpdate: "No iniciado en el ciclo. Se pushea a Ciclo 3. Kai creando cuentas colombianas en Vector Capital (en curso, cooldown S1).", progress: 0 },
+  { id: "soporte-us", name: "Soporte US Stocks", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["GM"], status: "Listo", weeks: [1, 5], lastUpdate: "Cerrado.", progress: 1 },
+  { id: "dividendos-cl", name: "Dividendos Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: ["KA", "AV"], status: "Listo", weeks: [1, 6], lastUpdate: "Alan tomó el relevo de Kai y resolvió los issues pendientes. Cerrado en S6.", progress: 1 },
+  { id: "retiros-cl", name: "Retiros Express Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: [], status: "Not started", weeks: [2, 3], lastUpdate: "Descartado por restricciones de tiempo. Se evalúa en próximo ciclo.", dropped: true, progress: 0 },
+  { id: "retiros-mm", name: "Retiros fondos MM", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["SB", "CA"], status: "Listo", weeks: [1, 6], lastUpdate: "Cerrado en cooldown S1. Carlos cerró el FE el Abr 28.", progress: 1 },
+  { id: "transf-pe", name: "Mejoras transf. Perú", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["GM"], status: "Listo", weeks: [2, 4], lastUpdate: "Live y operando.", progress: 1 },
   { id: "tc-depositos", name: "TC en depósitos", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["CA", "KA"], status: "Listo", weeks: [1, 4], lastUpdate: "Webhook de producción configurado por Kai en cooldown S1. Bet cerrado.", progress: 1 },
-  { id: "fix-orders", name: "Fix 5.0 Perú Orders", objective: "Regulatorio", objectiveNum: 99, team: ["AV", "DC"], status: "Listo", weeks: [2, 6], lastUpdate: "Live sábado Abr 25. David en soporte (AV de vacaciones).", progress: 1 },
-  { id: "fix-market", name: "Fix 5.0 Perú Market", objective: "Regulatorio", objectiveNum: 99, team: ["DC"], status: "Listo", weeks: [1, 6], lastUpdate: "Live sábado Abr 25. David en soporte durante CD2.", progress: 1 },
-  { id: "update-os", name: "Update iOS/Android", objective: "Regulatorio", objectiveNum: 99, team: ["JR"], status: "Listo", weeks: [1, 2], lastUpdate: "Jorge terminó temprano, se movió a Demo trii Pro.", progress: 1 },
+  { id: "fix-orders", name: "Fix 5.0 Perú Orders", objective: "Regulatorio", objectiveNum: 99, team: ["AV", "DC"], status: "Listo", weeks: [2, 6], lastUpdate: "Live sábado Abr 25. Operación arrancó lunes Abr 27. DC y AV en soporte operativo durante cooldown.", progress: 1 },
+  { id: "fix-market", name: "Fix 5.0 Perú Market", objective: "Regulatorio", objectiveNum: 99, team: ["DC"], status: "Listo", weeks: [1, 6], lastUpdate: "Live sábado Abr 25. Operación arrancó lunes Abr 27.", progress: 1 },
+  { id: "update-os", name: "Update iOS/Android", objective: "Regulatorio", objectiveNum: 99, team: ["JR"], status: "Listo", weeks: [1, 2], lastUpdate: "Cerrado temprano en S2.", progress: 1 },
 ];
 
 export const DISCOVERY_STAGES: DiscoveryStage[] = [
@@ -108,11 +115,6 @@ export const DISCOVERY_STAGES: DiscoveryStage[] = [
   { id: "design", label: "Design", desc: "Wireframes / UI en progreso" },
   { id: "ready", label: "Ready", desc: "Listo para desarrollo" },
 ];
-
-// Figma links (centralized so they're easy to update)
-const FIGMA_ONBOARDING_CO = "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4";
-const FIGMA_ONBOARDING_BLUM = "https://www.figma.com/design/LMHcQiNUjiuk53aD9DHkB8/PE_Fondos?node-id=6-9&t=A318m31A7bDZMYUr-1";
-const FIGMA_TAKE_PROFIT = "https://www.figma.com/design/zhhQv5ScB8SBoxeOLaBtcz/CO_%C3%93rdenes?m=auto&node-id=7834-34277&t=CpSRppUDDyV3efS5-1";
 
 export const DISCOVERY: DiscoveryObjective[] = [
   {
@@ -125,7 +127,7 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Juanita",
     designer: "Jael",
     tasks: [
-      { name: "Take Profit Colombia — web/app", stage: "ready", owner: "Juanita", designer: "Jael", priority: "high", figma: FIGMA_TAKE_PROFIT, notes: "Diseño cerrado. Listo para entrar a build." },
+      { name: "Take Profit Colombia — web/app", stage: "ready", owner: "Juanita", designer: "Jael", priority: "high", figma: "https://www.figma.com/design/zhhQv5ScB8SBoxeOLaBtcz/CO_%C3%93rdenes?m=auto&node-id=7834-34277&t=CpSRppUDDyV3efS5-1", notes: "Diseño cerrado a inicios de cooldown S1. Listo para entrar a build." },
       { name: "Modificación de órdenes — web/app", stage: "design", owner: "Juanita", designer: "Jael", priority: "high", figma: null, notes: "Juanita y Jael arrancan diseño tras cerrar Take Profit." },
       { name: "Cambiar default de órdenes en el app", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "" },
       { name: "Historial de órdenes de bolsa — web/app", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "low", figma: null, notes: "" },
@@ -141,9 +143,9 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Juanita",
     designer: "Jael",
     tasks: [
-      { name: "Lanzar Colombia", stage: "ready", owner: "Federico", designer: "Jael", priority: "high", figma: null, notes: "Listo para build — owner Federico" },
-      { name: "Análisis fundamental y técnico de US Stocks", stage: "research", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Evaluando proveedores y viabilidad financiera" },
-      { name: "Diferencial de spreads y comisiones para usuarios pro", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "" },
+      { name: "Lanzar Colombia", stage: "ready", owner: "Federico", designer: "Jael", priority: "high", figma: null, notes: "Listo para entrar a build. Owner: Federico." },
+      { name: "Análisis fundamental y técnico de US Stocks", stage: "research", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Evaluando proveedores y viabilidad financiera." },
+      { name: "Diferencial de spreads y comisiones para usuarios pro (US Stocks)", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "" },
     ],
   },
   {
@@ -167,7 +169,7 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: null,
     designer: "James Alonso",
     tasks: [
-      { name: "Nuevo flujo de onboarding (Colombia)", stage: "design", owner: null, designer: "James Alonso", priority: "high", figma: FIGMA_ONBOARDING_CO, notes: "Wireframes cerrados — picture clara. Diseño arranca esta semana (CD2)." },
+      { name: "Nuevo flujo de onboarding (Colombia)", stage: "research", owner: null, designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Wireframes de nueva experiencia en proceso (S6)." },
     ],
   },
   {
@@ -180,69 +182,39 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Felipe",
     designer: "Ange",
     tasks: [
-      { name: "Nuevo onboarding fondos Blum", stage: "ready", owner: "Felipe", designer: "Ange", priority: "high", figma: FIGMA_ONBOARDING_BLUM, notes: "Diseño cerrado. Pitch listo — entra a Ciclo 3 como bet." },
-      { name: "Rediseño depósito, retiros y movimientos de fondos (3 países)", stage: "design", owner: "Felipe", designer: "Ange", priority: "high", figma: null, notes: "Pasa de Backlog a Design — pitch S6 que ahora arranca diseño." },
+      { name: "Nuevo onboarding fondos Blum", stage: "design", owner: "Felipe", designer: "Ange", priority: "high", figma: "https://www.figma.com/design/LMHcQiNUjiuk53aD9DHkB8/PE_Fondos?node-id=6-9&t=A318m31A7bDZMYUr-1", notes: "Diseño cierra la próxima semana (cooldown S2)." },
+      { name: "Traslados entre fondos", stage: "research", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Solo viable en Colombia. No factible técnicamente en Perú por ahora." },
       { name: "Rentabilidad de fondos de inversión desde Back", stage: "research", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "" },
-      { name: "Traslados entre fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "low", figma: null, notes: "Solo viable en Colombia. Despriorizado en CD2 — vuelve a Backlog." },
+      { name: "Rediseño depósito, retiros y movimientos de fondos (3 países)", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "high", figma: null, notes: "Nuevo pitch incluido en S6 — mejoras de diseño para Colombia, Chile y Perú." },
       { name: "Mejoras en movimientos de transacciones y fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "low", figma: null, notes: "" },
     ],
     context: "Blum pidió USD 10M en AUMs en Perú antes de fin de año. Si no, cierran fondos.",
-  },
-  {
-    id: 99,
-    name: "Asks especiales",
-    shortName: "Asks especiales",
-    description: "Iniciativas que no están bajo un objetivo estratégico pero requieren atención de producto este ciclo.",
-    metric: "—",
-    target: "—",
-    po: "Juanita",
-    designer: null,
-    tasks: [
-      { name: "Mejoras Agente CX", stage: "research", owner: "Juanita", designer: null, priority: "med", figma: null, notes: "Picture clara de qué hace falta — pitch a cerrar esta semana (CD2)." },
-    ],
   },
 ];
 
 export const WEEKLY_LOG: WeeklyLogEntry[] = [
   {
-    week: "Cooldown S2", dates: "May 4-8", items: [
-      "Demo trii Pro y Retiros fondos MM en QA — lanzamiento esperado en app esta semana",
-      "Mejoras trii web — Jorge en cierre, 70% completado, finaliza esta semana",
-      "Vinculación Completa — 90% (Estefa + Kai en formulario), QA jueves May 7, producción la próxima",
-      "Gafe — modelo Declaraciones de renta cerrado; sigue con otros modelos documentales",
-      "Sergio + Carlos — bugs Mejoras onboarding Blum (hasta May 8)",
-      "Alan — de vacaciones, regresa Ciclo 3 S1",
-      "David — soporte Fix 5.0 Peru + soporte app durante cooldown",
-      "Discovery: Onboarding fondos Blum → Ready (pitch a Ciclo 3); Nuevo flujo onboarding CO → Design; Rediseño depósito/retiros/movimientos (3 países) → Design",
-      "Discovery: Traslados entre fondos → Backlog (despriorizado); Asesor AI CX reemplazado por Mejoras Agente CX (Research, pitch esta semana)",
-    ]
-  },
-  {
-    week: "Cooldown S1", dates: "Abr 27 - May 1", items: [
-      "TC en depósitos — Kai configuró webhook de producción · bet cerrado",
-      "Demo trii Pro — desbloqueado y cerrando en cooldown (Jorge)",
-      "Retiros fondos MM — Carlos cerró el FE el Abr 28",
-      "Mejoras trii web — Jorge en curso",
-      "Vector Capital — Kai arrancó cuentas colombianas (habilitador US Stocks CO)",
-      "Sergio — fixes y tech debt (Abr 27 → 29) · luego arranca Mejoras onboarding Blum",
-      "Carlos — arranca Mejoras onboarding Blum (Abr 29 → May 8)",
-      "Discovery: Take Profit cierra diseño · pasa a Ready",
-      "Discovery: Modificación de órdenes (Backlog → Design)",
+    week: "Cooldown S1", dates: "Abr 27 → May 1", items: [
+      "TC en depósitos: Kai configuró webhook de producción. Cerrado.",
+      "Demo trii Pro: Cerrado (JR).",
+      "Retiros fondos MM: Carlos cerró el FE el Abr 28. Cerrado.",
+      "Mejoras trii web: Jorge trabajando — en curso.",
+      "Crear cuentas colombianas en Vector Capital: Kai arrancó — en curso.",
+      "Sergio: Fixes and tech debt (Abr 27 → Abr 29) · Mejoras onboarding Blum arranca Abr 29.",
+      "Carlos: Mejoras onboarding Blum arranca Abr 29.",
     ]
   },
   {
     week: "Semana 6", dates: "Abr 20-24", items: [
-      "Retiros fondos MM y Demo trii Pro terminando desarrollo — entrega S6",
-      "Fix 5.0 Perú: go-live sábado Abr 25, operación arranca lunes Abr 27",
-      "Vinculación Completa: preguntas sobre API AyV — resolución esperada S6",
-      "Mejoras trii web: Jorge arranca S6 tras cerrar Demo Pro",
-      "Discovery: rediseño de tablero — ahora agrupado por etapa (Backlog/Research/Design/Ready) con acceso a Figma",
-      "Discovery Obj. 5: wireframes onboarding fondos Blum aprobados",
-      "Discovery Obj. 1: Take Profit en diseño con Figma conectado",
-      "Discovery Obj. 4: wireframes nuevo onboarding Colombia en proceso",
-      "Discovery Obj. 5: traslados entre fondos — solo Colombia (no viable Perú)",
-      "Discovery Obj. 5: nuevo pitch rediseño depósito/retiros/movimientos (3 países)",
-      "Discovery Obj. 2: Lanzar Colombia pasó a Ready",
+      "Cierre del ciclo: 12 de 14 bets cerradas. 1 pushed, 1 descartada.",
+      "Demo trii Pro desbloqueado tras caída de servicios BE a fines de S5. Cierre final en cooldown (JR).",
+      "Retiros fondos MM: Carlos cierra el FE el martes Abr 28 (primer día de cooldown).",
+      "Dividendos Chile: Alan tomó relevo de Kai y resolvió issues. Cerrado.",
+      "Fix 5.0 Perú: live el sábado Abr 25. Operación arranca lunes Abr 27.",
+      "Vinculación Completa: BE en cierre por Kai; gestión documental con Gafe; formulario con Estefa.",
+      "Soporte US Stocks: cerrado.",
+      "TC en depósitos: pendiente webhook de producción — Kai lo configura esta semana en cooldown.",
+      "Cambios Colombia: pushed a Ciclo 3.",
     ]
   },
   {
@@ -290,52 +262,93 @@ export const WEEKLY_LOG: WeeklyLogEntry[] = [
       "Update iOS/Android avanzando rápido",
     ]
   },
-];
+].map((w) => ({ ...w, week: `${w.week}`, dates: w.dates } as WeeklyLogEntry));
 
 export const RELEASES: Release[] = [
-  { version: "3.3.0", tag: "QA", date: "May 4", items: [
+  { version: "3.3.0", tag: "QA", date: "May 4, 2026", items: [
     "Registro de eventos para Posthog",
     "Nuevo texto para pago de dividendos \"Trianual\"",
     "Demo trii Pro",
     "Texto rentabilidad en pantalla de confirmar inversión en Fondo",
     "Si estás bloqueado en Mibanco, permitir sacar CDTs de Tuya",
   ]},
-  { version: "3.2.1", tag: "Live", date: "Abr 24", items: [
+  { version: "3.2.1", tag: "Live", date: "Abr 24, 2026", items: [
     "Cash in tarjeta de crédito",
     "Corrección texto de tiempo de espera para retiros en Nequi",
     "Corrección validación de montos en Stop Loss",
   ]},
-  { version: "3.1.4", date: "Abr 10", items: [
+  { version: "3.1.4", date: "Abr 10, 2026", items: [
     "Permite simular CDTs en Tuya sin tener el monto mínimo",
-    "Eliminación de \"Saldo en caja\" para retiros CDT Mibanco",
-    "Lista de movimientos de operaciones especiales",
+    "Eliminación de opción \"Saldo en caja\" para retiros de CDT de Mibanco",
+    "Lista de movimientos de operaciones especiales de mercado",
   ]},
-  { version: "3.1.2", date: "Mar 28", items: [
-    "Tags para listas de stocks locales (comisión cero y top)",
-    "Ocultamiento condicional de información sensible",
+  { version: "3.1.2", date: "Mar 28, 2026", items: [
+    "Tags para listas de stocks locales (Tag comisión cero y top)",
+    "Ocultamiento condicional de información sensible (montos y descripciones) en la tabla de inversiones",
     "Evento especial de mercado tipo recompra",
   ]},
-  { version: "3.0.56", date: "Mar 14", items: [
+  { version: "3.0.56", date: "Mar 14, 2026", items: [
     "iOS SDK 26",
-    "Android min SDK 24, Android 7 (Nougat)",
-    "Vuelve movimientos a navegación principal",
-    "Tag Subasta en listas de stocks locales",
-    "Corrección valores delay para usuarios sin trii pro",
+    "Android min version SDK 24, Android 7 (Nougat)",
+    "Actualización de navegación en home. Vuelve movimientos a navegación principal",
+    "Tag Subasta en las listas de stocks locales",
+    "Corrección valores de acciones con delay para usuarios sin trii pro",
     "Estados finalizado para CDTs",
+    "Actualización versiones de GitHub Actions",
   ]},
-  { version: "3.0.54", date: "Feb 22", items: [
-    "Optimización pantalla de stock",
+  { version: "3.0.54", date: "Feb 22, 2026", items: [
+    "Optimización pantalla de stock (soluciona efecto de carga que muestra valor -1)",
     "Movimientos de dividendos",
     "Opción de ocultar saldo se conserva al cerrar sesión",
-    "Carrusel de banner para acciones locales y EE.UU",
+    "Elección de moneda local o US se conserva al navegar por la aplicación",
+    "Carrusel de banner para acciones locales y EE. UU",
     "Sección CDT en descubre",
+    "Market hold para cambios en US Stocks Chile",
   ]},
-  { version: "3.0.51", date: "Feb 8", items: [
+  { version: "3.0.51", date: "Feb 8, 2026", items: [
     "SDK Meta",
-    "Lista de acciones sube en prioridad",
-    "Vuelve favoritos a pantalla de inicio",
+    "Conservar estado al ocultar saldo",
+    "Lista de acciones sube en prioridad en vista de invertir",
+    "Vuelve favoritos a la pantalla de inicio",
     "Lista de movimientos individual para US Stocks",
     "Filtros para ordenar acciones locales",
+    "Corrección de estilos en los banners",
+    "Corrección logos estirados al inicializar la app y actualizar slides de bienvenida",
+  ]},
+  { version: "3.0.46", date: "Ene 25, 2026", items: [
+    "CDTs Tuya",
+    "Integración PostHog",
+    "Cartola de movimientos en Chile",
+    "Onboarding US Stocks",
+    "Correcciones validaciones de órdenes en US Stocks",
+    "Corrección problemas carga portafolio usuarios Perú",
+    "Corrección validaciones para términos y condiciones",
+  ]},
+  { version: "3.0.36", date: "Ene 11, 2026", items: [
+    "Horarios de mercado para Fix 5.0",
+    "Actualización términos y condiciones Perú",
+    "Mejoras animación pantalla login",
+    "Mejoras en diseño de trii 3.0",
+  ]},
+  { version: "3.0.31", date: "Dic 28, 2025", items: [
+    "Home completamente nuevo",
+    "Pantalla de inversiones rediseñada",
+    "Nuevo diseño en toda la app",
+  ]},
+  { version: "2.72.51", date: "Dic 14, 2025", items: [
+    "Icono de navidad",
+    "Actualización de direcciones de Perú para fondos Blum",
+    "Se corrige validación de precios límites",
+  ]},
+  { version: "2.72.38", date: "Nov 30, 2025", items: [
+    "Se elimina en los fondos en la tabla de rentabilidad los elementos duplicados",
+    "Se corrige el error del cálculo de min y max para la cantidad de acciones en órdenes a mercado, que estaba tomando en cuenta el marketHoldPercentage 2 veces",
+  ]},
+  { version: "2.72.37", date: "Nov 16, 2025", items: [
+    "Se arregla la pantalla de videos",
+    "Se pone en más información del saldo el valor del marketHold que antes estaba quemado",
+    "Se corrige el error que no dejaba poner ninguna orden en cualquier tipo de subasta, ahora solo se puede orden límite en subasta",
+    "Se corrige el currency que se usa para el input y las validaciones",
   ]},
 ];
 
@@ -367,9 +380,11 @@ export const statusToken = (status: BetStatus, dropped?: boolean): StatusTokens 
   const m: Record<BetStatus, StatusTokens> = {
     "On track": { fg: "rgb(var(--primary))", bg: "rgb(var(--primary-dim))", dot: "rgb(var(--primary))" },
     "Listo": { fg: "rgb(var(--primary))", bg: "rgb(var(--primary-dim))", dot: "rgb(var(--primary))" },
+    "Cooldown": { fg: "rgb(var(--primary))", bg: "rgb(var(--primary-dim))", dot: "rgb(var(--primary))" },
     "Update": { fg: "rgb(var(--yellow))", bg: "rgb(var(--yellow-dim))", dot: "rgb(var(--yellow))" },
     "Blocked": { fg: "rgb(var(--error))", bg: "rgb(var(--error-dim))", dot: "rgb(var(--error))" },
     "Not started": { fg: "rgb(var(--fg-2))", bg: "rgb(var(--surface-2))", dot: "rgb(var(--fg-3))" },
+    "Pushed": { fg: "rgb(var(--fg-3))", bg: "rgb(var(--surface-2))", dot: "rgb(var(--fg-4))" },
   };
   return m[status] || m["Not started"];
 };
@@ -380,6 +395,8 @@ export const getKPIs = () => {
     total: active.length,
     onTrack: active.filter((b) => b.status === "On track").length,
     listo: active.filter((b) => b.status === "Listo").length,
+    cooldown: active.filter((b) => b.status === "Cooldown").length,
+    pushed: active.filter((b) => b.status === "Pushed").length,
     update: active.filter((b) => b.status === "Update").length,
     notStarted: active.filter((b) => b.status === "Not started").length,
     dropped: BETS.filter((b) => b.dropped).length,
@@ -523,35 +540,4 @@ export const getCooldownKPIs = () => {
     debt: t.filter((x) => x.kind === "debt").length,
     bug: t.filter((x) => x.kind === "bug").length,
   };
-};
-
-// -----------------------------------------------------------------------------
-// Legacy shape kept for any callers still importing `cycleData`. Internally
-// resolves to the same source of truth as BETS / DISCOVERY / etc. so the two
-// views never drift.
-// -----------------------------------------------------------------------------
-export interface CycleData {
-  cycleName: string;
-  dates: string;
-  cooldown: string;
-  currentWeek: number;
-  totalWeeks: number;
-  lastUpdated: string;
-  bets: Bet[];
-  discovery: DiscoveryObjective[];
-  weeklyLog: { week: string; items: string[] }[];
-  releases: Release[];
-}
-
-export const cycleData: CycleData = {
-  cycleName: CYCLE.cycleName,
-  dates: CYCLE.dates,
-  cooldown: CYCLE.cooldown,
-  currentWeek: CYCLE.currentWeek,
-  totalWeeks: CYCLE.totalWeeks,
-  lastUpdated: CYCLE.lastUpdated,
-  bets: BETS,
-  discovery: DISCOVERY,
-  weeklyLog: WEEKLY_LOG.map((w) => ({ week: `${w.week} (${w.dates})`, items: w.items })),
-  releases: RELEASES,
 };

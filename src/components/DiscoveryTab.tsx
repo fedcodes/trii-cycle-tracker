@@ -117,7 +117,8 @@ function TaskCard({
 }) {
   const c = objColor(objId);
   const pri = PRIORITY[task.priority] || PRIORITY.med;
-  const hasFigma = !!task.figma && task.figma !== "#";
+  const figmaUrl = task.figma && task.figma !== "#" ? task.figma : null;
+  const hasFigma = !!figmaUrl;
 
   return (
     <div
@@ -142,7 +143,7 @@ function TaskCard({
             textTransform: "uppercase",
           }}
         >
-          {objId === 99 ? "ESPECIAL" : `OBJ. ${objId}`}
+          OBJ. {objId}
         </span>
         <span
           style={{
@@ -200,9 +201,9 @@ function TaskCard({
           <Avatar name={task.designer} label="Des" />
         </div>
         <a
-          href={hasFigma ? task.figma! : undefined}
+          href={figmaUrl || undefined}
           target={hasFigma ? "_blank" : undefined}
-          rel="noreferrer"
+          rel="noopener noreferrer"
           onClick={(e) => !hasFigma && e.preventDefault()}
           title={hasFigma ? "Abrir en Figma" : "Sin archivo de Figma"}
           style={{
@@ -495,9 +496,6 @@ function ObjectiveOverview({ obj }: { obj: DiscoveryObjective }) {
 }
 
 function ObjectivesOverview() {
-  // Show only the 5 strategic objectives in the overview grid.
-  // Special asks (id 99) still appear in the Kanban below.
-  const strategic = DISCOVERY.filter((o) => o.id !== 99);
   return (
     <div style={{ padding: "18px 28px 0" }}>
       <div style={{ marginBottom: 12 }}>
@@ -513,7 +511,7 @@ function ObjectivesOverview() {
           gap: 10,
         }}
       >
-        {strategic.map((o) => (
+        {DISCOVERY.map((o) => (
           <ObjectiveOverview key={o.id} obj={o} />
         ))}
       </div>
@@ -576,6 +574,24 @@ function KanbanColumn({ stage, tasks }: { stage: DiscoveryStage; tasks: KanbanTa
           {tasks.length}
         </span>
         <div style={{ flex: 1 }} />
+        <button
+          style={{
+            width: 20,
+            height: 20,
+            borderRadius: 4,
+            border: "none",
+            background: "transparent",
+            color: "rgb(var(--fg-4))",
+            fontSize: 14,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          aria-label="Agregar"
+        >
+          +
+        </button>
       </div>
       <div
         style={{
@@ -616,10 +632,7 @@ function KanbanColumn({ stage, tasks }: { stage: DiscoveryStage; tasks: KanbanTa
 function DiscoveryKanban() {
   const all: KanbanTask[] = [];
   DISCOVERY.forEach((obj) => {
-    const short =
-      obj.id === 99
-        ? obj.shortName
-        : obj.name.replace(/^Obj\. \d+ — /, "").split(" ").slice(0, 3).join(" ");
+    const short = obj.name.replace(/^Obj\. \d+ — /, "").split(" ").slice(0, 3).join(" ");
     obj.tasks.forEach((t) =>
       all.push({ ...t, objId: obj.id, objShort: short })
     );
