@@ -265,13 +265,19 @@ export const WEEKLY_LOG: WeeklyLogEntry[] = [
 ].map((w) => ({ ...w, week: `${w.week}`, dates: w.dates } as WeeklyLogEntry));
 
 export const RELEASES: Release[] = [
-  { version: "3.2.1", tag: "QA", date: "Abr 24, 2026", items: [
+  { version: "3.3.0", tag: "QA", date: "May 4, 2026", items: [
+    "Registro de eventos para Posthog",
+    "Nuevo texto para pago de dividendos \"Trianual\"",
+    "Demo trii Pro",
+    "Texto rentabilidad en pantalla de confirmar inversión en Fondo",
+    "Si estás bloqueado en Mibanco, permitir sacar CDTs de Tuya",
+  ]},
+  { version: "3.2.1", tag: "Live", date: "Abr 24, 2026", items: [
     "Cash in tarjeta de crédito",
     "Corrección texto de tiempo de espera para retiros en Nequi",
     "Corrección validación de montos en Stop Loss",
-    "Si estás bloqueado en Mibanco, permitir sacar CDTs de Tuya",
   ]},
-  { version: "3.1.4", tag: "Live", date: "Abr 10, 2026", items: [
+  { version: "3.1.4", date: "Abr 10, 2026", items: [
     "Permite simular CDTs en Tuya sin tener el monto mínimo",
     "Eliminación de opción \"Saldo en caja\" para retiros de CDT de Mibanco",
     "Lista de movimientos de operaciones especiales de mercado",
@@ -498,7 +504,7 @@ export const COOLDOWN_TASKS: CooldownTask[] = [
   { id: "c-vector-co", title: "Crear cuentas de colombianos en Vector Capital", kind: "carryover", dev: "KA", status: "doing", note: "Carryover operativo / integración.", priority: "med", startDay: 2, endDay: 9 },
   { id: "c-form-vinc", title: "Formulario Vinculación Completa", kind: "carryover", betId: "vinculacion", dev: "ET", status: "doing", note: "FE del formulario dentro del flujo de Vinculación Completa.", priority: "high", startDay: 0, endDay: 9 },
 
-  { id: "d-blum-onb", title: "Fixes and tech debt", kind: "debt", dev: "SB", status: "doing", note: "Limpieza previa al push de AUMs de Obj. 5.", priority: "high", startDay: 0, endDay: 2 },
+  { id: "d-blum-onb", title: "Fixes and tech debt", kind: "debt", dev: "SB", status: "done", note: "Limpieza previa al push de AUMs de Obj. 5.", priority: "high", startDay: 0, endDay: 2 },
   { id: "d-blum-sb", title: "Mejoras onboarding Blum", kind: "bug", dev: "SB", status: "doing", note: "Mejoras de bugs en onboarding fondos Blum Perú.", priority: "high", startDay: 2, endDay: 9 },
   { id: "d-webhook-tc", title: "Webhook Prod para Depósitos de Tarjeta", kind: "debt", dev: "KA", status: "done", note: "Webhook movido a producción por Kai en cooldown S1.", priority: "high", startDay: 0, endDay: 2 },
 

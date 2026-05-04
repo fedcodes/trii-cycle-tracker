@@ -194,7 +194,7 @@ function ReleasesSummary() {
 
   const items = [
     { label: "Releases totales", value: total, sub: "Nov 2025 → hoy", accent: "rgb(var(--fg))", isText: false },
-    { label: "En QA hoy", value: qa, sub: qa === 0 ? "ninguno" : "v3.2.1", accent: "rgb(var(--yellow))", isText: false },
+    { label: "En QA hoy", value: qa, sub: qa === 0 ? "ninguno" : `v${nextRelease}`, accent: "rgb(var(--yellow))", isText: false },
     { label: "Cambios en el ciclo", value: itemsThisCycle, sub: "últimas 3 versiones", accent: "rgb(var(--primary))", isText: false },
     { label: "Próximo release", value: `v${nextRelease}`, sub: "esperado en cooldown", accent: "rgb(var(--fg-2))", isText: true },
   ];
