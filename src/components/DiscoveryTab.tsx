@@ -364,7 +364,7 @@ function ObjectiveOverview({ obj }: { obj: DiscoveryObjective }) {
             textTransform: "uppercase",
           }}
         >
-          Obj. {obj.id}
+          {obj.id >= 90 ? "Asks" : `Obj. ${obj.id}`}
         </span>
         <span
           style={{
@@ -501,13 +501,13 @@ function ObjectivesOverview() {
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 13, fontWeight: 700 }}>Objetivos del ciclo</div>
         <div style={{ fontSize: 11, color: "rgb(var(--fg-3))", marginTop: 2 }}>
-          Los 5 objetivos que enmarcan todo el discovery abajo
+          Los objetivos y asks que enmarcan todo el discovery abajo
         </div>
       </div>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
+          gridTemplateColumns: "repeat(6, 1fr)",
           gap: 10,
         }}
       >

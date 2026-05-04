@@ -83,29 +83,29 @@ export const CYCLE: CycleMeta = {
   cooldown: "Abr 27 → May 8, 2026",
   startDate: "2026-03-16",
   endDate: "2026-04-24",
-  currentDate: "2026-04-27",
+  currentDate: "2026-05-04",
   currentWeek: 6,
   totalWeeks: 6,
-  lastUpdated: "2026-04-27",
+  lastUpdated: "2026-05-04",
 };
 
 export const TOTAL_DAYS = 42;
 export const weekToDays = (w: number) => ({ start: (w - 1) * 7, end: (w - 1) * 7 + 4 });
 
 export const BETS: Bet[] = [
-  { id: "demo-pro", name: "Demo trii Pro", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["SB", "JR"], status: "Listo", weeks: [2, 6], lastUpdate: "Cerrado en cooldown S1 (JR).", progress: 1 },
+  { id: "demo-pro", name: "Demo trii Pro", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["SB", "JR"], status: "Cooldown", weeks: [2, 6], lastUpdate: "En QA · lanzamiento esperado en app esta semana (CD2).", progress: 0.95 },
   { id: "ordenes", name: "Órdenes", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["AV"], status: "Listo", weeks: [1, 1], lastUpdate: "Completado en S1", progress: 1 },
-  { id: "mejoras-web", name: "Mejoras trii web", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["CA", "JR"], status: "Cooldown", weeks: [6, 6], lastUpdate: "JR avanzó en paralelo a Demo trii Pro. Cierre final en cooldown.", progress: 0.1 },
-  { id: "vinculacion", name: "Vinculación Completa", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["KA", "ET", "GM"], status: "Cooldown", weeks: [1, 6], lastUpdate: "Kai cierra BE en cooldown. Gafe en gestión documental, Estefa en formulario. Kai pasa a habilitadores de US Stocks CO (cuentas Vector).", progress: 0.85 },
+  { id: "mejoras-web", name: "Mejoras trii web", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["CA", "JR"], status: "Cooldown", weeks: [6, 6], lastUpdate: "Jorge cerrando — 70% · cierre esperado esta semana (CD2).", progress: 0.7 },
+  { id: "vinculacion", name: "Vinculación Completa", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["KA", "ET", "GM"], status: "Cooldown", weeks: [1, 6], lastUpdate: "90% · Estefa y Kai en formulario. Versión a QA jueves May 7. Producción Ciclo 3 S1. Gafe terminó modelo de Declaraciones de renta — sigue con otros modelos documentales.", progress: 0.9 },
   { id: "cambios-co", name: "Cambios Colombia", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["GM", "KA"], status: "Pushed", weeks: [5, 6], lastUpdate: "No iniciado en el ciclo. Se pushea a Ciclo 3. Kai creando cuentas colombianas en Vector Capital (en curso, cooldown S1).", progress: 0 },
   { id: "soporte-us", name: "Soporte US Stocks", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["GM"], status: "Listo", weeks: [1, 5], lastUpdate: "Cerrado.", progress: 1 },
   { id: "dividendos-cl", name: "Dividendos Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: ["KA", "AV"], status: "Listo", weeks: [1, 6], lastUpdate: "Alan tomó el relevo de Kai y resolvió los issues pendientes. Cerrado en S6.", progress: 1 },
   { id: "retiros-cl", name: "Retiros Express Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: [], status: "Not started", weeks: [2, 3], lastUpdate: "Descartado por restricciones de tiempo. Se evalúa en próximo ciclo.", dropped: true, progress: 0 },
-  { id: "retiros-mm", name: "Retiros fondos MM", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["SB", "CA"], status: "Listo", weeks: [1, 6], lastUpdate: "Cerrado en cooldown S1. Carlos cerró el FE el Abr 28.", progress: 1 },
+  { id: "retiros-mm", name: "Retiros fondos MM", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["SB", "CA"], status: "Cooldown", weeks: [1, 6], lastUpdate: "En QA · lanzamiento esperado en app esta semana (CD2). Carlos cerró el FE el Abr 28.", progress: 0.95 },
   { id: "transf-pe", name: "Mejoras transf. Perú", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["GM"], status: "Listo", weeks: [2, 4], lastUpdate: "Live y operando.", progress: 1 },
   { id: "tc-depositos", name: "TC en depósitos", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["CA", "KA"], status: "Listo", weeks: [1, 4], lastUpdate: "Webhook de producción configurado por Kai en cooldown S1. Bet cerrado.", progress: 1 },
-  { id: "fix-orders", name: "Fix 5.0 Perú Orders", objective: "Regulatorio", objectiveNum: 99, team: ["AV", "DC"], status: "Listo", weeks: [2, 6], lastUpdate: "Live sábado Abr 25. Operación arrancó lunes Abr 27. DC y AV en soporte operativo durante cooldown.", progress: 1 },
-  { id: "fix-market", name: "Fix 5.0 Perú Market", objective: "Regulatorio", objectiveNum: 99, team: ["DC"], status: "Listo", weeks: [1, 6], lastUpdate: "Live sábado Abr 25. Operación arrancó lunes Abr 27.", progress: 1 },
+  { id: "fix-orders", name: "Fix 5.0 Perú Orders", objective: "Regulatorio", objectiveNum: 99, team: ["AV", "DC"], status: "Listo", weeks: [2, 6], lastUpdate: "Live sábado Abr 25. DC en soporte de Fix 5.0 + app durante cooldown S2 (AV de vacaciones).", progress: 1 },
+  { id: "fix-market", name: "Fix 5.0 Perú Market", objective: "Regulatorio", objectiveNum: 99, team: ["DC"], status: "Listo", weeks: [1, 6], lastUpdate: "Live sábado Abr 25. DC en soporte durante cooldown S2.", progress: 1 },
   { id: "update-os", name: "Update iOS/Android", objective: "Regulatorio", objectiveNum: 99, team: ["JR"], status: "Listo", weeks: [1, 2], lastUpdate: "Cerrado temprano en S2.", progress: 1 },
 ];
 
@@ -169,7 +169,7 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: null,
     designer: "James Alonso",
     tasks: [
-      { name: "Nuevo flujo de onboarding (Colombia)", stage: "research", owner: null, designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Wireframes de nueva experiencia en proceso (S6)." },
+      { name: "Nuevo flujo de onboarding (Colombia)", stage: "design", owner: null, designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Wireframes cerrados — picture clara de qué implementar. Diseño arranca esta semana (CD2)." },
     ],
   },
   {
@@ -182,17 +182,41 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Felipe",
     designer: "Ange",
     tasks: [
-      { name: "Nuevo onboarding fondos Blum", stage: "design", owner: "Felipe", designer: "Ange", priority: "high", figma: "https://www.figma.com/design/LMHcQiNUjiuk53aD9DHkB8/PE_Fondos?node-id=6-9&t=A318m31A7bDZMYUr-1", notes: "Diseño cierra la próxima semana (cooldown S2)." },
-      { name: "Traslados entre fondos", stage: "research", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Solo viable en Colombia. No factible técnicamente en Perú por ahora." },
+      { name: "Nuevo onboarding fondos Blum", stage: "ready", owner: "Felipe", designer: "Ange", priority: "high", figma: "https://www.figma.com/design/LMHcQiNUjiuk53aD9DHkB8/PE_Fondos?node-id=6-9&t=A318m31A7bDZMYUr-1", notes: "Diseño cerrado en cooldown S2. Pitch listo — entra a Ciclo 3 como bet." },
+      { name: "Traslados entre fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Solo viable en Colombia. Despriorizado en CD2 — vuelve a Backlog." },
       { name: "Rentabilidad de fondos de inversión desde Back", stage: "research", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "" },
-      { name: "Rediseño depósito, retiros y movimientos de fondos (3 países)", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "high", figma: null, notes: "Nuevo pitch incluido en S6 — mejoras de diseño para Colombia, Chile y Perú." },
+      { name: "Rediseño depósito, retiros y movimientos de fondos (3 países)", stage: "design", owner: "Felipe", designer: "Ange", priority: "high", figma: null, notes: "Pasa de Backlog a Design — pitch de S6 que ahora arranca diseño." },
       { name: "Mejoras en movimientos de transacciones y fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "low", figma: null, notes: "" },
     ],
     context: "Blum pidió USD 10M en AUMs en Perú antes de fin de año. Si no, cierran fondos.",
   },
+  {
+    id: 99,
+    name: "Asks especiales",
+    shortName: "Asks especiales",
+    description: "Pitches que no se mapean a un objetivo estratégico — requests puntuales de otras áreas (CX, ops) que entran a discovery por su impacto.",
+    metric: "—",
+    target: "—",
+    po: "Juanita",
+    designer: null,
+    tasks: [
+      { name: "Mejoras Agente CX", stage: "research", owner: "Juanita", designer: null, priority: "med", figma: null, notes: "Picture clara de qué hace falta — pitch a cerrar esta semana (CD2)." },
+    ],
+  },
 ];
 
 export const WEEKLY_LOG: WeeklyLogEntry[] = [
+  {
+    week: "Cooldown S2", dates: "May 4 → May 8", items: [
+      "Demo trii Pro y Retiros fondos MM en QA — lanzamiento esperado en app esta semana.",
+      "Mejoras trii web: Jorge en cierre · 70% · finaliza esta semana.",
+      "Vinculación Completa: Estefa y Kai en formulario · 90% · QA jueves May 7. Producción Ciclo 3 S1.",
+      "Gafe: modelo Declaraciones de renta cerrado; trabajando en otros modelos documentales.",
+      "Sergio: tech debt cerrado · arrancó con Carlos los bugs de Mejoras onboarding Blum.",
+      "Alan: de vacaciones — regresa Ciclo 3 S1.",
+      "David: soporte Fix 5.0 Peru + soporte app durante el cooldown.",
+    ]
+  },
   {
     week: "Cooldown S1", dates: "Abr 27 → May 1", items: [
       "TC en depósitos: Kai configuró webhook de producción. Cerrado.",
@@ -200,8 +224,8 @@ export const WEEKLY_LOG: WeeklyLogEntry[] = [
       "Retiros fondos MM: Carlos cerró el FE el Abr 28. Cerrado.",
       "Mejoras trii web: Jorge trabajando — en curso.",
       "Crear cuentas colombianas en Vector Capital: Kai arrancó — en curso.",
-      "Sergio: Fixes and tech debt (Abr 27 → Abr 29) · Mejoras onboarding Blum arranca Abr 29.",
-      "Carlos: Mejoras onboarding Blum arranca Abr 29.",
+      "Sergio: Fixes and tech debt (Abr 27 → Abr 29) · luego Mejoras onboarding Blum (bugs, Abr 29 → May 8).",
+      "Carlos: Mejoras onboarding Blum (bugs, Abr 29 → May 8).",
     ]
   },
   {
@@ -454,9 +478,9 @@ export const COOLDOWN: CooldownMeta = {
   dates: "Abr 27 → May 8, 2026",
   startDate: "2026-04-27",
   endDate: "2026-05-08",
-  currentDate: "2026-04-30",
+  currentDate: "2026-05-04",
   totalDays: 10,
-  currentDay: 4,
+  currentDay: 6,
   nextCycleStart: "2026-05-11",
   nextCycleName: "Ciclo 3 — 2026",
 };
