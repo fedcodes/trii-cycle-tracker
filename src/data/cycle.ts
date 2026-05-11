@@ -60,7 +60,7 @@ export interface WeeklyLogEntry {
 
 export interface Release {
   version: string;
-  tag?: "QA" | "Live";
+  tag?: "QA" | "Live" | "PROD";
   date: string;
   items: string[];
 }
@@ -128,10 +128,9 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Juanita",
     designer: "Jael",
     tasks: [
-      { name: "Take Profit Colombia — web/app", stage: "ready", owner: "Juanita", designer: "Jael", priority: "high", figma: "https://www.figma.com/design/zhhQv5ScB8SBoxeOLaBtcz/CO_%C3%93rdenes?m=auto&node-id=7834-34277&t=CpSRppUDDyV3efS5-1", notes: "Diseño cerrado a inicios de cooldown S1. Listo para entrar a build." },
-      { name: "Modificación de órdenes — web/app", stage: "design", owner: "Juanita", designer: "Jael", priority: "high", figma: null, notes: "Juanita y Jael arrancan diseño tras cerrar Take Profit." },
-      { name: "Cambiar default de órdenes en el app", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "" },
-      { name: "Historial de órdenes de bolsa — web/app", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "low", figma: null, notes: "" },
+      { name: "Modificación de órdenes — web/app", stage: "design", owner: "Juanita", designer: "Jael", priority: "high", figma: "https://www.figma.com/design/zhhQv5ScB8SBoxeOLaBtcz/CO_%C3%93rdenes?m=auto&node-id=7743-57551&t=CApConfKFjsV2k7I-1", notes: "Diseño en progreso." },
+      { name: "Cambiar default de órdenes en el app", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Carry-over de C2." },
+      { name: "Historial de órdenes de bolsa — web/app", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "low", figma: null, notes: "Carry-over de C2." },
     ],
   },
   {
@@ -144,9 +143,8 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Juanita",
     designer: "Jael",
     tasks: [
-      { name: "Lanzar Colombia", stage: "ready", owner: "Federico", designer: "Jael", priority: "high", figma: null, notes: "Listo para entrar a build. Owner: Federico." },
       { name: "Análisis fundamental y técnico de US Stocks", stage: "research", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Evaluando proveedores y viabilidad financiera." },
-      { name: "Diferencial de spreads y comisiones para usuarios pro (US Stocks)", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "" },
+      { name: "Diferencial de spreads y comisiones pro (US Stocks)", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Carry-over de C2." },
     ],
   },
   {
@@ -167,10 +165,13 @@ export const DISCOVERY: DiscoveryObjective[] = [
     description: "Subir la tasa de activación (usuarios que depositan y operan tras crear cuenta) del ~30% actual a 50%. Foco en el nuevo onboarding de Colombia y en remover fricción en depósitos / primeras órdenes.",
     metric: "Activación 30% → 50%",
     target: "Fin 2026",
-    po: null,
+    po: "Federico",
     designer: "James Alonso",
     tasks: [
-      { name: "Nuevo flujo de onboarding (Colombia)", stage: "design", owner: null, designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Wireframes cerrados — picture clara de qué implementar. Diseño arranca esta semana (CD2)." },
+      { name: "Nuevo flujo de onboarding (Colombia)", stage: "design", owner: "Federico", designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Diseño arrancó esta semana. PO ahora asignado (Federico)." },
+
+      { name: "Cambiar Pasarela de Pago Peru", stage: "research", owner: "Federico", designer: null, priority: "med", figma: null, notes: "Nuevo · evaluar alternativas a la pasarela actual en PE para destrabar activación." },
+      { name: "Inscripción Bolsa Millonaria", stage: "backlog", owner: "Felipe", designer: null, priority: "med", figma: null, notes: "Nuevo · inscripción al concurso anual de inversión para activar usuarios." },
     ],
   },
   {
@@ -183,11 +184,11 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Felipe",
     designer: "Ange",
     tasks: [
-      { name: "Nuevo onboarding fondos Blum", stage: "ready", owner: "Felipe", designer: "Ange", priority: "high", figma: "https://www.figma.com/design/LMHcQiNUjiuk53aD9DHkB8/PE_Fondos?node-id=6-9&t=A318m31A7bDZMYUr-1", notes: "Diseño cerrado en cooldown S2. Pitch listo — entra a Ciclo 3 como bet." },
-      { name: "Traslados entre fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Solo viable en Colombia. Despriorizado en CD2 — vuelve a Backlog." },
-      { name: "Rentabilidad de fondos de inversión desde Back", stage: "research", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "" },
-      { name: "Rediseño depósito, retiros y movimientos de fondos (3 países)", stage: "design", owner: "Felipe", designer: "Ange", priority: "high", figma: null, notes: "Pasa de Backlog a Design — pitch de S6 que ahora arranca diseño." },
-      { name: "Mejoras en movimientos de transacciones y fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "low", figma: null, notes: "" },
+      { name: "Rediseño depósitos y retiros fondos (3 países)", stage: "design", owner: "Felipe", designer: "Ange", priority: "high", figma: "https://www.figma.com/design/OLCQ6uzoJJymg88yu9AAo9/%F0%9F%94%AE-Fondos?node-id=7392-9132&t=ZHXU7Konp3kYZWj1-1", notes: "Diseño en progreso." },
+      { name: "Rentabilidad total", stage: "research", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Renombrado desde \"Rentabilidad de fondos de inversión desde Back\". Reasignado a Juanita · Jael — scope ampliado a rentabilidad total." },
+      { name: "Retiros directo a cuenta", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Nuevo · retiros directos a la cuenta del usuario en fondos." },
+      { name: "Traslados entre fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Solo viable en Colombia." },
+      { name: "Mejoras en movimientos de transacciones y fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "low", figma: null, notes: "Carry-over de C2." },
     ],
     context: "Blum pidió USD 10M en AUMs en Perú antes de fin de año. Si no, cierran fondos.",
   },
@@ -198,10 +199,10 @@ export const DISCOVERY: DiscoveryObjective[] = [
     description: "Pitches que no se mapean a un objetivo estratégico — requests puntuales de otras áreas (CX, ops) que entran a discovery por su impacto.",
     metric: "—",
     target: "—",
-    po: "Juanita",
+    po: "Federico",
     designer: null,
     tasks: [
-      { name: "Mejoras Agente CX", stage: "research", owner: "Juanita", designer: null, priority: "med", figma: null, notes: "Picture clara de qué hace falta — pitch a cerrar esta semana (CD2)." },
+      { name: "Cambiar todas las pasarelas en Colombia a Mercado Pago", stage: "research", owner: "Federico", designer: null, priority: "med", figma: null, notes: "Nuevo · migración de pasarelas en CO a Mercado Pago." },
     ],
   },
 ];
@@ -231,7 +232,7 @@ export const RELEASES: Release[] = [
     "Si estás bloqueado en Mibanco, permitir sacar CDTs de Tuya",
     "Permitir decimales en el calendario de dividendos para CO",
   ]},
-  { version: "3.2.1", tag: "Live", date: "Abr 24, 2026", items: [
+  { version: "3.2.1", tag: "PROD", date: "Abr 24, 2026", items: [
     "Cash in tarjeta de crédito",
     "Corrección texto de tiempo de espera para retiros en Nequi",
     "Corrección validación de montos en Stop Loss",
