@@ -30,6 +30,7 @@ function Pill({ fg, children }: { fg: "yellow" | "primary" | "fg-3"; children: R
 function VersionTag({ tag, first }: { tag?: string; first: boolean }) {
   if (tag === "QA") return <Pill fg="yellow">En QA</Pill>;
   if (tag === "Live") return <Pill fg="primary">Live</Pill>;
+  if (tag === "PROD") return <Pill fg="fg-3">Prod</Pill>;
   if (first) return <Pill fg="primary">Prod</Pill>;
   return <Pill fg="fg-3">Prod</Pill>;
 }
