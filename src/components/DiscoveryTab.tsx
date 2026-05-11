@@ -668,7 +668,7 @@ function DiscoveryKanban() {
           <LegendDot c="rgb(var(--obj-1))" label="Pro" />
           <LegendDot c="rgb(var(--obj-2))" label="US Stocks" />
           <LegendDot c="rgb(var(--obj-3))" label="Chile" />
-          <LegendDot c="rgb(var(--obj-4))" label="Activación" />
+          <LegendDot c="rgb(var(--obj-4))" label="CX" />
           <LegendDot c="rgb(var(--obj-5))" label="Fondos PE" />
         </div>
       </div>
