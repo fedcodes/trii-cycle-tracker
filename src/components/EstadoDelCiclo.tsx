@@ -93,15 +93,15 @@ const ObjChip = ({ num }: { num: number }) => {
 
 function KPIStrip() {
   const k = getKPIs();
-  const completedPct = Math.round((k.listo / k.total) * 100);
+  const completedPct = k.total ? Math.round((k.listo / k.total) * 100) : 0;
 
   const items = [
     { label: "Bets activas", value: k.total, sub: `${k.dropped} descartada${k.dropped === 1 ? "" : "s"}`, accent: "rgb(var(--fg))" },
+    { label: "On track", value: k.onTrack, sub: "Arrancan esta semana", accent: "rgb(var(--primary))" },
+    { label: "Not started", value: k.notStarted, sub: "Pendientes en el ciclo", accent: "rgb(var(--fg-3))" },
     { label: "Listo", value: k.listo, sub: `${completedPct}% del ciclo`, accent: "rgb(var(--primary))" },
-    { label: "En cooldown", value: k.cooldown, sub: "Cierran Abr 27 – May 8", accent: "rgb(var(--primary))" },
-    { label: "Pushed", value: k.pushed, sub: "Pasa a Ciclo 3", accent: "rgb(var(--fg-3))" },
-    { label: "Descartado", value: k.dropped, sub: "Fuera del ciclo", accent: "rgb(var(--fg-3))" },
-    { label: "Cooldown S1", value: "Abr 27", sub: "Día 1 · 10 días totales", accent: "rgb(var(--yellow))" },
+    { label: "Update", value: k.update, sub: "Requiere atención", accent: "rgb(var(--yellow))" },
+    { label: `${CYCLE.cycleName.split(" — ")[0]} · S${CYCLE.currentWeek}`, value: "May 11", sub: `Semana ${CYCLE.currentWeek} de ${CYCLE.totalWeeks}`, accent: "rgb(var(--primary))" },
   ];
 
   return (
@@ -202,8 +202,9 @@ function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
           <LegendDot c="rgb(var(--obj-1))" label="Pro" />
           <LegendDot c="rgb(var(--obj-2))" label="US Stocks" />
           <LegendDot c="rgb(var(--obj-3))" label="Chile" />
-          <LegendDot c="rgb(var(--obj-4))" label="Activación" />
-          <LegendDot c="rgb(var(--obj-99))" label="Regulatorio" />
+          <LegendDot c="rgb(var(--obj-4))" label="CX" />
+          <LegendDot c="rgb(var(--obj-5))" label="Fondos PE" />
+          <LegendDot c="rgb(var(--obj-99))" label="Reg. / Arq." />
         </div>
       </div>
 
@@ -233,7 +234,8 @@ function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
         <div style={{ position: "relative", height: 30, overflow: "hidden" }}>
           {[1, 2, 3, 4, 5, 6].map((w) => {
             const isCurrent = w === CYCLE.currentWeek;
-            const monthStart = new Date(2026, 2, 16);
+            const [yy, mm, dd] = CYCLE.startDate.split("-").map(Number);
+            const monthStart = new Date(yy, mm - 1, dd);
             const { start } = weekToDays(w);
             const d = new Date(monthStart);
             d.setDate(d.getDate() + start);

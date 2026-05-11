@@ -78,35 +78,36 @@ export interface CycleMeta {
 }
 
 export const CYCLE: CycleMeta = {
-  cycleName: "Ciclo 2 — 2026",
-  dates: "Mar 16 → Abr 24, 2026",
-  cooldown: "Abr 27 → May 8, 2026",
-  startDate: "2026-03-16",
-  endDate: "2026-04-24",
-  currentDate: "2026-05-04",
-  currentWeek: 6,
+  cycleName: "Ciclo 3 — 2026",
+  dates: "May 11 → Jun 19, 2026",
+  cooldown: "Jun 22 → Jul 3, 2026",
+  startDate: "2026-05-11",
+  endDate: "2026-06-19",
+  currentDate: "2026-05-11",
+  currentWeek: 1,
   totalWeeks: 6,
-  lastUpdated: "2026-05-04",
+  lastUpdated: "2026-05-11",
 };
 
 export const TOTAL_DAYS = 42;
 export const weekToDays = (w: number) => ({ start: (w - 1) * 7, end: (w - 1) * 7 + 4 });
 
 export const BETS: Bet[] = [
-  { id: "demo-pro", name: "Demo trii Pro", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["SB", "JR"], status: "Cooldown", weeks: [2, 6], lastUpdate: "En QA · lanzamiento esperado en app esta semana (CD2).", progress: 0.95 },
-  { id: "ordenes", name: "Órdenes", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["AV"], status: "Listo", weeks: [1, 1], lastUpdate: "Completado en S1", progress: 1 },
-  { id: "mejoras-web", name: "Mejoras trii web", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["CA", "JR"], status: "Cooldown", weeks: [6, 6], lastUpdate: "Jorge cerrando — 70% · cierre esperado esta semana (CD2).", progress: 0.7 },
-  { id: "vinculacion", name: "Vinculación Completa", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["KA", "ET", "GM"], status: "Cooldown", weeks: [1, 6], lastUpdate: "90% · Estefa y Kai en formulario. Versión a QA jueves May 7. Producción Ciclo 3 S1. Gafe terminó modelo de Declaraciones de renta — sigue con otros modelos documentales.", progress: 0.9 },
-  { id: "cambios-co", name: "Cambios Colombia", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["GM", "KA"], status: "Pushed", weeks: [5, 6], lastUpdate: "No iniciado en el ciclo. Se pushea a Ciclo 3. Kai creando cuentas colombianas en Vector Capital (en curso, cooldown S1).", progress: 0 },
-  { id: "soporte-us", name: "Soporte US Stocks", objective: "Obj. 2 — US Stocks CO", objectiveNum: 2, team: ["GM"], status: "Listo", weeks: [1, 5], lastUpdate: "Cerrado.", progress: 1 },
-  { id: "dividendos-cl", name: "Dividendos Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: ["KA", "AV"], status: "Listo", weeks: [1, 6], lastUpdate: "Alan tomó el relevo de Kai y resolvió los issues pendientes. Cerrado en S6.", progress: 1 },
-  { id: "retiros-cl", name: "Retiros Express Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: [], status: "Not started", weeks: [2, 3], lastUpdate: "Descartado por restricciones de tiempo. Se evalúa en próximo ciclo.", dropped: true, progress: 0 },
-  { id: "retiros-mm", name: "Retiros fondos MM", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["SB", "CA"], status: "Cooldown", weeks: [1, 6], lastUpdate: "En QA · lanzamiento esperado en app esta semana (CD2). Carlos cerró el FE el Abr 28.", progress: 0.95 },
-  { id: "transf-pe", name: "Mejoras transf. Perú", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["GM"], status: "Listo", weeks: [2, 4], lastUpdate: "Live y operando.", progress: 1 },
-  { id: "tc-depositos", name: "TC en depósitos", objective: "Obj. 4 — Activación", objectiveNum: 4, team: ["CA", "KA"], status: "Listo", weeks: [1, 4], lastUpdate: "Webhook de producción configurado por Kai en cooldown S1. Bet cerrado.", progress: 1 },
-  { id: "fix-orders", name: "Fix 5.0 Perú Orders", objective: "Regulatorio", objectiveNum: 99, team: ["AV", "DC"], status: "Listo", weeks: [2, 6], lastUpdate: "Live sábado Abr 25. DC en soporte de Fix 5.0 + app durante cooldown S2 (AV de vacaciones).", progress: 1 },
-  { id: "fix-market", name: "Fix 5.0 Perú Market", objective: "Regulatorio", objectiveNum: 99, team: ["DC"], status: "Listo", weeks: [1, 6], lastUpdate: "Live sábado Abr 25. DC en soporte durante cooldown S2.", progress: 1 },
-  { id: "update-os", name: "Update iOS/Android", objective: "Regulatorio", objectiveNum: 99, team: ["JR"], status: "Listo", weeks: [1, 2], lastUpdate: "Cerrado temprano en S2.", progress: 1 },
+  { id: "stop-loss-tp", name: "Stop loss / Take Profit Colombia", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR", "AV"], status: "On track", weeks: [1, 3], lastUpdate: "Arranca esta semana. JR (FE 3 sem) + AV (BE 2 sem).", progress: 0 },
+  { id: "modificacion-ordenes", name: "Modificación de órdenes", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR", "SB"], status: "Not started", weeks: [3, 5], lastUpdate: "SB arranca BE en S3, JR FE en S4.", progress: 0 },
+  { id: "alertas-web", name: "Alertas en Web", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR"], status: "Not started", weeks: [6, 6], lastUpdate: "Última bet del ciclo para JR.", progress: 0 },
+  { id: "hyc-us-stocks", name: "High Yield Cash US Stocks", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["ET", "LP"], status: "Not started", weeks: [4, 6], lastUpdate: "Lucas se une al equipo en S4 (3.0/6.0w).", progress: 0 },
+  { id: "alpaca-co", name: "Creación de usuarios CO en Alpaca", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["ET", "KA"], status: "On track", weeks: [1, 3], lastUpdate: "Habilitador del lanzamiento US Stocks CO.", progress: 0 },
+  { id: "cambios-co", name: "Cambios Colombia", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["GM"], status: "On track", weeks: [1, 3], lastUpdate: "Pushed de Ciclo 2. Arranca esta semana.", progress: 0 },
+  { id: "api-accival", name: "API de cambios Accival", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["SB"], status: "Not started", weeks: [5, 6], lastUpdate: "Backend BE-only.", progress: 0 },
+  { id: "retiros-inmediatos-cl", name: "Retiros Inmediatos Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: ["KA"], status: "Not started", weeks: [4, 5], lastUpdate: "Re-entra al ciclo tras descarte en C2 S4.", progress: 0 },
+  { id: "julio-2", name: "Julio 2.0", objective: "Obj. 4 — Experiencia CX", objectiveNum: 4, team: ["GM"], status: "Not started", weeks: [4, 6], lastUpdate: "Mejoras Agente CX — pitch convertido en bet.", progress: 0 },
+  { id: "onboarding-blum", name: "Mejoras onboarding en Blum", objective: "Obj. 5 — Fondos Perú", objectiveNum: 5, team: ["CA", "SB"], status: "On track", weeks: [1, 3], lastUpdate: "CA (FE 3 sem) + SB (BE 2 sem).", progress: 0 },
+  { id: "rediseno-fondos", name: "Mejoras diseño depósito y retiros fondos", objective: "Obj. 5 — Fondos Perú", objectiveNum: 5, team: ["CA"], status: "Not started", weeks: [4, 6], lastUpdate: "Rediseño 3 países.", progress: 0 },
+  { id: "fix-50-cl", name: "Fix 5.0 Chile", objective: "Regulatorio", objectiveNum: 99, team: ["AV"], status: "Not started", weeks: [3, 6], lastUpdate: "BIG · 4 sem. Alan arranca en S3 al cerrar Take Profit.", progress: 0 },
+  { id: "arq-diseno", name: "Implementación de diseño", objective: "Arquitectura", objectiveNum: 98, team: ["DC"], status: "On track", weeks: [1, 1], lastUpdate: "Arquitectura semana 1.", progress: 0 },
+  { id: "arq-libreria", name: "Librería de componentes", objective: "Arquitectura", objectiveNum: 98, team: ["DC"], status: "Not started", weeks: [2, 4], lastUpdate: "BIG · 3 sem.", progress: 0 },
+  { id: "arq-imagenes", name: "Reemplazar imágenes", objective: "Arquitectura", objectiveNum: 98, team: ["DC"], status: "Not started", weeks: [5, 6], lastUpdate: "Cierre de arquitectura.", progress: 0 },
 ];
 
 export const DISCOVERY_STAGES: DiscoveryStage[] = [
@@ -207,94 +208,28 @@ export const DISCOVERY: DiscoveryObjective[] = [
 
 export const WEEKLY_LOG: WeeklyLogEntry[] = [
   {
-    week: "Cooldown S2", dates: "May 4 → May 8", items: [
-      "Demo trii Pro y Retiros fondos MM en QA — lanzamiento esperado en app esta semana.",
-      "Mejoras trii web: Jorge en cierre · 70% · finaliza esta semana.",
-      "Vinculación Completa: Estefa y Kai en formulario · 90% · QA jueves May 7. Producción Ciclo 3 S1.",
-      "Gafe: modelo Declaraciones de renta cerrado; trabajando en otros modelos documentales.",
-      "Sergio: tech debt cerrado · arrancó con Carlos los bugs de Mejoras onboarding Blum.",
-      "Alan: de vacaciones — regresa Ciclo 3 S1.",
-      "David: soporte Fix 5.0 Peru + soporte app durante el cooldown.",
-    ]
-  },
-  {
-    week: "Cooldown S1", dates: "Abr 27 → May 1", items: [
-      "TC en depósitos: Kai configuró webhook de producción. Cerrado.",
-      "Demo trii Pro: Cerrado (JR).",
-      "Retiros fondos MM: Carlos cerró el FE el Abr 28. Cerrado.",
-      "Mejoras trii web: Jorge trabajando — en curso.",
-      "Crear cuentas colombianas en Vector Capital: Kai arrancó — en curso.",
-      "Sergio: Fixes and tech debt (Abr 27 → Abr 29) · luego Mejoras onboarding Blum (bugs, Abr 29 → May 8).",
-      "Carlos: Mejoras onboarding Blum (bugs, Abr 29 → May 8).",
-    ]
-  },
-  {
-    week: "Semana 6", dates: "Abr 20-24", items: [
-      "Cierre del ciclo: 12 de 14 bets cerradas. 1 pushed, 1 descartada.",
-      "Demo trii Pro desbloqueado tras caída de servicios BE a fines de S5. Cierre final en cooldown (JR).",
-      "Retiros fondos MM: Carlos cierra el FE el martes Abr 28 (primer día de cooldown).",
-      "Dividendos Chile: Alan tomó relevo de Kai y resolvió issues. Cerrado.",
-      "Fix 5.0 Perú: live el sábado Abr 25. Operación arranca lunes Abr 27.",
-      "Vinculación Completa: BE en cierre por Kai; gestión documental con Gafe; formulario con Estefa.",
-      "Soporte US Stocks: cerrado.",
-      "TC en depósitos: pendiente webhook de producción — Kai lo configura esta semana en cooldown.",
-      "Cambios Colombia: pushed a Ciclo 3.",
-    ]
-  },
-  {
-    week: "Semana 5", dates: "Abr 13-17", items: [
-      "TC en depósitos completado por Carlos — Fede testeando",
-      "Carlos arrancó FE retiros fondos MM",
-      "Mejoras transf. Perú live — Ops Perú testeando",
-      "Jorge arrancó Demo trii Pro",
-      "Vinculación: document reader terminado, FE y BE sin bloqueos",
-      "Fix 5.0 Perú: certificados en order entry y market data",
-      "James Alonso se unió al equipo de diseño",
-    ]
-  },
-  {
-    week: "Semana 4", dates: "Abr 6-10", items: [
-      "Carlos regresó — terminando TC depósitos, arranca FE retiros MM",
-      "Sergio se mueve a backend Demo trii Pro",
-      "Gafe y Kai arrancan backend Vinculación Completa",
-      "Decisión: Retiros Inmediatos Chile descartado del ciclo",
-      "Dividendos Chile bloqueado — pushed a Vector",
-      "Kai se mueve de Dividendos a Vinculación Completa",
-    ]
-  },
-  {
-    week: "Semana 3", dates: "Mar 30 - Abr 3", items: [
-      "Jorge corrigió varios bugs",
-      "Jorge movió 'Movimientos' al menú principal",
-      "Estefa avanzó testing servicios AyV",
-      "Sergio continuó backend retiros fondos MM",
-    ]
-  },
-  {
-    week: "Semana 2", dates: "Mar 23-27", items: [
-      "Jorge terminó Update iOS/Android temprano",
-      "Carlos fuera por emergencia familiar — impacta 3 proyectos FE",
-      "Kai descubrió limitación del Event BUS de Vector",
-      "Alan y David arrancan Fix 5.0 Perú",
-      "Estefa recibió definiciones AyV para Vinculación",
-    ]
-  },
-  {
-    week: "Semana 1", dates: "Mar 16-20", items: [
-      "Inicio del ciclo",
-      "Órdenes completado por Alan",
-      "Update iOS/Android avanzando rápido",
+    week: "Semana 1", dates: "May 11-15", items: [
+      "Inicio del Ciclo 3. 15 bets en mesa.",
+      "Bets activas: Stop loss / Take Profit Colombia (JR · AV), Mejoras onboarding en Blum (CA · SB), Creación de usuarios CO en Alpaca (ET · KA), Cambios Colombia (GM), Implementación de diseño arquitectura (DC).",
+      "Lanzamientos cooldown C2: Demo trii Pro y Mejoras trii web ya live · Retiros Inmediatos Fondos cierra esta semana (max miércoles).",
+      "Vinculación Completa: reunión con Acciones y Valores esta semana — go-live previsto Ciclo 3 S2.",
+      "Equipo: Lucas P (BE) se une — arranca en S4 con High Yield Cash US Stocks.",
     ]
   },
 ].map((w) => ({ ...w, week: `${w.week}`, dates: w.dates } as WeeklyLogEntry));
 
 export const RELEASES: Release[] = [
-  { version: "3.3.0", tag: "QA", date: "May 4, 2026", items: [
+  { version: "3.3.X", tag: "QA", date: "May 11, 2026", items: [
+    "Flujo rentar balance con soporte para múltiples fondos",
+  ]},
+  { version: "3.3.5", tag: "Live", date: "May 11, 2026", items: [
     "Registro de eventos para Posthog",
     "Nuevo texto para pago de dividendos \"Trianual\"",
     "Demo trii Pro",
+    "Flujo rentar balance con soporte para múltiples fondos",
     "Texto rentabilidad en pantalla de confirmar inversión en Fondo",
     "Si estás bloqueado en Mibanco, permitir sacar CDTs de Tuya",
+    "Permitir decimales en el calendario de dividendos para CO",
   ]},
   { version: "3.2.1", tag: "Live", date: "Abr 24, 2026", items: [
     "Cash in tarjeta de crédito",
@@ -377,7 +312,7 @@ export const RELEASES: Release[] = [
 ];
 
 export const objColor = (n: number): string => {
-  const map: Record<number, string> = { 1: "obj-1", 2: "obj-2", 3: "obj-3", 4: "obj-4", 5: "obj-5", 99: "obj-99" };
+  const map: Record<number, string> = { 1: "obj-1", 2: "obj-2", 3: "obj-3", 4: "obj-4", 5: "obj-5", 98: "obj-99", 99: "obj-99" };
   return `rgb(var(--${map[n]}))`;
 };
 
@@ -386,8 +321,9 @@ export const objShort = (n: number): string => {
     1: "Obj 1 · Pro",
     2: "Obj 2 · US Stocks",
     3: "Obj 3 · Chile",
-    4: "Obj 4 · Activación",
+    4: "Obj 4 · CX",
     5: "Obj 5 · Fondos PE",
+    98: "Arquitectura",
     99: "Regulatorio",
   };
   return map[n];
