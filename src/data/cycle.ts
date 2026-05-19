@@ -143,6 +143,7 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Juanita",
     designer: "Jael",
     tasks: [
+      { name: "High Yield Cash US", stage: "design", owner: "Federico", designer: "Jael", priority: "high", figma: null, notes: "Nuevo · diseño arrancando en S2." },
       { name: "Análisis fundamental y técnico de US Stocks", stage: "research", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Evaluando proveedores y viabilidad financiera." },
       { name: "Diferencial de spreads y comisiones pro (US Stocks)", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Carry-over de C2." },
     ],
@@ -156,9 +157,7 @@ export const DISCOVERY: DiscoveryObjective[] = [
     target: "Q3 2026",
     po: null,
     designer: null,
-    tasks: [
-      { name: "Pitches Chile", stage: "backlog", owner: null, designer: null, priority: "med", figma: null, notes: "Definir asignación de PO/diseño para abrir discovery Chile." },
-    ],
+    tasks: [],
   },
   {
     id: 4,
@@ -170,10 +169,11 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Federico",
     designer: "James Alonso",
     tasks: [
-      { name: "Nuevo flujo de onboarding (Colombia)", stage: "design", owner: "Federico", designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Diseño arrancó S1. PO asignado (Federico)." },
-      { name: "Nuevo onboarding", stage: "research", owner: "Federico", designer: "James Alonso", priority: "med", figma: null, notes: "Renombrado desde \"Activación post-onboarding\" — vuelve al naming original. Una vez el nuevo onboarding CO arranque a build, definir el siguiente." },
+      { name: "Nuevo flujo de onboarding (Colombia)", stage: "design", owner: "Federico", designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Diseño arrancó S1. PO asignado (Federico). Consolidado con \"Nuevo onboarding\" (mismo item)." },
       { name: "Cambiar Pasarela de Pago Peru", stage: "research", owner: "Federico", designer: null, priority: "med", figma: null, notes: "Nuevo · evaluar alternativas a la pasarela actual en PE para destrabar activación." },
       { name: "Inscripción Bolsa Millonaria", stage: "research", owner: "Felipe", designer: null, priority: "med", figma: null, notes: "Investigación arrancó · inscripción al concurso anual de inversión para activar usuarios." },
+      { name: "Regalar Acciones", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Nuevo · explorar feature de regalar acciones como mecanismo de activación." },
+      { name: "Portafolio de ETFs", stage: "backlog", owner: "Federico", designer: "James Alonso", priority: "med", figma: null, notes: "Nuevo · armar portafolio de ETFs para activación." },
     ],
   },
   {
