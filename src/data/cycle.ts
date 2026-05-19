@@ -83,29 +83,29 @@ export const CYCLE: CycleMeta = {
   cooldown: "Jun 22 → Jul 3, 2026",
   startDate: "2026-05-11",
   endDate: "2026-06-19",
-  currentDate: "2026-05-11",
-  currentWeek: 1,
+  currentDate: "2026-05-19",
+  currentWeek: 2,
   totalWeeks: 6,
-  lastUpdated: "2026-05-11",
+  lastUpdated: "2026-05-19",
 };
 
 export const TOTAL_DAYS = 42;
 export const weekToDays = (w: number) => ({ start: (w - 1) * 7, end: (w - 1) * 7 + 4 });
 
 export const BETS: Bet[] = [
-  { id: "stop-loss-tp", name: "Stop loss / Take Profit Colombia", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR", "AV"], status: "On track", weeks: [1, 3], lastUpdate: "Arranca esta semana. JR (FE 3 sem) + AV (BE 2 sem).", progress: 0 },
+  { id: "stop-loss-tp", name: "Stop loss / Take Profit Colombia", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR", "AV"], status: "On track", weeks: [1, 3], lastUpdate: "Alan y Jorge avanzando — bet on track.", progress: 0.5 },
   { id: "modificacion-ordenes", name: "Modificación de órdenes", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR", "SB"], status: "Not started", weeks: [3, 5], lastUpdate: "SB arranca BE en S3, JR FE en S4.", progress: 0 },
   { id: "alertas-web", name: "Alertas en Web", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR"], status: "Not started", weeks: [6, 6], lastUpdate: "Última bet del ciclo para JR.", progress: 0 },
   { id: "hyc-us-stocks", name: "High Yield Cash US Stocks", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["ET", "LP"], status: "Not started", weeks: [4, 6], lastUpdate: "Lucas se une al equipo en S4 (3.0/6.0w).", progress: 0 },
-  { id: "alpaca-co", name: "Creación de usuarios CO en Alpaca", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["ET", "KA"], status: "On track", weeks: [1, 3], lastUpdate: "Habilitador del lanzamiento US Stocks CO.", progress: 0 },
-  { id: "cambios-co", name: "Cambios Colombia", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["GM"], status: "On track", weeks: [1, 3], lastUpdate: "Pushed de Ciclo 2. Arranca esta semana.", progress: 0 },
+  { id: "alpaca-co", name: "Creación de usuarios CO en Alpaca", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["ET", "KA"], status: "Update", weeks: [1, 3], lastUpdate: "Foco se desplazó a Vinculación Completa (certificación jueves May 21). Recuperando esta semana.", progress: 0.1 },
+  { id: "cambios-co", name: "Cambios Colombia", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["GM"], status: "Update", weeks: [1, 3], lastUpdate: "Foco se desplazó a Vinculación Completa. Recuperando esta semana.", progress: 0.1 },
   { id: "api-accival", name: "API de cambios Accival", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["SB"], status: "Not started", weeks: [5, 6], lastUpdate: "Backend BE-only.", progress: 0 },
   { id: "retiros-inmediatos-cl", name: "Retiros Inmediatos Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: ["KA"], status: "Not started", weeks: [4, 5], lastUpdate: "Re-entra al ciclo tras descarte en C2 S4.", progress: 0 },
   { id: "julio-2", name: "Julio 2.0", objective: "Obj. 4 — Experiencia CX", objectiveNum: 4, team: ["GM"], status: "Not started", weeks: [4, 6], lastUpdate: "Mejoras Agente CX — pitch convertido en bet.", progress: 0 },
-  { id: "onboarding-blum", name: "Mejoras onboarding en Blum", objective: "Obj. 5 — Fondos Perú", objectiveNum: 5, team: ["CA", "SB"], status: "On track", weeks: [1, 3], lastUpdate: "CA (FE 3 sem) + SB (BE 2 sem).", progress: 0 },
+  { id: "onboarding-blum", name: "Mejoras onboarding en Blum", objective: "Obj. 5 — Fondos Perú", objectiveNum: 5, team: ["CA", "SB"], status: "On track", weeks: [1, 3], lastUpdate: "Testing arrancó May 19. Posible lanzamiento próxima semana — bet podría cerrar antes de tiempo.", progress: 0.9 },
   { id: "rediseno-fondos", name: "Mejoras diseño depósito y retiros fondos", objective: "Obj. 5 — Fondos Perú", objectiveNum: 5, team: ["CA"], status: "Not started", weeks: [4, 6], lastUpdate: "Rediseño 3 países.", progress: 0 },
   { id: "fix-50-cl", name: "Fix 5.0 Chile", objective: "Regulatorio", objectiveNum: 99, team: ["AV"], status: "Not started", weeks: [3, 6], lastUpdate: "BIG · 4 sem. Alan arranca en S3 al cerrar Take Profit.", progress: 0 },
-  { id: "arq-diseno", name: "Implementación de diseño", objective: "Arquitectura", objectiveNum: 98, team: ["DC"], status: "On track", weeks: [1, 1], lastUpdate: "Arquitectura semana 1.", progress: 0 },
+  { id: "arq-diseno", name: "Implementación de diseño", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["DC"], status: "On track", weeks: [1, 2], lastUpdate: "Arquitectura semanas 1-2.", progress: 0.5 },
   { id: "arq-libreria", name: "Librería de componentes", objective: "Arquitectura", objectiveNum: 98, team: ["DC"], status: "Not started", weeks: [2, 4], lastUpdate: "BIG · 3 sem.", progress: 0 },
   { id: "arq-imagenes", name: "Reemplazar imágenes", objective: "Arquitectura", objectiveNum: 98, team: ["DC"], status: "Not started", weeks: [5, 6], lastUpdate: "Cierre de arquitectura.", progress: 0 },
 ];
@@ -128,7 +128,7 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Juanita",
     designer: "Jael",
     tasks: [
-      { name: "Modificación de órdenes — web/app", stage: "design", owner: "Juanita", designer: "Jael", priority: "high", figma: "https://www.figma.com/design/zhhQv5ScB8SBoxeOLaBtcz/CO_%C3%93rdenes?m=auto&node-id=7743-57551&t=CApConfKFjsV2k7I-1", notes: "Diseño en progreso." },
+      { name: "Modificación de órdenes — web/app", stage: "ready", owner: "Juanita", designer: "Jael", priority: "high", figma: "https://www.figma.com/design/zhhQv5ScB8SBoxeOLaBtcz/CO_%C3%93rdenes?m=auto&node-id=7743-57551&t=CApConfKFjsV2k7I-1", notes: "Diseño cerrado · pasó a build (bet activa JR · SB, S3-S5)." },
       { name: "Cambiar default de órdenes en el app", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Carry-over de C2." },
       { name: "Historial de órdenes de bolsa — web/app", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "low", figma: null, notes: "Carry-over de C2." },
     ],
@@ -156,7 +156,9 @@ export const DISCOVERY: DiscoveryObjective[] = [
     target: "Q3 2026",
     po: null,
     designer: null,
-    tasks: [],
+    tasks: [
+      { name: "Pitches Chile", stage: "backlog", owner: null, designer: null, priority: "med", figma: null, notes: "Definir asignación de PO/diseño para abrir discovery Chile." },
+    ],
   },
   {
     id: 4,
@@ -168,10 +170,10 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Federico",
     designer: "James Alonso",
     tasks: [
-      { name: "Nuevo flujo de onboarding (Colombia)", stage: "design", owner: "Federico", designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Diseño arrancó esta semana. PO ahora asignado (Federico)." },
-
+      { name: "Nuevo flujo de onboarding (Colombia)", stage: "design", owner: "Federico", designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Diseño arrancó S1. PO asignado (Federico)." },
+      { name: "Nuevo onboarding", stage: "research", owner: "Federico", designer: "James Alonso", priority: "med", figma: null, notes: "Renombrado desde \"Activación post-onboarding\" — vuelve al naming original. Una vez el nuevo onboarding CO arranque a build, definir el siguiente." },
       { name: "Cambiar Pasarela de Pago Peru", stage: "research", owner: "Federico", designer: null, priority: "med", figma: null, notes: "Nuevo · evaluar alternativas a la pasarela actual en PE para destrabar activación." },
-      { name: "Inscripción Bolsa Millonaria", stage: "backlog", owner: "Felipe", designer: null, priority: "med", figma: null, notes: "Nuevo · inscripción al concurso anual de inversión para activar usuarios." },
+      { name: "Inscripción Bolsa Millonaria", stage: "research", owner: "Felipe", designer: null, priority: "med", figma: null, notes: "Investigación arrancó · inscripción al concurso anual de inversión para activar usuarios." },
     ],
   },
   {
@@ -184,11 +186,10 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Felipe",
     designer: "Ange",
     tasks: [
-      { name: "Rediseño depósitos y retiros fondos (3 países)", stage: "design", owner: "Felipe", designer: "Ange", priority: "high", figma: "https://www.figma.com/design/OLCQ6uzoJJymg88yu9AAo9/%F0%9F%94%AE-Fondos?node-id=7392-9132&t=ZHXU7Konp3kYZWj1-1", notes: "Diseño en progreso." },
+      { name: "Rediseño depósitos y retiros fondos (3 países)", stage: "ready", owner: "Felipe", designer: "Ange", priority: "high", figma: "https://www.figma.com/design/OLCQ6uzoJJymg88yu9AAo9/%F0%9F%94%AE-Fondos?node-id=7392-9132&t=ZHXU7Konp3kYZWj1-1", notes: "Diseño cerrado · pasó a build (bet activa CA, S4-S6)." },
+      { name: "Mejoras en movimientos de transacciones y fondos", stage: "design", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Pasó de Backlog a Design en S2 · diseño arrancando." },
       { name: "Rentabilidad total", stage: "research", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Renombrado desde \"Rentabilidad de fondos de inversión desde Back\". Reasignado a Juanita · Jael — scope ampliado a rentabilidad total." },
       { name: "Retiros directo a cuenta", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Nuevo · retiros directos a la cuenta del usuario en fondos." },
-      { name: "Traslados entre fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Solo viable en Colombia." },
-      { name: "Mejoras en movimientos de transacciones y fondos", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "low", figma: null, notes: "Carry-over de C2." },
     ],
     context: "Blum pidió USD 10M en AUMs en Perú antes de fin de año. Si no, cierran fondos.",
   },
@@ -208,6 +209,14 @@ export const DISCOVERY: DiscoveryObjective[] = [
 ];
 
 export const WEEKLY_LOG: WeeklyLogEntry[] = [
+  {
+    week: "Semana 2", dates: "May 18-22", items: [
+      "Mejoras onboarding Blum (CA · SB): testing arrancó May 19. Si todo sale bien, lanzamos la próxima semana — bet podría cerrar antes de tiempo.",
+      "Stop loss / Take Profit Colombia (JR · AV): Alan y Jorge trabajando — bet on track.",
+      "Creación de usuarios CO en Alpaca (ET · KA) y Cambios Colombia (GM): ambas en Update. El equipo Obj. 2 se enfocó en empujar Vinculación Completa (certificación AyV jueves May 21). Esta semana recuperamos el tiempo perdido.",
+      "Vinculación Completa: certificación con AyV el jueves May 21 — go-live previsto inmediatamente después.",
+    ]
+  },
   {
     week: "Semana 1", dates: "May 11-15", items: [
       "Inicio del Ciclo 3. 15 bets en mesa.",
