@@ -167,8 +167,12 @@ const LegendDot = ({ c, label }: { c: string; label: string }) => (
 
 function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
   const leftW = 300;
-  // current day = last weekday of currentWeek
-  const currentDayIdx = (CYCLE.currentWeek - 1) * 7 + 4;
+  // current day index = days elapsed from CYCLE.startDate to CYCLE.currentDate
+  const cycleStart = new Date(`${CYCLE.startDate}T00:00:00`);
+  const today = new Date(`${CYCLE.currentDate}T00:00:00`);
+  const daysElapsed = Math.round((today.getTime() - cycleStart.getTime()) / 86400000);
+  const currentDayIdx = Math.max(0, Math.min(TOTAL_DAYS - 1, daysElapsed));
+  const todayPct = ((currentDayIdx + 0.5) / TOTAL_DAYS) * 100;
 
   return (
     <div
@@ -279,7 +283,7 @@ function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
         </div>
       </div>
 
-      <div>
+      <div style={{ position: "relative" }}>
         {BETS.map((bet, i) => (
           <GanttRow
             key={bet.id}
@@ -290,6 +294,19 @@ function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
             onSelect={onSelect}
           />
         ))}
+        <div
+          style={{
+            position: "absolute",
+            left: `calc(${leftW}px + (100% - ${leftW}px) * ${todayPct / 100})`,
+            top: 0,
+            bottom: 0,
+            width: 2,
+            background: "rgb(var(--primary))",
+            boxShadow: "0 0 8px rgb(var(--primary) / 0.4)",
+            zIndex: 5,
+            pointerEvents: "none",
+          }}
+        />
       </div>
     </div>
   );
@@ -420,19 +437,6 @@ function GanttRow({
             }}
           />
         ))}
-        <div
-          style={{
-            position: "absolute",
-            left: `${toPct(currentDayIdx + 0.5)}%`,
-            top: 0,
-            bottom: 0,
-            width: 2,
-            background: "rgb(var(--primary))",
-            boxShadow: "0 0 8px rgb(var(--primary) / 0.4)",
-            zIndex: 3,
-          }}
-        />
-
         <div
           style={{
             position: "absolute",
