@@ -171,9 +171,9 @@ export const DISCOVERY: DiscoveryObjective[] = [
     tasks: [
       { name: "Nuevo flujo de onboarding (Colombia)", stage: "design", owner: "Federico", designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Diseño arrancó S1. PO asignado (Federico). Consolidado con \"Nuevo onboarding\" (mismo item)." },
       { name: "Cambiar Pasarela de Pago Peru", stage: "research", owner: "Federico", designer: null, priority: "med", figma: null, notes: "Nuevo · evaluar alternativas a la pasarela actual en PE para destrabar activación." },
-      { name: "Inscripción Bolsa Millonaria", stage: "research", owner: "Felipe", designer: null, priority: "med", figma: null, notes: "Investigación arrancó · inscripción al concurso anual de inversión para activar usuarios." },
+      { name: "Inscripción Bolsa Millonaria", stage: "research", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Investigación arrancó · inscripción al concurso anual de inversión para activar usuarios." },
       { name: "Regalar Acciones", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Nuevo · explorar feature de regalar acciones como mecanismo de activación." },
-      { name: "Portafolio de ETFs", stage: "backlog", owner: "Federico", designer: "James Alonso", priority: "med", figma: null, notes: "Nuevo · armar portafolio de ETFs para activación." },
+      { name: "Portafolio de ETFs", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Nuevo · armar portafolio de ETFs para activación." },
     ],
   },
   {
