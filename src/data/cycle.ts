@@ -60,7 +60,7 @@ export interface WeeklyLogEntry {
 
 export interface Release {
   version: string;
-  tag?: "QA" | "Live" | "PROD";
+  tag?: "QA" | "Review" | "Live" | "PROD";
   date: string;
   items: string[];
 }
@@ -83,29 +83,29 @@ export const CYCLE: CycleMeta = {
   cooldown: "Jun 22 → Jul 3, 2026",
   startDate: "2026-05-11",
   endDate: "2026-06-19",
-  currentDate: "2026-05-19",
-  currentWeek: 2,
+  currentDate: "2026-05-26",
+  currentWeek: 3,
   totalWeeks: 6,
-  lastUpdated: "2026-05-19",
+  lastUpdated: "2026-05-26",
 };
 
 export const TOTAL_DAYS = 42;
 export const weekToDays = (w: number) => ({ start: (w - 1) * 7, end: (w - 1) * 7 + 4 });
 
 export const BETS: Bet[] = [
-  { id: "stop-loss-tp", name: "Stop loss / Take Profit Colombia", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR", "AV"], status: "On track", weeks: [1, 3], lastUpdate: "Alan y Jorge avanzando — bet on track.", progress: 0.5 },
-  { id: "modificacion-ordenes", name: "Modificación de órdenes", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR", "SB"], status: "Not started", weeks: [3, 5], lastUpdate: "SB arranca BE en S3, JR FE en S4.", progress: 0 },
+  { id: "stop-loss-tp", name: "Stop loss / Take Profit Colombia", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR", "AV"], status: "Listo", weeks: [1, 3], lastUpdate: "Dev cerrado · en testing · lanza en release 3.6. JR rota a Modificación de órdenes.", progress: 1 },
+  { id: "modificacion-ordenes", name: "Modificación de órdenes", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR", "SB"], status: "On track", weeks: [3, 5], lastUpdate: "JR rota antes (arranca FE en S3 al cerrar Stop Loss); SB arranca BE en S3.", progress: 0.15 },
   { id: "alertas-web", name: "Alertas en Web", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["JR"], status: "Not started", weeks: [6, 6], lastUpdate: "Última bet del ciclo para JR.", progress: 0 },
   { id: "hyc-us-stocks", name: "High Yield Cash US Stocks", objective: "Obj. 1 — Escalar trii pro", objectiveNum: 1, team: ["ET", "LP"], status: "Not started", weeks: [4, 6], lastUpdate: "Lucas se une al equipo en S4 (3.0/6.0w).", progress: 0 },
-  { id: "alpaca-co", name: "Creación de usuarios CO en Alpaca", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["ET", "KA"], status: "Update", weeks: [1, 3], lastUpdate: "Foco se desplazó a Vinculación Completa (certificación jueves May 21). Recuperando esta semana.", progress: 0.1 },
-  { id: "cambios-co", name: "Cambios Colombia", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["GM"], status: "Update", weeks: [1, 3], lastUpdate: "Foco se desplazó a Vinculación Completa. Recuperando esta semana.", progress: 0.1 },
+  { id: "alpaca-co", name: "Creación de usuarios CO en Alpaca", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["ET", "KA"], status: "On track", weeks: [1, 3], lastUpdate: "Reto API AyV resuelto. Lanza en versión 3.4.3 esta semana (Vinculación Completa).", progress: 0.6 },
+  { id: "cambios-co", name: "Cambios Colombia", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["GM"], status: "On track", weeks: [1, 3], lastUpdate: "Reto API AyV resuelto. Lanza en versión 3.4.3 esta semana.", progress: 0.6 },
   { id: "api-accival", name: "API de cambios Accival", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["SB"], status: "Not started", weeks: [5, 6], lastUpdate: "Backend BE-only.", progress: 0 },
   { id: "retiros-inmediatos-cl", name: "Retiros Inmediatos Chile", objective: "Obj. 3 — Chile", objectiveNum: 3, team: ["KA"], status: "Not started", weeks: [4, 5], lastUpdate: "Re-entra al ciclo tras descarte en C2 S4.", progress: 0 },
   { id: "julio-2", name: "Julio 2.0", objective: "Obj. 4 — Experiencia CX", objectiveNum: 4, team: ["GM"], status: "Not started", weeks: [4, 6], lastUpdate: "Mejoras Agente CX — pitch convertido en bet.", progress: 0 },
-  { id: "onboarding-blum", name: "Mejoras onboarding en Blum", objective: "Obj. 5 — Fondos Perú", objectiveNum: 5, team: ["CA", "SB"], status: "On track", weeks: [1, 3], lastUpdate: "Testing arrancó May 19. Posible lanzamiento próxima semana — bet podría cerrar antes de tiempo.", progress: 0.9 },
+  { id: "onboarding-blum", name: "Mejoras onboarding en Blum", objective: "Obj. 5 — Fondos Perú", objectiveNum: 5, team: ["CA", "SB"], status: "Listo", weeks: [1, 3], lastUpdate: "Testing completado la semana pasada · lanza en release 3.6.", progress: 1 },
   { id: "rediseno-fondos", name: "Mejoras diseño depósito y retiros fondos", objective: "Obj. 5 — Fondos Perú", objectiveNum: 5, team: ["CA"], status: "Not started", weeks: [4, 6], lastUpdate: "Rediseño 3 países.", progress: 0 },
   { id: "fix-50-cl", name: "Fix 5.0 Chile", objective: "Regulatorio", objectiveNum: 99, team: ["AV"], status: "Not started", weeks: [3, 6], lastUpdate: "BIG · 4 sem. Alan arranca en S3 al cerrar Take Profit.", progress: 0 },
-  { id: "arq-diseno", name: "Implementación de diseño", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["DC"], status: "On track", weeks: [1, 2], lastUpdate: "Arquitectura semanas 1-2.", progress: 0.5 },
+  { id: "arq-diseno", name: "Implementación de diseño", objective: "Obj. 2 — US Stocks CO & PE", objectiveNum: 2, team: ["DC"], status: "Listo", weeks: [1, 1], lastUpdate: "Cerrado en S1.", progress: 1 },
   { id: "arq-libreria", name: "Librería de componentes", objective: "Arquitectura", objectiveNum: 98, team: ["DC"], status: "Not started", weeks: [2, 4], lastUpdate: "BIG · 3 sem.", progress: 0 },
   { id: "arq-imagenes", name: "Reemplazar imágenes", objective: "Arquitectura", objectiveNum: 98, team: ["DC"], status: "Not started", weeks: [5, 6], lastUpdate: "Cierre de arquitectura.", progress: 0 },
 ];
@@ -143,7 +143,7 @@ export const DISCOVERY: DiscoveryObjective[] = [
     po: "Juanita",
     designer: "Jael",
     tasks: [
-      { name: "High Yield Cash US", stage: "design", owner: "Federico", designer: "Jael", priority: "high", figma: null, notes: "Nuevo · diseño arrancando en S2." },
+      { name: "High Yield Cash US", stage: "ready", owner: "Federico", designer: "Jael", priority: "high", figma: "https://www.figma.com/design/oTMY3qoKyeGQOhk3Fp57eZ/Acciones-de-EEUU?node-id=12307-6509&t=zspVcFNfQxzaQioP-1", notes: "Diseño cerrado en S3 · pasó a build (bet activa ET · LP, S4-S6)." },
       { name: "Análisis fundamental y técnico de US Stocks", stage: "research", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Evaluando proveedores y viabilidad financiera." },
       { name: "Diferencial de spreads y comisiones pro (US Stocks)", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Carry-over de C2." },
     ],
@@ -170,10 +170,10 @@ export const DISCOVERY: DiscoveryObjective[] = [
     designer: "James Alonso",
     tasks: [
       { name: "Nuevo flujo de onboarding (Colombia)", stage: "design", owner: "Federico", designer: "James Alonso", priority: "high", figma: "https://www.figma.com/board/q9HbX3hhV5d9KBYUHYYvvI/Onboarding?node-id=157-6830&t=CEk1ffpLboM5fr07-4", notes: "Diseño arrancó S1. PO asignado (Federico). Consolidado con \"Nuevo onboarding\" (mismo item)." },
+      { name: "Regalar Acciones", stage: "design", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Pasó de Backlog a Design en S3. Lanza con US Stocks como mecanismo de activación." },
       { name: "Cambiar Pasarela de Pago Peru", stage: "research", owner: "Federico", designer: null, priority: "med", figma: null, notes: "Nuevo · evaluar alternativas a la pasarela actual en PE para destrabar activación." },
       { name: "Inscripción Bolsa Millonaria", stage: "research", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Investigación arrancó · inscripción al concurso anual de inversión para activar usuarios." },
-      { name: "Regalar Acciones", stage: "backlog", owner: "Juanita", designer: "Jael", priority: "med", figma: null, notes: "Nuevo · explorar feature de regalar acciones como mecanismo de activación." },
-      { name: "Portafolio de ETFs", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "med", figma: null, notes: "Nuevo · armar portafolio de ETFs para activación." },
+      { name: "Portafolio de ETFs", stage: "backlog", owner: "Felipe", designer: "Ange", priority: "low", figma: null, notes: "Nuevo · armar portafolio de ETFs para activación." },
     ],
   },
   {
@@ -210,6 +210,15 @@ export const DISCOVERY: DiscoveryObjective[] = [
 
 export const WEEKLY_LOG: WeeklyLogEntry[] = [
   {
+    week: "Semana 3", dates: "May 25-29", items: [
+      "Stop loss / Take Profit Colombia (JR · AV): dev cerrado · pasa a testing · lanza en versión 3.6. JR rota a Modificación de órdenes (FE arranca en S3).",
+      "Mejoras onboarding Blum (CA · SB): testing completado la semana pasada · lanza también en versión 3.6.",
+      "Vinculación Completa / US Stocks CO: retos con la API de Acciones y Valores resueltos (testeando desde May 25). Lanza en versión 3.4.3 esta semana junto con correcciones del app. Alpaca CO y Cambios CO vuelven a On track.",
+      "Modificación de órdenes (JR · SB): arranca on track con JR (FE) y SB (BE) activos en S3.",
+      "Discovery: diseño de High Yield Cash US cerrándose (Figma agregado). Mejoras en movimientos de fondos sigue en Design. Regalar Acciones pasa de Backlog a Design.",
+    ]
+  },
+  {
     week: "Semana 2", dates: "May 18-22", items: [
       "Mejoras onboarding Blum (CA · SB): testing arrancó May 19. Si todo sale bien, lanzamos la próxima semana — bet podría cerrar antes de tiempo.",
       "Stop loss / Take Profit Colombia (JR · AV): Alan y Jorge trabajando — bet on track.",
@@ -229,10 +238,24 @@ export const WEEKLY_LOG: WeeklyLogEntry[] = [
 ].map((w) => ({ ...w, week: `${w.week}`, dates: w.dates } as WeeklyLogEntry));
 
 export const RELEASES: Release[] = [
-  { version: "3.3.X", tag: "QA", date: "May 11, 2026", items: [
-    "Flujo rentar balance con soporte para múltiples fondos",
+  { version: "3.6.0", tag: "QA", date: "Jun 1, 2026", items: [
+    "Tipos de órdenes: Stop Loss y Take Profit",
+    "Nuevo Onboarding Blum",
   ]},
-  { version: "3.3.5", tag: "Live", date: "May 11, 2026", items: [
+  { version: "3.4.3", tag: "Review", date: "May 26, 2026", items: [
+    "Proceso vinculación completa",
+    "Tag para identificar vinculación completa",
+    "Corrección valor de time_in_force para órdenes límite (letras para US Stocks, número para demás órdenes)",
+    "Permitir mover montos de CDTs finalizados a saldo disponible",
+    "Actualización librería de CustomerIO",
+    "Usar balance disponible para pago de usuarios en demo de trii Pro",
+  ]},
+  { version: "3.3.8", tag: "Live", date: "May 22, 2026", items: [
+    "Flujo rentar balance con soporte para múltiples fondos",
+    "Corrección textos \"Para participar en la oferta debes tener acciones cumplidas\"",
+    "Corrección validación precio límite para operaciones especiales",
+  ]},
+  { version: "3.3.5", tag: "PROD", date: "May 11, 2026", items: [
     "Registro de eventos para Posthog",
     "Nuevo texto para pago de dividendos \"Trianual\"",
     "Demo trii Pro",
