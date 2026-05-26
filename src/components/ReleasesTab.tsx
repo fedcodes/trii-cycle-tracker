@@ -2,9 +2,10 @@
 
 import { RELEASES, Release } from "@/data/cycle";
 
-function Pill({ fg, children }: { fg: "yellow" | "primary" | "fg-3"; children: React.ReactNode }) {
+function Pill({ fg, children }: { fg: "yellow" | "blue" | "primary" | "fg-3"; children: React.ReactNode }) {
   const styleMap = {
     yellow: { bg: "rgb(var(--yellow-dim))", color: "rgb(var(--yellow))" },
+    blue: { bg: "rgb(var(--obj-2-dim))", color: "rgb(var(--blue))" },
     primary: { bg: "rgb(var(--primary-dim))", color: "rgb(var(--primary))" },
     "fg-3": { bg: "rgb(var(--surface-2))", color: "rgb(var(--fg-3))" },
   };
@@ -29,6 +30,7 @@ function Pill({ fg, children }: { fg: "yellow" | "primary" | "fg-3"; children: R
 
 function VersionTag({ tag, first }: { tag?: string; first: boolean }) {
   if (tag === "QA") return <Pill fg="yellow">En QA</Pill>;
+  if (tag === "Review") return <Pill fg="blue">En revisión</Pill>;
   if (tag === "Live") return <Pill fg="primary">Live</Pill>;
   if (tag === "PROD") return <Pill fg="fg-3">Prod</Pill>;
   if (first) return <Pill fg="primary">Prod</Pill>;
@@ -45,6 +47,7 @@ function ReleaseCard({
   isLast: boolean;
 }) {
   const isQA = release.tag === "QA";
+  const isReview = release.tag === "Review";
   return (
     <div
       style={{
@@ -95,15 +98,19 @@ function ReleaseCard({
             borderRadius: "50%",
             background: isQA
               ? "rgb(var(--yellow))"
-              : isFirst
-                ? "rgb(var(--primary))"
-                : "rgb(var(--fg-3))",
+              : isReview
+                ? "rgb(var(--blue))"
+                : isFirst
+                  ? "rgb(var(--primary))"
+                  : "rgb(var(--fg-3))",
             border: `2px solid rgb(var(--bg))`,
             boxShadow: isQA
               ? "0 0 0 3px rgb(var(--yellow) / 0.2)"
-              : isFirst
-                ? "0 0 0 3px rgb(var(--primary) / 0.2)"
-                : "none",
+              : isReview
+                ? "0 0 0 3px rgb(var(--blue) / 0.2)"
+                : isFirst
+                  ? "0 0 0 3px rgb(var(--primary) / 0.2)"
+                  : "none",
           }}
         />
         <div style={{ paddingLeft: 18 }}>
@@ -284,6 +291,7 @@ export default function ReleasesTab() {
           </div>
           <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
             <LegendChip c="rgb(var(--yellow))" label="En QA" />
+            <LegendChip c="rgb(var(--blue))" label="En revisión" />
             <LegendChip c="rgb(var(--primary))" label="Live / reciente" />
             <LegendChip c="rgb(var(--fg-3))" label="Prod anterior" />
           </div>
