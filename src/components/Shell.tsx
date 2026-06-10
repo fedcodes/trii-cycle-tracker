@@ -1,6 +1,9 @@
 "use client";
 
-import { CYCLE } from "@/data/cycle";
+import { useState } from "react";
+import type { CycleRow } from "@/lib/types";
+import { currentWeekOf, cycleDatesLabel } from "@/lib/cycle-utils";
+import CycleFormModal from "./CycleFormModal";
 
 export type TabKey = "Estado del ciclo" | "Discovery" | "Releases" | "Cooldown" | "Backlog";
 // "Cooldown" hidden between cooldowns — add back when next cooldown starts
@@ -9,13 +12,19 @@ export const TABS: TabKey[] = ["Estado del ciclo", "Discovery", "Backlog", "Rele
 export default function Shell({
   active,
   onNav,
+  cycle,
+  onCycleSaved,
   children,
 }: {
   active: TabKey;
   onNav: (t: TabKey) => void;
+  cycle: CycleRow | null;
+  onCycleSaved: () => void;
   children: React.ReactNode;
 }) {
-  const pct = Math.round((CYCLE.currentWeek / CYCLE.totalWeeks) * 100);
+  const [editingCycle, setEditingCycle] = useState(false);
+  const currentWeek = cycle ? currentWeekOf(cycle) : 0;
+  const pct = cycle ? Math.round((currentWeek / cycle.total_weeks) * 100) : 0;
 
   return (
     <div
@@ -65,7 +74,7 @@ export default function Shell({
               Cycle Tracker
             </div>
             <div style={{ fontSize: 11.5, color: "rgb(var(--fg-3))", marginTop: 1 }}>
-              {CYCLE.cycleName} · {CYCLE.dates}
+              {cycle ? `${cycle.name} · ${cycleDatesLabel(cycle)}` : "Sin ciclo activo"}
             </div>
           </div>
         </div>
@@ -93,59 +102,92 @@ export default function Shell({
         </nav>
 
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ textAlign: "right" }}>
-            <div
-              style={{
-                fontSize: 10.5,
-                color: "rgb(var(--fg-3))",
-                fontWeight: 500,
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-              }}
-            >
-              Semana {CYCLE.currentWeek} / {CYCLE.totalWeeks}
-            </div>
-            <div style={{ fontSize: 11, color: "rgb(var(--fg-4))", marginTop: 2 }}>
-              Última: {CYCLE.lastUpdated}
-            </div>
-          </div>
-          <div
+          {cycle && (
+            <>
+              <div style={{ textAlign: "right" }}>
+                <div
+                  style={{
+                    fontSize: 10.5,
+                    color: "rgb(var(--fg-3))",
+                    fontWeight: 500,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Semana {currentWeek} / {cycle.total_weeks}
+                </div>
+                <div style={{ fontSize: 11, color: "rgb(var(--fg-4))", marginTop: 2 }}>
+                  {cycle.cooldown_start ? "Cooldown después del ciclo" : "Ciclo activo"}
+                </div>
+              </div>
+              <div
+                style={{
+                  position: "relative",
+                  width: 72,
+                  height: 28,
+                  background: "rgb(var(--surface-1))",
+                  borderRadius: 6,
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: `${pct}%`,
+                    background: "rgb(var(--primary-dim))",
+                  }}
+                />
+                <span
+                  style={{
+                    position: "relative",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "rgb(var(--primary))",
+                  }}
+                >
+                  {pct}%
+                </span>
+              </div>
+            </>
+          )}
+          <button
+            onClick={() => setEditingCycle(true)}
+            title={cycle ? "Editar ciclo y fechas" : "Crear ciclo"}
+            aria-label="Configurar ciclo"
             style={{
-              position: "relative",
-              width: 72,
+              width: 28,
               height: 28,
-              background: "rgb(var(--surface-1))",
               borderRadius: 6,
-              overflow: "hidden",
-              display: "flex",
+              border: "1px solid rgb(var(--surface-2))",
+              background: "transparent",
+              color: "rgb(var(--fg-3))",
+              cursor: "pointer",
+              display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <div
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: `${pct}%`,
-                background: "rgb(var(--primary-dim))",
-              }}
-            />
-            <span
-              style={{
-                position: "relative",
-                fontSize: 12,
-                fontWeight: 700,
-                color: "rgb(var(--primary))",
-              }}
-            >
-              {pct}%
-            </span>
-          </div>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </button>
         </div>
       </header>
       {children}
+      {editingCycle && (
+        <CycleFormModal
+          cycle={cycle}
+          onClose={() => setEditingCycle(false)}
+          onSaved={onCycleSaved}
+        />
+      )}
     </div>
   );
 }

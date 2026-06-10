@@ -17,7 +17,6 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CYCLE } from "@/data/cycle";
 import {
   getSupabase,
   type BacklogIdeaRow,
@@ -228,7 +227,7 @@ export default function BacklogTab() {
             <PrioMatrixInfo />
           </div>
           <div style={{ fontSize: 11, color: "rgb(var(--fg-3))", marginTop: 2 }}>
-            Orden manual · prioridad calculada por matriz Impact × Effort · {CYCLE.lastUpdated}
+            Orden manual · prioridad calculada por matriz Impact × Effort
           </div>
         </div>
       </div>

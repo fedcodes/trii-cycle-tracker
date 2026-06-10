@@ -1,107 +1,228 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { BetRow, BetStatus, BetUpdateRow, CycleRow } from "@/lib/types";
+import { BET_STATUSES } from "@/lib/types";
 import {
-  BETS,
-  WEEKLY_LOG,
-  CYCLE,
-  TOTAL_DAYS,
-  weekToDays,
+  OBJECTIVE_LABELS,
+  OBJECTIVE_NUMS,
+  currentWeekOf,
+  daysElapsedOf,
   objColor,
   objShort,
   statusToken,
-  getKPIs,
-  Bet,
-  BetStatus,
-} from "@/data/cycle";
+  totalDays,
+  weekLabel,
+  weekToDays,
+} from "@/lib/cycle-utils";
+import {
+  deleteBet,
+  deleteBetUpdate,
+  fetchCycleData,
+  insertBet,
+  insertBetUpdate,
+  updateBet,
+} from "@/lib/db";
+import {
+  DangerConfirmButton,
+  ErrorBanner,
+  Field,
+  GhostButton,
+  LegendDot,
+  LoadingState,
+  Modal,
+  ObjChip,
+  PrimaryButton,
+  Select,
+  StatusDot,
+  TeamStack,
+  TextArea,
+  TextInput,
+  labelStyle,
+} from "./ui";
 
-const StatusDot = ({
-  status,
-  dropped,
-  size = 8,
-}: {
-  status: BetStatus;
-  dropped?: boolean;
-  size?: number;
-}) => {
-  const t = statusToken(status, dropped);
-  return (
-    <span
-      style={{
-        display: "inline-block",
-        width: size,
-        height: size,
-        borderRadius: "50%",
-        background: t.dot,
-        flexShrink: 0,
-      }}
-    />
+const parseTeam = (raw: string): string[] =>
+  raw
+    .split(/[,·\s]+/)
+    .map((t) => t.trim().toUpperCase())
+    .filter(Boolean);
+
+export default function EstadoDelCiclo({ cycle }: { cycle: CycleRow }) {
+  const [bets, setBets] = useState<BetRow[]>([]);
+  const [updates, setUpdates] = useState<BetUpdateRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [formBet, setFormBet] = useState<BetRow | "new" | null>(null);
+
+  const currentWeek = currentWeekOf(cycle);
+
+  const load = useCallback(async () => {
+    try {
+      const data = await fetchCycleData(cycle.id);
+      setBets(data.bets);
+      setUpdates(data.updates);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
+    }
+  }, [cycle.id]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const patchBet = useCallback(async (id: string, patch: Partial<BetRow>) => {
+    setBets((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
+    const err = await updateBet(id, patch);
+    if (err) setError(err);
+  }, []);
+
+  const removeBet = useCallback(async (id: string) => {
+    setBets((prev) => prev.filter((b) => b.id !== id));
+    setUpdates((prev) => prev.filter((u) => u.bet_id !== id));
+    setSelectedId(null);
+    const err = await deleteBet(id);
+    if (err) setError(err);
+  }, []);
+
+  const addUpdate = useCallback(
+    async (betId: string | null, note: string, week: number) => {
+      const bet = betId ? bets.find((b) => b.id === betId) : null;
+      const { data, error: err } = await insertBetUpdate({
+        cycle_id: cycle.id,
+        bet_id: betId,
+        week,
+        note,
+        progress: bet ? bet.progress : null,
+        status: bet ? bet.status : null,
+      });
+      if (err || !data) {
+        setError(err ?? "No se pudo guardar el update");
+        return;
+      }
+      setUpdates((prev) => [data, ...prev]);
+      if (betId) patchBet(betId, { last_update: note });
+    },
+    [bets, cycle.id, patchBet]
   );
-};
 
-const TeamStack = ({ team }: { team: string[] }) => (
-  <span style={{ display: "inline-flex" }}>
-    {team.map((t, i) => (
-      <span
-        key={t}
+  const removeUpdate = useCallback(async (id: string) => {
+    setUpdates((prev) => prev.filter((u) => u.id !== id));
+    const err = await deleteBetUpdate(id);
+    if (err) setError(err);
+  }, []);
+
+  const saveBet = useCallback(
+    async (draft: BetDraft, existing: BetRow | null) => {
+      if (existing) {
+        await patchBet(existing.id, draft);
+        return true;
+      }
+      const position = bets.length ? Math.max(...bets.map((b) => b.position)) + 1 : 0;
+      const { data, error: err } = await insertBet({
+        cycle_id: cycle.id,
+        ...draft,
+        last_update: draft.last_update ?? "",
+        dropped: false,
+        position,
+      });
+      if (err || !data) {
+        setError(err ?? "No se pudo crear la bet");
+        return false;
+      }
+      setBets((prev) => [...prev, data]);
+      return true;
+    },
+    [bets, cycle.id, patchBet]
+  );
+
+  const selected = selectedId ? bets.find((b) => b.id === selectedId) ?? null : null;
+
+  if (loading) return <LoadingState label="Cargando bets…" />;
+
+  return (
+    <>
+      {error && <ErrorBanner message={`Error: ${error}`} />}
+      <KPIStrip bets={bets} cycle={cycle} currentWeek={currentWeek} />
+      <div
         style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 20,
-          height: 20,
-          borderRadius: "50%",
-          background: "rgb(var(--surface-2))",
-          color: "rgb(var(--fg))",
-          fontSize: 9,
-          fontWeight: 600,
-          border: "1.5px solid rgb(var(--surface-1))",
-          marginLeft: i === 0 ? 0 : -6,
+          padding: "16px 28px 24px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 14,
+          position: "relative",
         }}
       >
-        {t}
-      </span>
-    ))}
-    {team.length === 0 && (
-      <span style={{ fontSize: 10, color: "rgb(var(--fg-4))", fontStyle: "italic" }}>
-        sin equipo
-      </span>
-    )}
-  </span>
-);
-
-const ObjChip = ({ num }: { num: number }) => {
-  const c = objColor(num);
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        fontSize: 10,
-        fontWeight: 600,
-        letterSpacing: "0.04em",
-        color: "rgb(var(--fg-2))",
-        textTransform: "uppercase",
-      }}
-    >
-      <span style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
-      {objShort(num)}
-    </span>
+        <Gantt
+          bets={bets}
+          cycle={cycle}
+          onSelect={(b) => setSelectedId(b.id)}
+          onNew={() => setFormBet("new")}
+        />
+        <WeeklyLog
+          updates={updates}
+          bets={bets}
+          cycle={cycle}
+          currentWeek={currentWeek}
+          onAdd={(note, week) => addUpdate(null, note, week)}
+          onDelete={removeUpdate}
+        />
+        {selected && (
+          <ProjectDetail
+            bet={selected}
+            cycle={cycle}
+            updates={updates.filter((u) => u.bet_id === selected.id)}
+            currentWeek={currentWeek}
+            onClose={() => setSelectedId(null)}
+            onPatch={(patch) => patchBet(selected.id, patch)}
+            onEdit={() => setFormBet(selected)}
+            onDelete={() => removeBet(selected.id)}
+            onAddUpdate={(note) => addUpdate(selected.id, note, currentWeek)}
+            onDeleteUpdate={removeUpdate}
+          />
+        )}
+      </div>
+      {formBet && (
+        <BetFormModal
+          cycle={cycle}
+          bet={formBet === "new" ? null : formBet}
+          onClose={() => setFormBet(null)}
+          onSave={saveBet}
+        />
+      )}
+    </>
   );
-};
+}
 
-function KPIStrip() {
-  const k = getKPIs();
-  const completedPct = k.total ? Math.round((k.listo / k.total) * 100) : 0;
+// ── KPI strip ──────────────────────────────────────────────
+
+function KPIStrip({
+  bets,
+  cycle,
+  currentWeek,
+}: {
+  bets: BetRow[];
+  cycle: CycleRow;
+  currentWeek: number;
+}) {
+  const active = bets.filter((b) => !b.dropped);
+  const count = (s: BetStatus) => active.filter((b) => b.status === s).length;
+  const listo = count("Listo");
+  const dropped = bets.length - active.length;
+  const completedPct = active.length ? Math.round((listo / active.length) * 100) : 0;
+  const start = new Date(`${cycle.start_date}T00:00:00`);
+  const startLabel = `${start.toLocaleDateString("es", { month: "short" }).replace(".", "")} ${start.getDate()}`;
 
   const items = [
-    { label: "Bets activas", value: k.total, sub: `${k.dropped} descartada${k.dropped === 1 ? "" : "s"}`, accent: "rgb(var(--fg))" },
-    { label: "On track", value: k.onTrack, sub: "Arrancan esta semana", accent: "rgb(var(--primary))" },
-    { label: "Not started", value: k.notStarted, sub: "Pendientes en el ciclo", accent: "rgb(var(--fg-3))" },
-    { label: "Listo", value: k.listo, sub: `${completedPct}% del ciclo`, accent: "rgb(var(--primary))" },
-    { label: "Update", value: k.update, sub: "Requiere atención", accent: "rgb(var(--yellow))" },
-    { label: `${CYCLE.cycleName.split(" — ")[0]} · S${CYCLE.currentWeek}`, value: "May 11", sub: `Semana ${CYCLE.currentWeek} de ${CYCLE.totalWeeks}`, accent: "rgb(var(--primary))" },
+    { label: "Bets activas", value: active.length, sub: `${dropped} descartada${dropped === 1 ? "" : "s"}`, accent: "rgb(var(--fg))" },
+    { label: "On track", value: count("On track"), sub: "En curso esta semana", accent: "rgb(var(--primary))" },
+    { label: "Not started", value: count("Not started"), sub: "Pendientes en el ciclo", accent: "rgb(var(--fg-3))" },
+    { label: "Listo", value: listo, sub: `${completedPct}% del ciclo`, accent: "rgb(var(--primary))" },
+    { label: "Update", value: count("Update"), sub: "Requiere atención", accent: "rgb(var(--yellow))" },
+    { label: `${cycle.name.split(" — ")[0]} · S${currentWeek}`, value: startLabel, sub: `Semana ${currentWeek} de ${cycle.total_weeks}`, accent: "rgb(var(--primary))" },
   ];
 
   return (
@@ -150,29 +271,25 @@ function KPIStrip() {
   );
 }
 
-const LegendDot = ({ c, label }: { c: string; label: string }) => (
-  <span
-    style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 5,
-      fontSize: 10.5,
-      color: "rgb(var(--fg-3))",
-    }}
-  >
-    <span style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
-    {label}
-  </span>
-);
+// ── Gantt ──────────────────────────────────────────────────
 
-function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
+function Gantt({
+  bets,
+  cycle,
+  onSelect,
+  onNew,
+}: {
+  bets: BetRow[];
+  cycle: CycleRow;
+  onSelect: (b: BetRow) => void;
+  onNew: () => void;
+}) {
   const leftW = 300;
-  // current day index = days elapsed from CYCLE.startDate to CYCLE.currentDate
-  const cycleStart = new Date(`${CYCLE.startDate}T00:00:00`);
-  const today = new Date(`${CYCLE.currentDate}T00:00:00`);
-  const daysElapsed = Math.round((today.getTime() - cycleStart.getTime()) / 86400000);
-  const currentDayIdx = Math.max(0, Math.min(TOTAL_DAYS - 1, daysElapsed));
-  const todayPct = ((currentDayIdx + 0.5) / TOTAL_DAYS) * 100;
+  const TOTAL = totalDays(cycle);
+  const currentDayIdx = daysElapsedOf(cycle);
+  const todayPct = ((currentDayIdx + 0.5) / TOTAL) * 100;
+  const weeks = Array.from({ length: cycle.total_weeks }, (_, i) => i + 1);
+  const currentWeek = currentWeekOf(cycle);
 
   return (
     <div
@@ -187,7 +304,7 @@ function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "baseline",
+          alignItems: "center",
           padding: "14px 18px 10px",
           borderBottom: "1px solid rgb(var(--surface-2))",
           gap: 12,
@@ -199,7 +316,7 @@ function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
             Bets del ciclo
           </div>
           <div style={{ fontSize: 11, color: "rgb(var(--fg-3))", marginTop: 2 }}>
-            {BETS.length} proyectos · {CYCLE.dates.replace(", 2026", "")} · click para ver detalle
+            {bets.length} proyectos · click para ver detalle y agregar updates
           </div>
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -209,6 +326,12 @@ function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
           <LegendDot c="rgb(var(--obj-4))" label="CX" />
           <LegendDot c="rgb(var(--obj-5))" label="Fondos PE" />
           <LegendDot c="rgb(var(--obj-99))" label="Reg. / Arq." />
+          <PrimaryButton onClick={onNew} style={{ padding: "6px 12px" }}>
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+              <path d="M6 2 V10 M2 6 H10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+            Nueva bet
+          </PrimaryButton>
         </div>
       </div>
 
@@ -236,27 +359,22 @@ function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
           Proyecto / equipo
         </div>
         <div style={{ position: "relative", height: 30, overflow: "hidden" }}>
-          {[1, 2, 3, 4, 5, 6].map((w) => {
-            const isCurrent = w === CYCLE.currentWeek;
-            const [yy, mm, dd] = CYCLE.startDate.split("-").map(Number);
-            const monthStart = new Date(yy, mm - 1, dd);
-            const { start } = weekToDays(w);
-            const d = new Date(monthStart);
-            d.setDate(d.getDate() + start);
-            const monthStr = d
-              .toLocaleDateString("es", { month: "short" })
-              .replace(".", "");
-            const dayStr = d.getDate();
+          {weeks.map((w) => {
+            const isCurrent = w === currentWeek;
+            const start = new Date(`${cycle.start_date}T00:00:00`);
+            const d = new Date(start);
+            d.setDate(d.getDate() + weekToDays(w).start);
+            const monthStr = d.toLocaleDateString("es", { month: "short" }).replace(".", "");
             return (
               <div
                 key={w}
                 style={{
                   position: "absolute",
-                  left: `${((w - 1) / 6) * 100}%`,
-                  width: `${(1 / 6) * 100}%`,
+                  left: `${((w - 1) / cycle.total_weeks) * 100}%`,
+                  width: `${(1 / cycle.total_weeks) * 100}%`,
                   top: 0,
                   height: 30,
-                  borderRight: w < 6 ? "1px solid rgb(var(--surface-2))" : "none",
+                  borderRight: w < cycle.total_weeks ? "1px solid rgb(var(--surface-2))" : "none",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "center",
@@ -274,7 +392,7 @@ function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
                 >
                   S{w}{" "}
                   <span style={{ color: "rgb(var(--fg-4))", fontWeight: 500 }}>
-                    · {monthStr} {dayStr}
+                    · {monthStr} {d.getDate()}
                   </span>
                 </div>
               </div>
@@ -284,29 +402,43 @@ function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
       </div>
 
       <div style={{ position: "relative" }}>
-        {BETS.map((bet, i) => (
+        {bets.length === 0 && (
+          <div
+            style={{
+              padding: "40px 20px",
+              textAlign: "center",
+              color: "rgb(var(--fg-4))",
+              fontSize: 11.5,
+            }}
+          >
+            Sin bets en el ciclo. Agrega la primera con &quot;Nueva bet&quot;.
+          </div>
+        )}
+        {bets.map((bet, i) => (
           <GanttRow
             key={bet.id}
             bet={bet}
+            cycle={cycle}
             leftW={leftW}
-            currentDayIdx={currentDayIdx}
-            isLast={i === BETS.length - 1}
+            isLast={i === bets.length - 1}
             onSelect={onSelect}
           />
         ))}
-        <div
-          style={{
-            position: "absolute",
-            left: `calc(${leftW}px + (100% - ${leftW}px) * ${todayPct / 100})`,
-            top: 0,
-            bottom: 0,
-            width: 2,
-            background: "rgb(var(--primary))",
-            boxShadow: "0 0 8px rgb(var(--primary) / 0.4)",
-            zIndex: 5,
-            pointerEvents: "none",
-          }}
-        />
+        {bets.length > 0 && (
+          <div
+            style={{
+              position: "absolute",
+              left: `calc(${leftW}px + (100% - ${leftW}px) * ${todayPct / 100})`,
+              top: 0,
+              bottom: 0,
+              width: 2,
+              background: "rgb(var(--primary))",
+              boxShadow: "0 0 8px rgb(var(--primary) / 0.4)",
+              zIndex: 5,
+              pointerEvents: "none",
+            }}
+          />
+        )}
       </div>
     </div>
   );
@@ -314,22 +446,22 @@ function Gantt({ onSelect }: { onSelect: (b: Bet) => void }) {
 
 function GanttRow({
   bet,
+  cycle,
   leftW,
-  currentDayIdx,
   isLast,
   onSelect,
 }: {
-  bet: Bet;
+  bet: BetRow;
+  cycle: CycleRow;
   leftW: number;
-  currentDayIdx: number;
   isLast: boolean;
-  onSelect: (b: Bet) => void;
+  onSelect: (b: BetRow) => void;
 }) {
-  const obj = objColor(bet.objectiveNum);
-  const wkS = weekToDays(bet.weeks[0]);
-  const wkE = weekToDays(bet.weeks[1]);
-  // percentages across TOTAL_DAYS
-  const toPct = (day: number) => (day / TOTAL_DAYS) * 100;
+  const obj = objColor(bet.objective_num);
+  const TOTAL = totalDays(cycle);
+  const wkS = weekToDays(bet.week_start);
+  const wkE = weekToDays(bet.week_end);
+  const toPct = (day: number) => (day / TOTAL) * 100;
   const barLeftPct = toPct(wkS.start);
   const barWidthPct = toPct(wkE.end - wkS.start + 1);
   const [hover, setHover] = useState(false);
@@ -404,19 +536,19 @@ function GanttRow({
             color: "rgb(var(--fg-3))",
           }}
         >
-          <ObjChip num={bet.objectiveNum} />
+          <ObjChip num={bet.objective_num} />
           <span style={{ color: "rgb(var(--fg-4))" }}>·</span>
           <TeamStack team={bet.team} />
         </div>
       </div>
 
       <div style={{ position: "relative", overflow: "hidden" }}>
-        {[1, 2, 3, 4, 5].map((w) => (
+        {Array.from({ length: cycle.total_weeks - 1 }, (_, i) => i + 1).map((w) => (
           <div
             key={w}
             style={{
               position: "absolute",
-              left: `${(w / 6) * 100}%`,
+              left: `${(w / cycle.total_weeks) * 100}%`,
               top: 0,
               bottom: 0,
               width: 1,
@@ -424,7 +556,7 @@ function GanttRow({
             }}
           />
         ))}
-        {[0, 1, 2, 3, 4, 5].map((w) => (
+        {Array.from({ length: cycle.total_weeks }, (_, i) => i).map((w) => (
           <div
             key={w}
             style={{
@@ -460,8 +592,7 @@ function GanttRow({
                 top: 0,
                 bottom: 0,
                 width: `${bet.progress * 100}%`,
-                background:
-                  bet.status === "Update" ? "rgb(var(--yellow) / 0.5)" : obj,
+                background: bet.status === "Update" ? "rgb(var(--yellow) / 0.5)" : obj,
                 opacity: 0.55,
               }}
             />
@@ -476,11 +607,12 @@ function GanttRow({
               paddingRight: 8,
               fontSize: 10.5,
               fontWeight: 600,
-              color: bet.status === "Listo"
-                ? "rgb(var(--bg))"
-                : bet.dropped
-                  ? "rgb(var(--fg-4))"
-                  : "rgb(var(--fg))",
+              color:
+                bet.status === "Listo"
+                  ? "rgb(var(--bg))"
+                  : bet.dropped
+                    ? "rgb(var(--fg-4))"
+                    : "rgb(var(--fg))",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -491,9 +623,8 @@ function GanttRow({
             {bet.status === "Pushed" ? (
               <span style={{ color: "rgb(var(--fg-3))", fontStyle: "italic" }}>Pushed →</span>
             ) : (
-              !bet.dropped && bet.status !== "Not started" && (
-                <span>{Math.round((bet.progress || 0) * 100)}%</span>
-              )
+              !bet.dropped &&
+              bet.status !== "Not started" && <span>{Math.round((bet.progress || 0) * 100)}%</span>
             )}
           </div>
         </div>
@@ -502,8 +633,48 @@ function GanttRow({
   );
 }
 
-function WeeklyLog() {
-  const [expanded, setExpanded] = useState(0);
+// ── Weekly log ─────────────────────────────────────────────
+
+function WeeklyLog({
+  updates,
+  bets,
+  cycle,
+  currentWeek,
+  onAdd,
+  onDelete,
+}: {
+  updates: BetUpdateRow[];
+  bets: BetRow[];
+  cycle: CycleRow;
+  currentWeek: number;
+  onAdd: (note: string, week: number) => void;
+  onDelete: (id: string) => void;
+}) {
+  const groups = useMemo(() => {
+    const byWeek = new Map<number, BetUpdateRow[]>();
+    updates.forEach((u) => {
+      const arr = byWeek.get(u.week) ?? [];
+      arr.push(u);
+      byWeek.set(u.week, arr);
+    });
+    return [...byWeek.entries()].sort((a, b) => b[0] - a[0]);
+  }, [updates]);
+
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [note, setNote] = useState("");
+  const [week, setWeek] = useState(currentWeek);
+  const betName = (id: string | null) => (id ? bets.find((b) => b.id === id)?.name ?? null : null);
+
+  const openWeek = expanded ?? groups[0]?.[0] ?? null;
+
+  const submit = () => {
+    if (!note.trim()) return;
+    onAdd(note.trim(), week);
+    setNote("");
+    setAdding(false);
+    setExpanded(week);
+  };
 
   return (
     <div
@@ -519,13 +690,13 @@ function WeeklyLog() {
           padding: "12px 18px",
           borderBottom: "1px solid rgb(var(--surface-2))",
           display: "flex",
-          alignItems: "baseline",
+          alignItems: "center",
           gap: 10,
         }}
       >
         <div style={{ fontSize: 13, fontWeight: 700 }}>Weekly log</div>
         <div style={{ fontSize: 11, color: "rgb(var(--fg-3))" }}>
-          Notas de cada semana del ciclo
+          Updates de bets y notas generales por semana
         </div>
         <div style={{ flex: 1 }} />
         <div
@@ -535,24 +706,65 @@ function WeeklyLog() {
             fontVariantNumeric: "tabular-nums",
           }}
         >
-          {WEEKLY_LOG.length} semanas
+          {updates.length} entrada{updates.length === 1 ? "" : "s"}
         </div>
+        <GhostButton onClick={() => setAdding((a) => !a)} style={{ padding: "5px 10px", fontSize: 10.5 }}>
+          + Nota general
+        </GhostButton>
       </div>
-      {WEEKLY_LOG.map((w, i) => {
-        const isOpen = expanded === i;
-        const isCurrent = i === 0;
+
+      {adding && (
+        <div
+          style={{
+            padding: "12px 18px",
+            borderBottom: "1px solid rgb(var(--surface-2))",
+            display: "flex",
+            gap: 10,
+            alignItems: "flex-start",
+            background: "rgb(var(--surface-0))",
+          }}
+        >
+          <Select
+            value={week}
+            onChange={(e) => setWeek(Number(e.target.value))}
+            style={{ width: 110, flexShrink: 0 }}
+          >
+            {Array.from({ length: cycle.total_weeks }, (_, i) => i + 1).map((w) => (
+              <option key={w} value={w}>
+                Semana {w}
+              </option>
+            ))}
+          </Select>
+          <TextArea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Qué pasó esta semana…"
+            rows={2}
+            autoFocus
+            style={{ flex: 1 }}
+          />
+          <PrimaryButton onClick={submit} disabled={!note.trim()}>
+            Guardar
+          </PrimaryButton>
+        </div>
+      )}
+
+      {groups.length === 0 && (
+        <div style={{ padding: "30px 20px", textAlign: "center", color: "rgb(var(--fg-4))", fontSize: 11.5 }}>
+          Sin entradas todavía.
+        </div>
+      )}
+
+      {groups.map(([w, items]) => {
+        const isOpen = openWeek === w;
+        const isCurrent = w === currentWeek;
         return (
           <div
-            key={w.week}
-            style={{
-              borderBottom:
-                i === WEEKLY_LOG.length - 1
-                  ? "none"
-                  : "1px solid rgb(var(--surface-2) / 0.6)",
-            }}
+            key={w}
+            style={{ borderBottom: "1px solid rgb(var(--surface-2) / 0.6)" }}
           >
             <button
-              onClick={() => setExpanded(isOpen ? -1 : i)}
+              onClick={() => setExpanded(isOpen ? -1 : w)}
               style={{
                 width: "100%",
                 background: "transparent",
@@ -585,7 +797,7 @@ function WeeklyLog() {
                   minWidth: 70,
                 }}
               >
-                {w.week}
+                Semana {w}
               </span>
               <span
                 style={{
@@ -594,9 +806,9 @@ function WeeklyLog() {
                   fontVariantNumeric: "tabular-nums",
                 }}
               >
-                {w.dates} ·{" "}
+                {weekLabel(cycle, w)} ·{" "}
                 <span style={{ color: "rgb(var(--fg-4))" }}>
-                  {w.items.length} update{w.items.length === 1 ? "" : "s"}
+                  {items.length} update{items.length === 1 ? "" : "s"}
                 </span>
               </span>
               <span
@@ -623,32 +835,56 @@ function WeeklyLog() {
                   gap: 7,
                 }}
               >
-                {w.items.map((it, j) => (
-                  <li
-                    key={j}
-                    style={{
-                      display: "flex",
-                      gap: 10,
-                      alignItems: "flex-start",
-                      fontSize: 11.5,
-                      color: "rgb(var(--fg-2))",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    <span
+                {items.map((u) => {
+                  const name = betName(u.bet_id);
+                  return (
+                    <li
+                      key={u.id}
                       style={{
-                        color: "rgb(var(--fg-4))",
-                        marginTop: 1,
-                        flexShrink: 0,
-                        fontSize: 10,
-                        fontWeight: 700,
+                        display: "flex",
+                        gap: 10,
+                        alignItems: "flex-start",
+                        fontSize: 11.5,
+                        color: "rgb(var(--fg-2))",
+                        lineHeight: 1.5,
                       }}
                     >
-                      ·
-                    </span>
-                    <span>{it}</span>
-                  </li>
-                ))}
+                      <span
+                        style={{
+                          color: "rgb(var(--fg-4))",
+                          marginTop: 1,
+                          flexShrink: 0,
+                          fontSize: 10,
+                          fontWeight: 700,
+                        }}
+                      >
+                        ·
+                      </span>
+                      <span style={{ flex: 1 }}>
+                        {name && (
+                          <span style={{ fontWeight: 700, color: "rgb(var(--fg))" }}>{name}: </span>
+                        )}
+                        {u.note}
+                      </span>
+                      <button
+                        onClick={() => onDelete(u.id)}
+                        title="Eliminar entrada"
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                          color: "rgb(var(--fg-4))",
+                          cursor: "pointer",
+                          fontSize: 12,
+                          lineHeight: 1,
+                          padding: "0 2px",
+                          flexShrink: 0,
+                        }}
+                      >
+                        ×
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
@@ -658,10 +894,39 @@ function WeeklyLog() {
   );
 }
 
-function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
-  const c = objColor(bet.objectiveNum);
+// ── Project detail drawer (editable) ───────────────────────
+
+function ProjectDetail({
+  bet,
+  cycle,
+  updates,
+  currentWeek,
+  onClose,
+  onPatch,
+  onEdit,
+  onDelete,
+  onAddUpdate,
+  onDeleteUpdate,
+}: {
+  bet: BetRow;
+  cycle: CycleRow;
+  updates: BetUpdateRow[];
+  currentWeek: number;
+  onClose: () => void;
+  onPatch: (patch: Partial<BetRow>) => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onAddUpdate: (note: string) => void;
+  onDeleteUpdate: (id: string) => void;
+}) {
+  const c = objColor(bet.objective_num);
   const t = statusToken(bet.status, bet.dropped);
-  const pct = Math.round((bet.progress || 0) * 100);
+  const [progressPct, setProgressPct] = useState(Math.round((bet.progress || 0) * 100));
+  const [note, setNote] = useState("");
+
+  useEffect(() => {
+    setProgressPct(Math.round((bet.progress || 0) * 100));
+  }, [bet.id, bet.progress]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -671,25 +936,16 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const updates: { week: string; dates: string; text: string }[] = [];
-  WEEKLY_LOG.forEach((w) => {
-    w.items.forEach((item) => {
-      const n = bet.name.toLowerCase();
-      const firstWord = n.split(" ")[0];
-      const lc = item.toLowerCase();
-      if (
-        lc.includes(n) ||
-        (firstWord.length > 4 && lc.includes(firstWord)) ||
-        (bet.name === "Retiros fondos MM" && (lc.includes("retiros mm") || lc.includes("retiros fondos mm"))) ||
-        (bet.name === "Mejoras transf. Perú" && lc.includes("transf.")) ||
-        (bet.name.startsWith("Fix 5.0 Perú") && lc.includes("fix 5.0")) ||
-        (bet.name === "TC en depósitos" && lc.includes("tc") && lc.includes("depósito"))
-      ) {
-        updates.push({ week: w.week, dates: w.dates, text: item });
-      }
-    });
-  });
-  const hasHistory = updates.length > 0;
+  const commitProgress = () => {
+    const p = Math.max(0, Math.min(100, progressPct)) / 100;
+    if (p !== bet.progress) onPatch({ progress: p });
+  };
+
+  const submitUpdate = () => {
+    if (!note.trim()) return;
+    onAddUpdate(note.trim());
+    setNote("");
+  };
 
   return (
     <div
@@ -704,11 +960,7 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
     >
       <div
         onClick={onClose}
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgb(0 0 0 / 0.5)",
-        }}
+        style={{ position: "absolute", inset: 0, background: "rgb(0 0 0 / 0.5)" }}
       />
       <div
         style={{
@@ -739,27 +991,46 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
               marginBottom: 10,
             }}
           >
-            <ObjChip num={bet.objectiveNum} />
-            <button
-              onClick={onClose}
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: 5,
-                border: "none",
-                background: "rgb(var(--surface-1))",
-                color: "rgb(var(--fg-3))",
-                fontSize: 14,
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: "inherit",
-              }}
-              aria-label="Cerrar"
-            >
-              ×
-            </button>
+            <ObjChip num={bet.objective_num} />
+            <div style={{ display: "flex", gap: 6 }}>
+              <button
+                onClick={onEdit}
+                title="Editar bet"
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: 5,
+                  border: "1px solid rgb(var(--surface-2))",
+                  background: "rgb(var(--surface-1))",
+                  color: "rgb(var(--fg-2))",
+                  fontSize: 10.5,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                }}
+              >
+                Editar
+              </button>
+              <button
+                onClick={onClose}
+                aria-label="Cerrar"
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 5,
+                  border: "none",
+                  background: "rgb(var(--surface-1))",
+                  color: "rgb(var(--fg-3))",
+                  fontSize: 14,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "inherit",
+                }}
+              >
+                ×
+              </button>
+            </div>
           </div>
           <div
             style={{
@@ -778,74 +1049,113 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
           </div>
         </div>
 
-        <div
-          style={{
-            padding: "16px 22px",
-            borderBottom: "1px solid rgb(var(--surface-2))",
-          }}
-        >
+        <div style={{ padding: "16px 22px", borderBottom: "1px solid rgb(var(--surface-2))" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <div>
               <div style={labelStyle}>Estado</div>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "4px 8px",
-                  borderRadius: 4,
-                  background: t.bg,
-                  color: t.fg,
-                  fontSize: 11.5,
-                  fontWeight: 700,
-                }}
-              >
-                <StatusDot status={bet.status} dropped={bet.dropped} size={7} />
-                {bet.dropped ? "Descartado" : bet.status}
+              <div style={{ position: "relative", display: "inline-block" }}>
+                <select
+                  value={bet.status}
+                  onChange={(e) => onPatch({ status: e.target.value as BetStatus })}
+                  style={{
+                    appearance: "none",
+                    WebkitAppearance: "none",
+                    background: t.bg,
+                    color: t.fg,
+                    border: "none",
+                    borderRadius: 4,
+                    padding: "5px 22px 5px 22px",
+                    fontFamily: "inherit",
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  {BET_STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 8,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    width: 7,
+                    height: 7,
+                    borderRadius: "50%",
+                    background: t.dot,
+                    pointerEvents: "none",
+                  }}
+                />
+                <svg
+                  width="8"
+                  height="8"
+                  viewBox="0 0 8 8"
+                  style={{
+                    position: "absolute",
+                    right: 7,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    pointerEvents: "none",
+                    color: t.fg,
+                    opacity: 0.7,
+                  }}
+                >
+                  <path d="M1 2.5 L4 5.5 L7 2.5" stroke="currentColor" strokeWidth="1.2" fill="none" />
+                </svg>
               </div>
             </div>
             <div>
-              <div style={labelStyle}>Avance</div>
+              <div style={labelStyle}>Avance · {progressPct}%</div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div
-                  style={{
-                    flex: 1,
-                    height: 5,
-                    borderRadius: 3,
-                    background: "rgb(var(--surface-2))",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: `${pct}%`,
-                      height: "100%",
-                      background: bet.dropped ? "rgb(var(--fg-4))" : c,
-                    }}
-                  />
-                </div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    fontVariantNumeric: "tabular-nums",
-                    minWidth: 32,
-                    textAlign: "right",
-                    color: bet.dropped ? "rgb(var(--fg-4))" : "rgb(var(--fg))",
-                  }}
-                >
-                  {pct}%
-                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={progressPct}
+                  onChange={(e) => setProgressPct(Number(e.target.value))}
+                  onPointerUp={commitProgress}
+                  onKeyUp={commitProgress}
+                  style={{ flex: 1, accentColor: c, cursor: "pointer" }}
+                />
               </div>
             </div>
             <div>
               <div style={labelStyle}>Calendario</div>
-              <div style={{ fontSize: 12, color: "rgb(var(--fg))", fontWeight: 500 }}>
-                S{bet.weeks[0]} → S{bet.weeks[1]}
-                <span style={{ color: "rgb(var(--fg-4))", fontWeight: 400 }}>
-                  {" "}
-                  · {bet.weeks[1] - bet.weeks[0] + 1} sem
-                </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Select
+                  value={bet.week_start}
+                  onChange={(e) => {
+                    const ws = Number(e.target.value);
+                    onPatch({ week_start: ws, week_end: Math.max(ws, bet.week_end) });
+                  }}
+                  style={{ width: 64, padding: "4px 18px 4px 8px", fontSize: 11 }}
+                >
+                  {Array.from({ length: cycle.total_weeks }, (_, i) => i + 1).map((w) => (
+                    <option key={w} value={w}>
+                      S{w}
+                    </option>
+                  ))}
+                </Select>
+                <span style={{ color: "rgb(var(--fg-4))", fontSize: 11 }}>→</span>
+                <Select
+                  value={bet.week_end}
+                  onChange={(e) => {
+                    const we = Number(e.target.value);
+                    onPatch({ week_end: we, week_start: Math.min(we, bet.week_start) });
+                  }}
+                  style={{ width: 64, padding: "4px 18px 4px 8px", fontSize: 11 }}
+                >
+                  {Array.from({ length: cycle.total_weeks }, (_, i) => i + 1).map((w) => (
+                    <option key={w} value={w}>
+                      S{w}
+                    </option>
+                  ))}
+                </Select>
               </div>
             </div>
             <div>
@@ -855,12 +1165,7 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
           </div>
         </div>
 
-        <div
-          style={{
-            padding: "16px 22px",
-            borderBottom: "1px solid rgb(var(--surface-2))",
-          }}
-        >
+        <div style={{ padding: "16px 22px", borderBottom: "1px solid rgb(var(--surface-2))" }}>
           <div style={{ ...labelStyle, marginBottom: 7 }}>Último update</div>
           <div
             style={{
@@ -870,11 +1175,27 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
               textWrap: "pretty" as React.CSSProperties["textWrap"],
             }}
           >
-            {bet.lastUpdate}
+            {bet.last_update || "—"}
           </div>
         </div>
 
         <div style={{ padding: "16px 22px 24px", flex: 1 }}>
+          <div style={{ ...labelStyle, marginBottom: 7 }}>
+            Agregar update · Semana {currentWeek}
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 18 }}>
+            <TextArea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Qué pasó con esta bet…"
+              rows={2}
+              style={{ flex: 1 }}
+            />
+            <PrimaryButton onClick={submitUpdate} disabled={!note.trim()}>
+              Guardar
+            </PrimaryButton>
+          </div>
+
           <div
             style={{
               display: "flex",
@@ -885,10 +1206,10 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
           >
             <div style={labelStyle}>Historial</div>
             <div style={{ fontSize: 10, color: "rgb(var(--fg-4))" }}>
-              {updates.length} entrada{updates.length === 1 ? "" : "s"} en weekly log
+              {updates.length} update{updates.length === 1 ? "" : "s"}
             </div>
           </div>
-          {hasHistory ? (
+          {updates.length > 0 ? (
             <div
               style={{
                 display: "flex",
@@ -900,7 +1221,7 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
             >
               {updates.map((u, i) => (
                 <div
-                  key={i}
+                  key={u.id}
                   style={{
                     position: "relative",
                     paddingLeft: 22,
@@ -932,16 +1253,9 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
                       boxShadow: i === 0 ? `0 0 0 2px ${c}` : "none",
                     }}
                   />
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "baseline",
-                      gap: 8,
-                      marginBottom: 3,
-                    }}
-                  >
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 3 }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "rgb(var(--fg))" }}>
-                      {u.week}
+                      Semana {u.week}
                     </div>
                     <div
                       style={{
@@ -950,8 +1264,25 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
                         fontVariantNumeric: "tabular-nums",
                       }}
                     >
-                      {u.dates}
+                      {weekLabel(cycle, u.week)}
+                      {u.progress !== null && ` · ${Math.round(u.progress * 100)}%`}
                     </div>
+                    <div style={{ flex: 1 }} />
+                    <button
+                      onClick={() => onDeleteUpdate(u.id)}
+                      title="Eliminar update"
+                      style={{
+                        border: "none",
+                        background: "transparent",
+                        color: "rgb(var(--fg-4))",
+                        cursor: "pointer",
+                        fontSize: 12,
+                        lineHeight: 1,
+                        padding: 0,
+                      }}
+                    >
+                      ×
+                    </button>
                   </div>
                   <div
                     style={{
@@ -961,7 +1292,7 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
                       textWrap: "pretty" as React.CSSProperties["textWrap"],
                     }}
                   >
-                    {u.text}
+                    {u.note}
                   </div>
                 </div>
               ))}
@@ -979,47 +1310,195 @@ function ProjectDetail({ bet, onClose }: { bet: Bet; onClose: () => void }) {
                 textAlign: "center",
               }}
             >
-              Sin entradas históricas en weekly log.
-              <br />
-              <span style={{ color: "rgb(var(--fg-4))", fontSize: 10.5 }}>
-                Ver &quot;Último update&quot; arriba.
-              </span>
+              Sin updates registrados para esta bet.
             </div>
           )}
+
+          <div style={{ marginTop: 24, display: "flex", justifyContent: "space-between", gap: 8 }}>
+            <label
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 7,
+                fontSize: 11,
+                color: "rgb(var(--fg-3))",
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={bet.dropped}
+                onChange={(e) => onPatch({ dropped: e.target.checked })}
+                style={{ accentColor: "rgb(var(--primary))" }}
+              />
+              Descartada del ciclo
+            </label>
+            <DangerConfirmButton label="Eliminar bet" confirmLabel="Eliminar" onConfirm={onDelete} />
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-const labelStyle: React.CSSProperties = {
-  fontSize: 9.5,
-  fontWeight: 700,
-  letterSpacing: "0.08em",
-  color: "rgb(var(--fg-4))",
-  textTransform: "uppercase",
-  marginBottom: 5,
-};
+// ── Bet form (create / edit) ───────────────────────────────
 
-export default function EstadoDelCiclo() {
-  const [selected, setSelected] = useState<Bet | null>(null);
+type BetDraft = Pick<
+  BetRow,
+  "name" | "objective_num" | "objective" | "team" | "status" | "week_start" | "week_end" | "progress"
+> & { last_update?: string };
+
+function BetFormModal({
+  cycle,
+  bet,
+  onClose,
+  onSave,
+}: {
+  cycle: CycleRow;
+  bet: BetRow | null;
+  onClose: () => void;
+  onSave: (draft: BetDraft, existing: BetRow | null) => Promise<boolean>;
+}) {
+  const [name, setName] = useState(bet?.name ?? "");
+  const [objNum, setObjNum] = useState(bet?.objective_num ?? 1);
+  const [objective, setObjective] = useState(bet?.objective ?? OBJECTIVE_LABELS[1]);
+  const [teamRaw, setTeamRaw] = useState(bet?.team.join(", ") ?? "");
+  const [status, setStatus] = useState<BetStatus>(bet?.status ?? "Not started");
+  const [weekStart, setWeekStart] = useState(bet?.week_start ?? 1);
+  const [weekEnd, setWeekEnd] = useState(bet?.week_end ?? cycle.total_weeks);
+  const [lastUpdate, setLastUpdate] = useState(bet?.last_update ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const valid = name.trim().length > 0 && weekStart <= weekEnd;
+
+  const submit = async () => {
+    if (!valid || saving) return;
+    setSaving(true);
+    const ok = await onSave(
+      {
+        name: name.trim(),
+        objective_num: objNum,
+        objective: objective.trim() || OBJECTIVE_LABELS[objNum] || "",
+        team: parseTeam(teamRaw),
+        status,
+        week_start: weekStart,
+        week_end: weekEnd,
+        progress: bet?.progress ?? 0,
+        last_update: lastUpdate.trim(),
+      },
+      bet
+    );
+    setSaving(false);
+    if (ok) onClose();
+  };
+
+  const weeks = Array.from({ length: cycle.total_weeks }, (_, i) => i + 1);
 
   return (
-    <>
-      <KPIStrip />
-      <div
-        style={{
-          padding: "16px 28px 24px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 14,
-          position: "relative",
-        }}
-      >
-        <Gantt onSelect={setSelected} />
-        <WeeklyLog />
-        {selected && <ProjectDetail bet={selected} onClose={() => setSelected(null)} />}
+    <Modal
+      title={bet ? "Editar bet" : "Nueva bet"}
+      subtitle={bet ? bet.name : `Se agrega a ${cycle.name}`}
+      onClose={onClose}
+      width={540}
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <Field label="Nombre del proyecto">
+          <TextInput
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Stop loss / Take Profit Colombia"
+            autoFocus
+          />
+        </Field>
+        <div style={{ display: "flex", gap: 12 }}>
+          <Field label="Objetivo">
+            <Select
+              value={objNum}
+              onChange={(e) => {
+                const n = Number(e.target.value);
+                setObjNum(n);
+                setObjective(OBJECTIVE_LABELS[n] ?? "");
+              }}
+            >
+              {OBJECTIVE_NUMS.map((n) => (
+                <option key={n} value={n}>
+                  {objShort(n)}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Estado">
+            <Select value={status} onChange={(e) => setStatus(e.target.value as BetStatus)}>
+              {BET_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+        <Field label="Etiqueta del objetivo">
+          <TextInput
+            value={objective}
+            onChange={(e) => setObjective(e.target.value)}
+            placeholder="Obj. 1 — Escalar trii pro"
+          />
+        </Field>
+        <div style={{ display: "flex", gap: 12 }}>
+          <Field label="Equipo (iniciales)">
+            <TextInput
+              value={teamRaw}
+              onChange={(e) => setTeamRaw(e.target.value)}
+              placeholder="JR, AV"
+            />
+          </Field>
+          <Field label="Semana inicio" flex={0}>
+            <Select
+              value={weekStart}
+              onChange={(e) => setWeekStart(Number(e.target.value))}
+              style={{ width: 80 }}
+            >
+              {weeks.map((w) => (
+                <option key={w} value={w}>
+                  S{w}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Semana fin" flex={0}>
+            <Select
+              value={weekEnd}
+              onChange={(e) => setWeekEnd(Number(e.target.value))}
+              style={{ width: 80 }}
+            >
+              {weeks.map((w) => (
+                <option key={w} value={w}>
+                  S{w}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+        <Field label="Último update (opcional)">
+          <TextArea
+            value={lastUpdate}
+            onChange={(e) => setLastUpdate(e.target.value)}
+            placeholder="Contexto o estado actual de la bet…"
+            rows={2}
+          />
+        </Field>
+        {!valid && name.trim() && (
+          <div style={{ fontSize: 11, color: "rgb(var(--error))" }}>
+            La semana de inicio debe ser ≤ a la semana de fin.
+          </div>
+        )}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 4 }}>
+          <GhostButton onClick={onClose}>Cancelar</GhostButton>
+          <PrimaryButton onClick={submit} disabled={!valid || saving}>
+            {saving ? "Guardando…" : bet ? "Guardar cambios" : "Crear bet"}
+          </PrimaryButton>
+        </div>
       </div>
-    </>
+    </Modal>
   );
 }
