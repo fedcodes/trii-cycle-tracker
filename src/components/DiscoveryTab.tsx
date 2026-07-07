@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -23,15 +23,18 @@ import {
   DISCOVERY_STAGES,
   PRIORITY_TONES,
   STAGE_TONES,
-  objColor,
 } from "@/lib/cycle-utils";
+import { useObjectives } from "@/lib/objectives-context";
 import {
   deleteDiscoveryTask,
   fetchDiscovery,
+  insertDiscoveryObjective,
   insertDiscoveryTask,
   updateDiscoveryObjective,
   updateDiscoveryTask,
+  updateObjective,
 } from "@/lib/db";
+import type { ObjectiveRow } from "@/lib/types";
 import {
   DangerConfirmButton,
   ErrorBanner,
@@ -51,14 +54,22 @@ const PRIORITIES: DiscoveryPriority[] = ["high", "med", "low"];
 type TaskFormTarget = { task: DiscoveryTaskRow | null; stage: DiscoveryStageId };
 
 export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
+  const {
+    activeObjectives,
+    colorOf,
+    objectives: catalog,
+    reload: reloadCatalog,
+  } = useObjectives();
   const [objectives, setObjectives] = useState<DiscoveryObjectiveRow[]>([]);
   const [tasks, setTasks] = useState<DiscoveryTaskRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formTarget, setFormTarget] = useState<TaskFormTarget | null>(null);
+  const syncedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
+    syncedRef.current = false;
     (async () => {
       try {
         const data = await fetchDiscovery(cycle.id);
@@ -77,6 +88,43 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
     };
   }, [cycle.id]);
 
+  // Los objetivos del catálogo (Admin) aparecen acá automáticamente:
+  // al cargar, se crea la card del ciclo para cada objetivo activo que falte.
+  useEffect(() => {
+    if (loading || syncedRef.current || activeObjectives.length === 0) return;
+    syncedRef.current = true;
+    const have = new Set(objectives.map((o) => o.obj_num));
+    const missing = activeObjectives.filter((o) => !have.has(o.num));
+    if (missing.length === 0) return;
+    (async () => {
+      let position = objectives.length
+        ? Math.max(...objectives.map((o) => o.position)) + 1
+        : 0;
+      const created: DiscoveryObjectiveRow[] = [];
+      for (const cat of missing) {
+        const { data, error: err } = await insertDiscoveryObjective({
+          cycle_id: cycle.id,
+          obj_num: cat.num,
+          name: cat.label,
+          short_name: cat.short_name,
+          description: "",
+          metric: "",
+          target: "",
+          po: null,
+          designer: null,
+          context: null,
+          position: position++,
+        });
+        if (err) {
+          setError(err);
+          return;
+        }
+        if (data) created.push(data);
+      }
+      if (created.length) setObjectives((prev) => [...prev, ...created]);
+    })();
+  }, [loading, activeObjectives, objectives, cycle.id]);
+
   const patchTask = useCallback(async (id: string, patch: Partial<DiscoveryTaskRow>) => {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
     const err = await updateDiscoveryTask(id, patch);
@@ -92,7 +140,11 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
   const createTask = useCallback(
     async (draft: TaskDraft) => {
       const position = tasks.length ? Math.max(...tasks.map((t) => t.position)) + 1 : 0;
-      const { data, error: err } = await insertDiscoveryTask({ ...draft, position });
+      const { data, error: err } = await insertDiscoveryTask({
+        ...draft,
+        cycle_id: cycle.id,
+        position,
+      });
       if (err || !data) {
         setError(err ?? "No se pudo crear el item");
         return false;
@@ -112,10 +164,29 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
     []
   );
 
+  // PO / Diseño viven en el catálogo global (tab Admin).
+  const patchCatalogObjective = useCallback(
+    async (id: string, patch: Partial<ObjectiveRow>) => {
+      const err = await updateObjective(id, patch);
+      if (err) setError(err);
+      else await reloadCatalog();
+    },
+    [reloadCatalog]
+  );
+
   const objById = useMemo(
     () => new Map(objectives.map((o) => [o.id, o])),
     [objectives]
   );
+
+  // Cards visibles: se ocultan los objetivos desactivados en Admin.
+  const visibleObjectives = useMemo(() => {
+    const catByNum = new Map(catalog.map((o) => [o.num, o]));
+    return objectives.filter((o) => {
+      const cat = catByNum.get(o.obj_num);
+      return !cat || cat.active;
+    });
+  }, [objectives, catalog]);
 
   // Para los datalists de responsables: nombres ya usados en el ciclo.
   const knownPeople = useMemo(() => {
@@ -147,7 +218,12 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
     <>
       {error && <ErrorBanner message={`Error: ${error}`} />}
       <DiscoverySummary tasks={tasks} />
-      <ObjectivesOverview objectives={objectives} tasks={tasks} onPatch={patchObjective} />
+      <ObjectivesOverview
+        objectives={visibleObjectives}
+        tasks={tasks}
+        onPatch={patchObjective}
+        onPatchCatalog={patchCatalogObjective}
+      />
 
       <div style={{ padding: "18px 28px 24px" }}>
         <div
@@ -167,11 +243,9 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
             </div>
           </div>
           <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-            <LegendDot c="rgb(var(--obj-1))" label="Pro" />
-            <LegendDot c="rgb(var(--obj-2))" label="US Stocks" />
-            <LegendDot c="rgb(var(--obj-3))" label="Chile" />
-            <LegendDot c="rgb(var(--obj-4))" label="Activación" />
-            <LegendDot c="rgb(var(--obj-5))" label="Fondos PE" />
+            {visibleObjectives.map((o) => (
+              <LegendDot key={o.id} c={colorOf(o.obj_num)} label={o.short_name} />
+            ))}
           </div>
         </div>
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
@@ -206,7 +280,7 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
       {formTarget && (
         <TaskFormModal
           target={formTarget}
-          objectives={objectives}
+          objectives={visibleObjectives}
           knownPeople={knownPeople}
           onClose={() => setFormTarget(null)}
           onCreate={createTask}
@@ -375,174 +449,183 @@ function ObjectivesOverview({
   objectives,
   tasks,
   onPatch,
+  onPatchCatalog,
 }: {
   objectives: DiscoveryObjectiveRow[];
   tasks: DiscoveryTaskRow[];
   onPatch: (id: string, patch: Partial<DiscoveryObjectiveRow>) => void;
+  onPatchCatalog: (id: string, patch: Partial<ObjectiveRow>) => void;
 }) {
+  const { colorOf, objectives: catalog } = useObjectives();
+  const catByNum = useMemo(() => new Map(catalog.map((o) => [o.num, o])), [catalog]);
+
   return (
     <div style={{ padding: "18px 28px 0" }}>
-      <div style={{ marginBottom: 12 }}>
+      <div style={{ marginBottom: 10 }}>
         <div style={{ fontSize: 13, fontWeight: 700 }}>Objetivos del ciclo</div>
         <div style={{ fontSize: 11, color: "rgb(var(--fg-3))", marginTop: 2 }}>
-          Los objetivos y asks que enmarcan todo el discovery abajo · click en PO / Design para reasignar
+          Desde el catálogo del tab Admin · click en PO / Design para reasignar
         </div>
       </div>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(${Math.max(objectives.length, 1)}, 1fr)`,
-          gap: 10,
+          gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+          gap: 8,
         }}
       >
         {objectives.map((o) => {
-          const c = objColor(o.obj_num);
+          const c = colorOf(o.obj_num);
+          const cat = catByNum.get(o.obj_num);
+          // Contenido desde el catálogo (Admin); fallback a los campos del ciclo
+          // para cards viejas que aún guardan su propia descripción/métrica.
+          const desc = cat?.short_description?.trim() || o.description;
+          const metric =
+            cat?.metric?.trim() ||
+            [o.metric, o.target && o.target !== "—" ? o.target : ""]
+              .filter((s) => s && s !== "—")
+              .join(" · ");
           const taskCount = tasks.filter((t) => t.objective_id === o.id).length;
+          // PO / Diseño: del catálogo (Admin) cuando el objetivo existe ahí;
+          // los edits inline escriben allá. Fallback: la card del ciclo.
+          const po = cat ? cat.po || null : o.po;
+          const designer = cat ? cat.designer || null : o.designer;
+          const commitPo = (v: string | null) =>
+            cat ? onPatchCatalog(cat.id, { po: v ?? "" }) : onPatch(o.id, { po: v });
+          const commitDesigner = (v: string | null) =>
+            cat ? onPatchCatalog(cat.id, { designer: v ?? "" }) : onPatch(o.id, { designer: v });
           return (
             <div
               key={o.id}
+              title={o.context ?? undefined}
               style={{
                 background: "rgb(var(--surface-1))",
                 border: "1px solid rgb(var(--surface-2))",
-                borderTop: `3px solid ${c}`,
-                borderRadius: 8,
-                padding: "14px 16px",
+                borderLeft: `3px solid ${c}`,
+                borderRadius: 7,
+                padding: "10px 12px",
                 display: "flex",
                 flexDirection: "column",
-                gap: 10,
-                minHeight: 220,
+                gap: 6,
               }}
             >
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
+                {o.obj_num < 90 && (
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: "0.07em",
+                      color: c,
+                      textTransform: "uppercase",
+                      flexShrink: 0,
+                    }}
+                  >
+                    Obj. {o.obj_num}
+                  </span>
+                )}
                 <span
                   style={{
-                    fontSize: 10,
+                    fontSize: 12,
                     fontWeight: 700,
-                    letterSpacing: "0.08em",
-                    color: c,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {o.obj_num >= 90 ? "Asks" : `Obj. ${o.obj_num}`}
-                </span>
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 700,
-                    color: "rgb(var(--fg))",
+                    color: o.obj_num >= 90 ? c : "rgb(var(--fg))",
                     letterSpacing: "-0.005em",
-                    lineHeight: 1.25,
+                    lineHeight: 1.2,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                 >
                   {o.short_name}
                 </span>
-              </div>
-
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "rgb(var(--fg-2))",
-                  lineHeight: 1.5,
-                  textWrap: "pretty" as React.CSSProperties["textWrap"],
-                }}
-              >
-                {o.description}
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
-                  padding: "8px 10px",
-                  background: "rgb(var(--bg))",
-                  borderRadius: 5,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 9,
-                    fontWeight: 700,
-                    letterSpacing: "0.08em",
-                    color: "rgb(var(--fg-4))",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Métrica
-                </div>
-                <div
-                  style={{
-                    fontSize: 11.5,
-                    fontWeight: 600,
-                    color: "rgb(var(--fg))",
-                    letterSpacing: "-0.003em",
-                  }}
-                >
-                  {o.metric}
-                </div>
-                <div style={{ fontSize: 10, color: "rgb(var(--fg-3))" }}>Target: {o.target}</div>
-              </div>
-
-              <div style={{ flex: 1 }} />
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  fontSize: 10.5,
-                  color: "rgb(var(--fg-3))",
-                  paddingTop: 8,
-                  borderTop: "1px solid rgb(var(--surface-2))",
-                  flexWrap: "wrap",
-                }}
-              >
-                <span>
-                  PO{" "}
-                  <InlinePerson
-                    value={o.po}
-                    placeholder="sin asignar"
-                    onCommit={(v) => onPatch(o.id, { po: v })}
-                  />
-                </span>
-                <span style={{ color: "rgb(var(--fg-4))" }}>·</span>
-                <span>
-                  Design{" "}
-                  <InlinePerson
-                    value={o.designer}
-                    placeholder="sin asignar"
-                    onCommit={(v) => onPatch(o.id, { designer: v })}
-                  />
-                </span>
                 <span
                   style={{
                     marginLeft: "auto",
+                    fontSize: 10,
                     color: "rgb(var(--fg-4))",
                     fontVariantNumeric: "tabular-nums",
+                    flexShrink: 0,
                   }}
                 >
                   {taskCount} task{taskCount === 1 ? "" : "s"}
                 </span>
               </div>
 
-              {o.context && (
+              {desc && (
                 <div
                   style={{
-                    fontSize: 10,
-                    color: "rgb(var(--yellow))",
-                    background: "rgb(var(--yellow-dim))",
-                    padding: "6px 8px",
-                    borderRadius: 3,
-                    lineHeight: 1.4,
-                    display: "flex",
-                    gap: 6,
-                    alignItems: "flex-start",
+                    fontSize: 10.5,
+                    color: "rgb(var(--fg-3))",
+                    lineHeight: 1.45,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical" as React.CSSProperties["WebkitBoxOrient"],
+                    overflow: "hidden",
                   }}
                 >
-                  <span style={{ flexShrink: 0, marginTop: 1 }}>⚠</span>
-                  <span>{o.context}</span>
+                  {desc}
                 </div>
               )}
+
+              {metric && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    gap: 6,
+                    fontSize: 10.5,
+                    fontWeight: 600,
+                    color: "rgb(var(--fg-2))",
+                  }}
+                >
+                  <span style={{ color: c, flexShrink: 0 }}>◆</span>
+                  <span
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                    title={metric}
+                  >
+                    {metric}
+                  </span>
+                </div>
+              )}
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontSize: 10,
+                  color: "rgb(var(--fg-3))",
+                  marginTop: "auto",
+                  paddingTop: 6,
+                  borderTop: "1px solid rgb(var(--surface-2) / 0.6)",
+                }}
+              >
+                <span>
+                  PO{" "}
+                  <InlinePerson value={po} placeholder="sin asignar" onCommit={commitPo} />
+                </span>
+                <span style={{ color: "rgb(var(--fg-4))" }}>·</span>
+                <span>
+                  Design{" "}
+                  <InlinePerson
+                    value={designer}
+                    placeholder="sin asignar"
+                    onCommit={commitDesigner}
+                  />
+                </span>
+                {o.context && (
+                  <span
+                    style={{ marginLeft: "auto", color: "rgb(var(--yellow))", flexShrink: 0 }}
+                    title={o.context}
+                  >
+                    ⚠
+                  </span>
+                )}
+              </div>
             </div>
           );
         })}
@@ -664,7 +747,12 @@ function KanbanColumn({
           </div>
         ) : (
           tasks.map((t) => (
-            <DraggableTaskCard key={t.id} task={t} obj={objById.get(t.objective_id)} onOpen={onOpen} />
+            <DraggableTaskCard
+              key={t.id}
+              task={t}
+              obj={t.objective_id ? objById.get(t.objective_id) : undefined}
+              onOpen={onOpen}
+            />
           ))
         )}
       </div>
@@ -767,8 +855,8 @@ function DraggableTaskCard({
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
   });
-  const objNum = obj?.obj_num ?? 99;
-  const c = objColor(objNum);
+  const { colorOf } = useObjectives();
+  const c = obj ? colorOf(obj.obj_num) : "rgb(var(--fg-4))";
   const pri = PRIORITY_TONES[task.priority] || PRIORITY_TONES.med;
   const figmaUrl = task.figma && task.figma !== "#" ? task.figma : null;
   const hasFigma = !!figmaUrl;
@@ -809,7 +897,7 @@ function DraggableTaskCard({
             textTransform: "uppercase",
           }}
         >
-          {objNum >= 90 ? "Asks" : `OBJ. ${objNum}`}
+          {!obj ? "Sin objetivo" : obj.obj_num >= 90 ? obj.short_name : `OBJ. ${obj.obj_num}`}
         </span>
         <span
           style={{
@@ -821,7 +909,7 @@ function DraggableTaskCard({
             flex: 1,
           }}
         >
-          {obj?.short_name ?? ""}
+          {obj && obj.obj_num < 90 ? obj.short_name : ""}
         </span>
         <span
           title={`Prioridad ${pri.label}`}
@@ -919,7 +1007,10 @@ function DraggableTaskCard({
 
 // ── Task form (create / edit) ──────────────────────────────
 
-type TaskDraft = Omit<DiscoveryTaskRow, "id" | "created_at" | "updated_at" | "position">;
+type TaskDraft = Omit<
+  DiscoveryTaskRow,
+  "id" | "cycle_id" | "created_at" | "updated_at" | "position"
+>;
 
 function TaskFormModal({
   target,
@@ -940,7 +1031,10 @@ function TaskFormModal({
 }) {
   const { task } = target;
   const [name, setName] = useState(task?.name ?? "");
-  const [objectiveId, setObjectiveId] = useState(task?.objective_id ?? objectives[0]?.id ?? "");
+  // "" = sin objetivo. Al editar se respeta el valor actual (incluido null).
+  const [objectiveId, setObjectiveId] = useState(
+    task ? task.objective_id ?? "" : objectives[0]?.id ?? ""
+  );
   const [stage, setStage] = useState<DiscoveryStageId>(task?.stage ?? target.stage);
   const [owner, setOwner] = useState(task?.owner ?? "");
   const [designer, setDesigner] = useState(task?.designer ?? "");
@@ -949,13 +1043,13 @@ function TaskFormModal({
   const [notes, setNotes] = useState(task?.notes ?? "");
   const [saving, setSaving] = useState(false);
 
-  const valid = name.trim().length > 0 && objectiveId;
+  const valid = name.trim().length > 0;
 
   const submit = async () => {
     if (!valid || saving) return;
     setSaving(true);
     const draft: TaskDraft = {
-      objective_id: objectiveId,
+      objective_id: objectiveId || null,
       name: name.trim(),
       stage,
       owner: owner.trim() || null,
@@ -1004,6 +1098,7 @@ function TaskFormModal({
                   {o.obj_num >= 90 ? o.short_name : `Obj. ${o.obj_num} — ${o.short_name}`}
                 </option>
               ))}
+              <option value="">Sin objetivo</option>
             </Select>
           </Field>
           <Field label="Etapa">

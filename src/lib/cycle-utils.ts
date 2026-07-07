@@ -45,7 +45,22 @@ export const cycleDatesLabel = (cycle: CycleRow): string => {
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // ── Objetivos ──────────────────────────────────────────────
+// El catálogo vive en la tabla `objectives` (tab Admin) y se consume vía
+// ObjectivesProvider / useObjectives. Lo de abajo son los fallbacks
+// hardcodeados para cuando el catálogo aún no cargó.
 export const OBJECTIVE_NUMS = [1, 2, 3, 4, 5, 98, 99] as const;
+
+// Paleta disponible para el catálogo (tokens definidos en globals.css).
+export const OBJ_COLOR_OPTIONS: { token: string; label: string }[] = [
+  { token: "obj-1", label: "Verde" },
+  { token: "obj-2", label: "Azul" },
+  { token: "obj-3", label: "Ámbar" },
+  { token: "obj-4", label: "Cobre" },
+  { token: "obj-5", label: "Lila" },
+  { token: "obj-99", label: "Gris" },
+];
+
+export const tokenColor = (token: string) => `rgb(var(--${token}))`;
 
 export const objColor = (n: number): string => {
   const map: Record<number, string> = { 1: "obj-1", 2: "obj-2", 3: "obj-3", 4: "obj-4", 5: "obj-5", 98: "obj-99", 99: "obj-99" };

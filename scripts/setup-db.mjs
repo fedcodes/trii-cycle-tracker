@@ -172,7 +172,7 @@ for (let i = 0; i < TASKS.length; i++) {
 }
 
 const counts = {};
-for (const t of ["cycles", "bets", "bet_updates", "discovery_objectives", "discovery_tasks", "backlog_ideas"]) {
+for (const t of ["objectives", "cycles", "bets", "bet_updates", "discovery_objectives", "discovery_tasks", "backlog_ideas"]) {
   counts[t] = (await client.query(`select count(*)::int as n from ${t}`)).rows[0].n;
 }
 console.log("Seed complete:", counts);

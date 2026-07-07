@@ -5,9 +5,9 @@ import type { CycleRow } from "@/lib/types";
 import { currentWeekOf, cycleDatesLabel } from "@/lib/cycle-utils";
 import CycleFormModal from "./CycleFormModal";
 
-export type TabKey = "Estado del ciclo" | "Discovery" | "Releases" | "Cooldown" | "Backlog";
+export type TabKey = "Estado del ciclo" | "Discovery" | "Releases" | "Cooldown" | "Backlog" | "Admin";
 // "Cooldown" hidden between cooldowns — add back when next cooldown starts
-export const TABS: TabKey[] = ["Estado del ciclo", "Discovery", "Backlog", "Releases"];
+export const TABS: TabKey[] = ["Estado del ciclo", "Discovery", "Backlog", "Releases", "Admin"];
 
 export default function Shell({
   active,

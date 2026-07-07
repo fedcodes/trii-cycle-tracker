@@ -19,6 +19,24 @@ export const BET_STATUSES: BetStatus[] = [
   "Pushed",
 ];
 
+// Catálogo global de objetivos (tabla `objectives`, editable desde Admin).
+// `color` es un token CSS (obj-1 … obj-5, obj-99) — ver OBJ_COLOR_OPTIONS.
+export interface ObjectiveRow {
+  id: string;
+  num: number;
+  label: string; // "Obj. 1 — Escalar trii pro"
+  short_name: string; // "Pro"
+  color: string;
+  short_description: string; // se muestra en la card de Discovery
+  metric: string; // métricas de éxito, ej. "10% de penetración pro · Fin 2026"
+  po: string; // "" = sin asignar
+  designer: string; // "" = sin asignar
+  active: boolean;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CycleRow {
   id: string;
   name: string;
@@ -80,7 +98,8 @@ export interface DiscoveryObjectiveRow {
 
 export interface DiscoveryTaskRow {
   id: string;
-  objective_id: string;
+  cycle_id: string;
+  objective_id: string | null; // null = sin objetivo (p. ej. objetivo desactivado)
   name: string;
   stage: DiscoveryStageId;
   owner: string | null;
