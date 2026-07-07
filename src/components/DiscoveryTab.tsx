@@ -27,13 +27,20 @@ import {
 import { useObjectives } from "@/lib/objectives-context";
 import {
   deleteDiscoveryTask,
+  fetchBacklogIdeas,
   fetchDiscovery,
   insertDiscoveryObjective,
   insertDiscoveryTask,
+  updateBacklogIdea,
   updateDiscoveryObjective,
   updateDiscoveryTask,
   updateObjective,
 } from "@/lib/db";
+import type { BacklogIdeaRow, BacklogStatus } from "@/lib/supabase";
+import {
+  STAGE_TO_BACKLOG_STATUS,
+  importBacklogIdeaToDiscovery,
+} from "@/lib/backlog-discovery";
 import type { ObjectiveRow } from "@/lib/types";
 import {
   DangerConfirmButton,
@@ -51,6 +58,17 @@ import {
 
 const PRIORITIES: DiscoveryPriority[] = ["high", "med", "low"];
 
+const BACKLOG_STATUSES: BacklogStatus[] = [
+  "Pending",
+  "In Discovery",
+  "In Design",
+  "Completed Design",
+  "In Betting Table",
+  "In Development",
+  "Completed",
+  "Not Doing",
+];
+
 type TaskFormTarget = { task: DiscoveryTaskRow | null; stage: DiscoveryStageId };
 
 export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
@@ -65,7 +83,23 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formTarget, setFormTarget] = useState<TaskFormTarget | null>(null);
+  const [backlogIdeas, setBacklogIdeas] = useState<BacklogIdeaRow[]>([]);
+  const [showBacklogPicker, setShowBacklogPicker] = useState(false);
   const syncedRef = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchBacklogIdeas()
+      .then((ideas) => {
+        if (!cancelled) setBacklogIdeas(ideas);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -125,11 +159,30 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
     })();
   }, [loading, activeObjectives, objectives, cycle.id]);
 
-  const patchTask = useCallback(async (id: string, patch: Partial<DiscoveryTaskRow>) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
-    const err = await updateDiscoveryTask(id, patch);
-    if (err) setError(err);
-  }, []);
+  const patchTask = useCallback(
+    async (id: string, patch: Partial<DiscoveryTaskRow>) => {
+      const current = tasks.find((t) => t.id === id);
+      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+      const err = await updateDiscoveryTask(id, patch);
+      if (err) {
+        setError(err);
+        return;
+      }
+      // Sync al backlog: la idea de origen sigue la etapa de la task.
+      const backlogId =
+        patch.backlog_id !== undefined ? patch.backlog_id : current?.backlog_id;
+      if (backlogId && patch.stage && patch.stage !== current?.stage) {
+        const status = STAGE_TO_BACKLOG_STATUS[patch.stage];
+        const bErr = await updateBacklogIdea(backlogId, { status });
+        if (bErr) setError(bErr);
+        else
+          setBacklogIdeas((prev) =>
+            prev.map((b) => (b.id === backlogId ? { ...b, status } : b))
+          );
+      }
+    },
+    [tasks]
+  );
 
   const removeTask = useCallback(async (id: string) => {
     setTasks((prev) => prev.filter((t) => t.id !== id));
@@ -153,6 +206,27 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
       return true;
     },
     [tasks]
+  );
+
+  // Importa una idea del backlog como task del tablero (queda linkeada por backlog_id).
+  const importFromBacklog = useCallback(
+    async (idea: BacklogIdeaRow) => {
+      const { task, syncedStatus, error: err } = await importBacklogIdeaToDiscovery(
+        cycle.id,
+        idea
+      );
+      if (err || !task) {
+        setError(err ?? "No se pudo importar la idea");
+        return false;
+      }
+      setTasks((prev) => [...prev, task]);
+      if (syncedStatus)
+        setBacklogIdeas((prev) =>
+          prev.map((b) => (b.id === idea.id ? { ...b, status: syncedStatus } : b))
+        );
+      return true;
+    },
+    [cycle.id]
   );
 
   const patchObjective = useCallback(
@@ -248,6 +322,34 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
             {visibleObjectives.map((o) => (
               <LegendDot key={o.id} c={colorOf(o.obj_num)} label={o.short_name} />
             ))}
+            <button
+              onClick={() => setShowBacklogPicker(true)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 7,
+                padding: "6px 11px",
+                background: "rgb(var(--primary-dim))",
+                color: "rgb(var(--primary))",
+                border: "1px solid rgb(var(--primary-dim))",
+                borderRadius: 5,
+                fontFamily: "inherit",
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "-0.003em",
+                cursor: "pointer",
+              }}
+            >
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                <path
+                  d="M6 2 V10 M2 6 H10"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </svg>
+              Agregar del backlog
+            </button>
           </div>
         </div>
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
@@ -290,7 +392,196 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
           onDelete={removeTask}
         />
       )}
+
+      {showBacklogPicker && (
+        <BacklogPickerModal
+          ideas={backlogIdeas}
+          linkedIds={new Set(tasks.map((t) => t.backlog_id).filter(Boolean) as string[])}
+          onImport={importFromBacklog}
+          onClose={() => setShowBacklogPicker(false)}
+        />
+      )}
     </>
+  );
+}
+
+// ── Backlog picker (importa ideas del backlog al tablero) ──
+
+function BacklogPickerModal({
+  ideas,
+  linkedIds,
+  onImport,
+  onClose,
+}: {
+  ideas: BacklogIdeaRow[];
+  linkedIds: Set<string>;
+  onImport: (idea: BacklogIdeaRow) => Promise<boolean>;
+  onClose: () => void;
+}) {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"All" | BacklogStatus>("In Discovery");
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const filtered = useMemo(
+    () =>
+      ideas.filter((i) => {
+        if (statusFilter !== "All" && i.status !== statusFilter) return false;
+        if (
+          search &&
+          !`${i.idea} ${i.vertical} ${i.responsable}`
+            .toLowerCase()
+            .includes(search.toLowerCase())
+        )
+          return false;
+        return true;
+      }),
+    [ideas, search, statusFilter]
+  );
+
+  const doImport = async (idea: BacklogIdeaRow) => {
+    if (busyId) return;
+    setBusyId(idea.id);
+    await onImport(idea);
+    setBusyId(null);
+  };
+
+  return (
+    <Modal
+      title="Agregar del backlog"
+      subtitle="Las ideas importadas quedan linkeadas: mover la task actualiza su status en el backlog"
+      onClose={onClose}
+      width={640}
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <div style={{ flex: 1 }}>
+            <TextInput
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar idea…"
+              autoFocus
+            />
+          </div>
+          <div style={{ width: 170 }}>
+            <Select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as "All" | BacklogStatus)}
+            >
+              {["All", ...BACKLOG_STATUSES].map((s) => (
+                <option key={s} value={s}>
+                  {s === "All" ? "Todos los status" : s}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
+
+        <div
+          style={{
+            maxHeight: 380,
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+          }}
+        >
+          {filtered.length === 0 ? (
+            <div
+              style={{
+                fontSize: 11,
+                color: "rgb(var(--fg-4))",
+                fontStyle: "italic",
+                padding: "24px 8px",
+                textAlign: "center",
+              }}
+            >
+              No hay ideas que coincidan.
+            </div>
+          ) : (
+            filtered.map((idea) => {
+              const linked = linkedIds.has(idea.id);
+              return (
+                <div
+                  key={idea.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "9px 12px",
+                    background: "rgb(var(--surface-1))",
+                    border: "1px solid rgb(var(--surface-2))",
+                    borderRadius: 6,
+                    opacity: linked ? 0.55 : 1,
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 11.5,
+                        fontWeight: 600,
+                        color: "rgb(var(--fg))",
+                        lineHeight: 1.35,
+                      }}
+                    >
+                      {idea.idea}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 10,
+                        color: "rgb(var(--fg-3))",
+                        marginTop: 2,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {[idea.vertical, idea.responsable, (idea.countries || []).join(" · "), idea.status]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </div>
+                  </div>
+                  {linked ? (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: "rgb(var(--fg-4))",
+                        flexShrink: 0,
+                      }}
+                    >
+                      Ya en el tablero
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => doImport(idea)}
+                      disabled={busyId !== null}
+                      style={{
+                        padding: "4px 10px",
+                        background: "rgb(var(--primary-dim))",
+                        color: "rgb(var(--primary))",
+                        border: "none",
+                        borderRadius: 4,
+                        fontFamily: "inherit",
+                        fontSize: 10.5,
+                        fontWeight: 600,
+                        cursor: busyId ? "wait" : "pointer",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {busyId === idea.id ? "Agregando…" : "Agregar"}
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <GhostButton onClick={onClose}>Cerrar</GhostButton>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
@@ -901,6 +1192,24 @@ function DraggableTaskCard({
         >
           {!obj ? "Sin objetivo" : obj.obj_num >= 90 ? obj.short_name : `OBJ. ${obj.obj_num}`}
         </span>
+        {task.backlog_id && (
+          <span
+            title="Linkeada al backlog — mover esta task actualiza su status allá"
+            style={{
+              fontSize: 8.5,
+              fontWeight: 700,
+              letterSpacing: "0.05em",
+              color: "rgb(var(--fg-3))",
+              background: "rgb(var(--surface-2))",
+              padding: "1px 5px",
+              borderRadius: 3,
+              textTransform: "uppercase",
+              flexShrink: 0,
+            }}
+          >
+            Backlog
+          </span>
+        )}
         <span
           style={{
             fontSize: 9.5,
@@ -1052,6 +1361,7 @@ function TaskFormModal({
     setSaving(true);
     const draft: TaskDraft = {
       objective_id: objectiveId || null,
+      backlog_id: task?.backlog_id ?? null,
       name: name.trim(),
       stage,
       owner: owner.trim() || null,
