@@ -7,8 +7,10 @@ import DiscoveryTab from "@/components/DiscoveryTab";
 import ReleasesTab from "@/components/ReleasesTab";
 import CooldownTab from "@/components/CooldownTab";
 import BacklogTab from "@/components/BacklogTab";
+import AdminTab from "@/components/AdminTab";
 import { ErrorBanner, LoadingState } from "@/components/ui";
 import { fetchActiveCycle } from "@/lib/db";
+import { ObjectivesProvider } from "@/lib/objectives-context";
 import type { CycleRow } from "@/lib/types";
 
 export default function Home() {
@@ -35,6 +37,7 @@ export default function Home() {
   const needsCycle = active === "Estado del ciclo" || active === "Discovery";
 
   return (
+    <ObjectivesProvider>
     <Shell active={active} onNav={setActive} cycle={cycle} onCycleSaved={loadCycle}>
       {error && <ErrorBanner message={`No se pudo cargar el ciclo: ${error}`} />}
       {needsCycle && loading && <LoadingState label="Cargando ciclo…" />}
@@ -55,6 +58,8 @@ export default function Home() {
       {active === "Releases" && <ReleasesTab />}
       {active === "Cooldown" && <CooldownTab />}
       {active === "Backlog" && <BacklogTab />}
+      {active === "Admin" && <AdminTab />}
     </Shell>
+    </ObjectivesProvider>
   );
 }

@@ -4,17 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { BetRow, BetStatus, BetUpdateRow, CycleRow } from "@/lib/types";
 import { BET_STATUSES } from "@/lib/types";
 import {
-  OBJECTIVE_LABELS,
-  OBJECTIVE_NUMS,
   currentWeekOf,
   daysElapsedOf,
-  objColor,
-  objShort,
   statusToken,
   totalDays,
   weekLabel,
   weekToDays,
 } from "@/lib/cycle-utils";
+import { useObjectives } from "@/lib/objectives-context";
 import {
   deleteBet,
   deleteBetUpdate,
@@ -284,12 +281,17 @@ function Gantt({
   onSelect: (b: BetRow) => void;
   onNew: () => void;
 }) {
+  const { colorOf, activeObjectives } = useObjectives();
   const leftW = 300;
   const TOTAL = totalDays(cycle);
   const currentDayIdx = daysElapsedOf(cycle);
   const todayPct = ((currentDayIdx + 0.5) / TOTAL) * 100;
   const weeks = Array.from({ length: cycle.total_weeks }, (_, i) => i + 1);
   const currentWeek = currentWeekOf(cycle);
+
+  // Leyenda: objetivos del catálogo presentes en las bets del ciclo.
+  const betNums = new Set(bets.map((b) => b.objective_num));
+  const legend = activeObjectives.filter((o) => betNums.has(o.num));
 
   return (
     <div
@@ -320,12 +322,9 @@ function Gantt({
           </div>
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-          <LegendDot c="rgb(var(--obj-1))" label="Pro" />
-          <LegendDot c="rgb(var(--obj-2))" label="US Stocks" />
-          <LegendDot c="rgb(var(--obj-3))" label="Chile" />
-          <LegendDot c="rgb(var(--obj-4))" label="CX" />
-          <LegendDot c="rgb(var(--obj-5))" label="Fondos PE" />
-          <LegendDot c="rgb(var(--obj-99))" label="Reg. / Arq." />
+          {legend.map((o) => (
+            <LegendDot key={o.id} c={colorOf(o.num)} label={o.short_name} />
+          ))}
           <PrimaryButton onClick={onNew} style={{ padding: "6px 12px" }}>
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
               <path d="M6 2 V10 M2 6 H10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -457,7 +456,8 @@ function GanttRow({
   isLast: boolean;
   onSelect: (b: BetRow) => void;
 }) {
-  const obj = objColor(bet.objective_num);
+  const { colorOf } = useObjectives();
+  const obj = colorOf(bet.objective_num);
   const TOTAL = totalDays(cycle);
   const wkS = weekToDays(bet.week_start);
   const wkE = weekToDays(bet.week_end);
@@ -919,7 +919,8 @@ function ProjectDetail({
   onAddUpdate: (note: string) => void;
   onDeleteUpdate: (id: string) => void;
 }) {
-  const c = objColor(bet.objective_num);
+  const { colorOf } = useObjectives();
+  const c = colorOf(bet.objective_num);
   const t = statusToken(bet.status, bet.dropped);
   const [progressPct, setProgressPct] = useState(Math.round((bet.progress || 0) * 100));
   const [note, setNote] = useState("");
@@ -1359,9 +1360,15 @@ function BetFormModal({
   onClose: () => void;
   onSave: (draft: BetDraft, existing: BetRow | null) => Promise<boolean>;
 }) {
+  const { activeObjectives, shortOf, labelOf } = useObjectives();
+  const defaultNum = activeObjectives[0]?.num ?? 1;
   const [name, setName] = useState(bet?.name ?? "");
-  const [objNum, setObjNum] = useState(bet?.objective_num ?? 1);
-  const [objective, setObjective] = useState(bet?.objective ?? OBJECTIVE_LABELS[1]);
+  const [objNum, setObjNum] = useState(bet?.objective_num ?? defaultNum);
+  const [objective, setObjective] = useState(bet?.objective ?? labelOf(defaultNum));
+
+  // Nums ofrecidos: catálogo activo + el num actual de la bet (aunque esté inactivo o borrado).
+  const objNums = activeObjectives.map((o) => o.num);
+  if (bet && !objNums.includes(bet.objective_num)) objNums.push(bet.objective_num);
   const [teamRaw, setTeamRaw] = useState(bet?.team.join(", ") ?? "");
   const [status, setStatus] = useState<BetStatus>(bet?.status ?? "Not started");
   const [weekStart, setWeekStart] = useState(bet?.week_start ?? 1);
@@ -1378,7 +1385,7 @@ function BetFormModal({
       {
         name: name.trim(),
         objective_num: objNum,
-        objective: objective.trim() || OBJECTIVE_LABELS[objNum] || "",
+        objective: objective.trim() || labelOf(objNum),
         team: parseTeam(teamRaw),
         status,
         week_start: weekStart,
@@ -1417,12 +1424,12 @@ function BetFormModal({
               onChange={(e) => {
                 const n = Number(e.target.value);
                 setObjNum(n);
-                setObjective(OBJECTIVE_LABELS[n] ?? "");
+                setObjective(labelOf(n));
               }}
             >
-              {OBJECTIVE_NUMS.map((n) => (
+              {objNums.map((n) => (
                 <option key={n} value={n}>
-                  {objShort(n)}
+                  {shortOf(n)}
                 </option>
               ))}
             </Select>

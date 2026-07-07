@@ -4,7 +4,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { BetStatus } from "@/lib/types";
-import { objColor, objShort, statusToken } from "@/lib/cycle-utils";
+import { statusToken } from "@/lib/cycle-utils";
+import { useObjectives } from "@/lib/objectives-context";
 
 export const labelStyle: React.CSSProperties = {
   fontSize: 9.5,
@@ -71,7 +72,8 @@ export const TeamStack = ({ team }: { team: string[] }) => (
 );
 
 export const ObjChip = ({ num }: { num: number }) => {
-  const c = objColor(num);
+  const { colorOf, shortOf } = useObjectives();
+  const c = colorOf(num);
   return (
     <span
       style={{
@@ -86,7 +88,7 @@ export const ObjChip = ({ num }: { num: number }) => {
       }}
     >
       <span style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
-      {objShort(num)}
+      {shortOf(num)}
     </span>
   );
 };
@@ -231,8 +233,17 @@ export function Field({
   children: React.ReactNode;
   flex?: number;
 }) {
+  // flex 0 = "ancho del contenido": con `0` a secas el wrapper colapsa a 0px
+  // y el input de ancho fijo se desborda encima del campo vecino.
   return (
-    <label style={{ display: "flex", flexDirection: "column", flex, minWidth: 0 }}>
+    <label
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        flex: flex === 0 ? "0 0 auto" : flex,
+        minWidth: 0,
+      }}
+    >
       <span style={labelStyle}>{label}</span>
       {children}
     </label>

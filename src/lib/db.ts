@@ -8,7 +8,39 @@ import type {
   CycleRow,
   DiscoveryObjectiveRow,
   DiscoveryTaskRow,
+  ObjectiveRow,
 } from "./types";
+
+// ── Objectives (catálogo global) ───────────────────────────
+
+export async function fetchObjectives(): Promise<ObjectiveRow[]> {
+  const { data, error } = await getSupabase()
+    .from("objectives")
+    .select("*")
+    .order("num", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as ObjectiveRow[];
+}
+
+export async function insertObjective(
+  row: Omit<ObjectiveRow, "id" | "created_at" | "updated_at">
+): Promise<{ data: ObjectiveRow | null; error: string | null }> {
+  const { data, error } = await getSupabase().from("objectives").insert(row).select().single();
+  return { data: (data as ObjectiveRow) ?? null, error: error?.message ?? null };
+}
+
+export async function updateObjective(
+  id: string,
+  patch: Partial<ObjectiveRow>
+): Promise<string | null> {
+  const { error } = await getSupabase().from("objectives").update(patch).eq("id", id);
+  return error?.message ?? null;
+}
+
+export async function deleteObjective(id: string): Promise<string | null> {
+  const { error } = await getSupabase().from("objectives").delete().eq("id", id);
+  return error?.message ?? null;
+}
 
 export interface CycleData {
   cycle: CycleRow | null;
@@ -81,21 +113,58 @@ export interface DiscoveryData {
 
 export async function fetchDiscovery(cycleId: string): Promise<DiscoveryData> {
   const sb = getSupabase();
-  const objectives = await sb
-    .from("discovery_objectives")
-    .select("*")
-    .eq("cycle_id", cycleId)
-    .order("position", { ascending: true });
+  const [objectives, tasks] = await Promise.all([
+    sb
+      .from("discovery_objectives")
+      .select("*")
+      .eq("cycle_id", cycleId)
+      .order("position", { ascending: true }),
+    sb
+      .from("discovery_tasks")
+      .select("*")
+      .eq("cycle_id", cycleId)
+      .order("position", { ascending: true }),
+  ]);
   if (objectives.error) throw new Error(objectives.error.message);
-  const objs = (objectives.data ?? []) as DiscoveryObjectiveRow[];
-  if (objs.length === 0) return { objectives: [], tasks: [] };
-  const tasks = await sb
-    .from("discovery_tasks")
-    .select("*")
-    .in("objective_id", objs.map((o) => o.id))
-    .order("position", { ascending: true });
   if (tasks.error) throw new Error(tasks.error.message);
-  return { objectives: objs, tasks: (tasks.data ?? []) as DiscoveryTaskRow[] };
+  return {
+    objectives: (objectives.data ?? []) as DiscoveryObjectiveRow[],
+    tasks: (tasks.data ?? []) as DiscoveryTaskRow[],
+  };
+}
+
+// Des-asigna las tasks de un objetivo (por num) en el ciclo activo.
+// Se usa al desactivar un objetivo desde Admin.
+export async function unassignObjectiveTasks(objNum: number): Promise<string | null> {
+  const sb = getSupabase();
+  const cycles = await sb.from("cycles").select("id").eq("is_active", true);
+  if (cycles.error) return cycles.error.message;
+  const cycleIds = (cycles.data ?? []).map((c) => c.id);
+  if (cycleIds.length === 0) return null;
+  const objs = await sb
+    .from("discovery_objectives")
+    .select("id")
+    .in("cycle_id", cycleIds)
+    .eq("obj_num", objNum);
+  if (objs.error) return objs.error.message;
+  const objIds = (objs.data ?? []).map((o) => o.id);
+  if (objIds.length === 0) return null;
+  const { error } = await sb
+    .from("discovery_tasks")
+    .update({ objective_id: null })
+    .in("objective_id", objIds);
+  return error?.message ?? null;
+}
+
+export async function insertDiscoveryObjective(
+  row: Omit<DiscoveryObjectiveRow, "id">
+): Promise<{ data: DiscoveryObjectiveRow | null; error: string | null }> {
+  const { data, error } = await getSupabase()
+    .from("discovery_objectives")
+    .insert(row)
+    .select()
+    .single();
+  return { data: (data as DiscoveryObjectiveRow) ?? null, error: error?.message ?? null };
 }
 
 export async function updateDiscoveryObjective(
