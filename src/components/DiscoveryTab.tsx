@@ -218,8 +218,10 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
     <>
       {error && <ErrorBanner message={`Error: ${error}`} />}
       <DiscoverySummary tasks={tasks} />
+      {/* Cards solo para objetivos estratégicos; los especiales (num >= 90,
+          Arquitectura / Asks) siguen disponibles en el dropdown del form. */}
       <ObjectivesOverview
-        objectives={visibleObjectives}
+        objectives={visibleObjectives.filter((o) => o.obj_num < 90)}
         tasks={tasks}
         onPatch={patchObjective}
         onPatchCatalog={patchCatalogObjective}
