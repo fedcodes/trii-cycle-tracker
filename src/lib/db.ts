@@ -1,7 +1,7 @@
 // Thin typed data-access layer over Supabase.
 // All mutations return the error message (or null) so callers can surface it.
 
-import { getSupabase } from "./supabase";
+import { getSupabase, type BacklogIdeaRow } from "./supabase";
 import type {
   BetRow,
   BetUpdateRow,
@@ -192,5 +192,24 @@ export async function updateDiscoveryTask(
 
 export async function deleteDiscoveryTask(id: string): Promise<string | null> {
   const { error } = await getSupabase().from("discovery_tasks").delete().eq("id", id);
+  return error?.message ?? null;
+}
+
+// ── Backlog (tabla backlog_ideas — fuente de ideas para Discovery) ──
+
+export async function fetchBacklogIdeas(): Promise<BacklogIdeaRow[]> {
+  const { data, error } = await getSupabase()
+    .from("backlog_ideas")
+    .select("*")
+    .order("position", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as BacklogIdeaRow[];
+}
+
+export async function updateBacklogIdea(
+  id: string,
+  patch: Partial<BacklogIdeaRow>
+): Promise<string | null> {
+  const { error } = await getSupabase().from("backlog_ideas").update(patch).eq("id", id);
   return error?.message ?? null;
 }

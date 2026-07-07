@@ -57,7 +57,7 @@ export default function Home() {
       {active === "Discovery" && cycle && <DiscoveryTab cycle={cycle} />}
       {active === "Releases" && <ReleasesTab />}
       {active === "Cooldown" && <CooldownTab />}
-      {active === "Backlog" && <BacklogTab />}
+      {active === "Backlog" && <BacklogTab cycle={cycle} />}
       {active === "Admin" && <AdminTab />}
     </Shell>
     </ObjectivesProvider>

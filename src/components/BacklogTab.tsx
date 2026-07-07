@@ -23,6 +23,8 @@ import {
   type BacklogSize,
   type BacklogStatus,
 } from "@/lib/supabase";
+import { importBacklogIdeaToDiscovery } from "@/lib/backlog-discovery";
+import type { CycleRow } from "@/lib/types";
 
 const COUNTRIES = ["CO", "CL", "PE", "Backend", "CX"] as const;
 const SIZES: BacklogSize[] = ["S", "M", "L", "XL"];
@@ -84,7 +86,7 @@ function calcPrio(impact: BacklogSize, effort: BacklogSize): PrioCode | null {
   return row[col];
 }
 
-export default function BacklogTab() {
+export default function BacklogTab({ cycle }: { cycle: CycleRow | null }) {
   const [items, setItems] = useState<BacklogIdeaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +96,43 @@ export default function BacklogTab() {
   const [countryFilter, setCountryFilter] = useState<"All" | (typeof COUNTRIES)[number]>("All");
   const [hideDone, setHideDone] = useState(true);
   const [newRowIds, setNewRowIds] = useState<Set<string>>(new Set());
+  // Ideas ya linkeadas al tablero de discovery del ciclo activo.
+  const [discoveryIds, setDiscoveryIds] = useState<Set<string>>(new Set());
+  const [movingId, setMovingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!cycle) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await getSupabase()
+        .from("discovery_tasks")
+        .select("backlog_id")
+        .eq("cycle_id", cycle.id)
+        .not("backlog_id", "is", null);
+      if (cancelled || error) return;
+      setDiscoveryIds(new Set((data ?? []).map((d) => d.backlog_id as string)));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [cycle]);
+
+  // Mueve una idea al tablero de discovery del ciclo activo (linkeada por backlog_id).
+  const moveToDiscovery = async (idea: BacklogIdeaRow) => {
+    if (!cycle || movingId) return;
+    setMovingId(idea.id);
+    const { task, syncedStatus, error: err } = await importBacklogIdeaToDiscovery(cycle.id, idea);
+    setMovingId(null);
+    if (err || !task) {
+      setError(err ?? "No se pudo mover la idea a discovery");
+      return;
+    }
+    setDiscoveryIds((prev) => new Set(prev).add(idea.id));
+    if (syncedStatus)
+      setItems((prev) =>
+        prev.map((x) => (x.id === idea.id ? { ...x, status: syncedStatus } : x))
+      );
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -315,6 +354,7 @@ export default function BacklogTab() {
                 <HeaderCell width={70} align="center">Effort</HeaderCell>
                 <HeaderCell width={125}>Prioritization</HeaderCell>
                 <HeaderCell width={150}>Status</HeaderCell>
+                <HeaderCell width={36} align="center">Disc.</HeaderCell>
                 <th
                   style={{
                     padding: "9px 10px",
@@ -329,7 +369,7 @@ export default function BacklogTab() {
               {loading ? (
                 <tr>
                   <td
-                    colSpan={11}
+                    colSpan={12}
                     style={{
                       padding: "40px 20px",
                       textAlign: "center",
@@ -343,7 +383,7 @@ export default function BacklogTab() {
               ) : error ? (
                 <tr>
                   <td
-                    colSpan={11}
+                    colSpan={12}
                     style={{
                       padding: "40px 20px",
                       textAlign: "center",
@@ -357,7 +397,7 @@ export default function BacklogTab() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={11}
+                    colSpan={12}
                     style={{
                       padding: "40px 20px",
                       textAlign: "center",
@@ -388,6 +428,10 @@ export default function BacklogTab() {
                           onUpdate={update}
                           onDelete={del}
                           isNew={newRowIds.has(it.id)}
+                          inDiscovery={discoveryIds.has(it.id)}
+                          canMove={!!cycle}
+                          moving={movingId === it.id}
+                          onMoveToDiscovery={moveToDiscovery}
                         />
                       );
                     })}
@@ -728,18 +772,30 @@ function BacklogRow({
   onUpdate,
   onDelete,
   isNew,
+  inDiscovery,
+  canMove,
+  moving,
+  onMoveToDiscovery,
 }: {
   item: BacklogIdeaRow;
   idx: number;
   onUpdate: (id: string, patch: Partial<BacklogIdeaRow>) => void;
   onDelete: (id: string) => void;
   isNew: boolean;
+  inDiscovery: boolean;
+  canMove: boolean;
+  moving: boolean;
+  onMoveToDiscovery: (idea: BacklogIdeaRow) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
   });
   const prio = calcPrio(item.impact, item.effort);
   const dimmed = item.status === "Not Doing" || item.status === "Completed";
+  // Solo ideas que aún no pasaron a build pueden moverse a discovery.
+  const movable = ["Pending", "In Discovery", "In Design", "Completed Design"].includes(
+    item.status
+  );
   const cellStyle: React.CSSProperties = {
     padding: "6px 10px",
     borderRight: "1px solid rgb(var(--surface-2))",
@@ -875,11 +931,98 @@ function BacklogRow({
         <PrioBadge prio={prio} />
       </td>
 
-      <td style={{ ...cellStyle, width: 150, borderRight: "none" }}>
+      <td style={{ ...cellStyle, width: 150 }}>
         <StatusCell
           value={item.status}
           onChange={(v) => onUpdate(item.id, { status: v })}
         />
+      </td>
+
+      <td
+        style={{
+          ...cellStyle,
+          width: 36,
+          borderRight: "none",
+          opacity: 1,
+          textAlign: "center",
+        }}
+      >
+        {inDiscovery ? (
+          <span
+            title="Ya está en el tablero de discovery del ciclo activo"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 22,
+              height: 22,
+              borderRadius: 4,
+              color: "rgb(var(--obj-2))",
+              background: "rgb(var(--obj-2-dim))",
+            }}
+          >
+            <svg width="11" height="11" viewBox="0 0 10 10" fill="none">
+              <path
+                d="M1.5 5.5 L4 8 L8.5 2.5"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        ) : movable ? (
+          <button
+            onClick={() => onMoveToDiscovery(item)}
+            disabled={!canMove || moving}
+            title={
+              canMove
+                ? "Mover al tablero de discovery del ciclo activo"
+                : "No hay un ciclo activo"
+            }
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 4,
+              border: "none",
+              background: "transparent",
+              color: "rgb(var(--fg-4))",
+              cursor: canMove && !moving ? "pointer" : "default",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: moving ? 0.5 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!canMove || moving) return;
+              e.currentTarget.style.color = "rgb(var(--primary))";
+              e.currentTarget.style.background = "rgb(var(--primary-dim))";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "rgb(var(--fg-4))";
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+              <rect
+                x="1.5"
+                y="2"
+                width="4"
+                height="10"
+                rx="1"
+                stroke="currentColor"
+                strokeWidth="1.2"
+              />
+              <path
+                d="M7.5 7 H12.5 M10.3 4.8 L12.5 7 L10.3 9.2"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        ) : null}
       </td>
 
       <td style={{ padding: "6px 8px 6px 4px", verticalAlign: "middle", width: 28 }}>

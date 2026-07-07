@@ -100,6 +100,7 @@ export interface DiscoveryTaskRow {
   id: string;
   cycle_id: string;
   objective_id: string | null; // null = sin objetivo (p. ej. objetivo desactivado)
+  backlog_id: string | null; // idea del backlog de la que nació esta task
   name: string;
   stage: DiscoveryStageId;
   owner: string | null;

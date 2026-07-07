@@ -204,6 +204,11 @@ drop trigger if exists backlog_ideas_updated_at on backlog_ideas;
 create trigger backlog_ideas_updated_at before update on backlog_ideas
   for each row execute function set_updated_at();
 
+-- ── link: discovery task ← idea del backlog ────────────────
+-- Una task de discovery puede nacer de una idea del backlog; al mover la task
+-- de etapa se sincroniza el status de la idea. Idempotente.
+alter table discovery_tasks add column if not exists backlog_id uuid references backlog_ideas(id) on delete set null;
+
 -- ── RLS: internal tool, anon key has full access (same model as before).
 -- Tighten with Supabase Auth if the URL ever becomes public.
 do $$
