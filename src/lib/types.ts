@@ -52,6 +52,7 @@ export interface CycleRow {
 export interface BetRow {
   id: string;
   cycle_id: string;
+  carried_from_cycle_id: string | null; // ciclo del que vino al hacer la transición
   name: string;
   objective_num: number;
   objective: string;

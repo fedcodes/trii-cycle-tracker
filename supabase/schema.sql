@@ -114,6 +114,53 @@ drop trigger if exists bets_updated_at on bets;
 create trigger bets_updated_at before update on bets
   for each row execute function set_updated_at();
 
+-- Bet movida desde el ciclo anterior al crear el siguiente (null = nació en este ciclo).
+alter table bets add column if not exists carried_from_cycle_id uuid references cycles(id) on delete set null;
+
+-- ── Transición de ciclo ────────────────────────────────────
+-- Crea el siguiente ciclo en una sola transacción: desactiva el ciclo activo,
+-- inserta el nuevo como activo y mueve las bets indicadas. Las bets que no se
+-- mueven (Listo, descartadas) quedan archivadas en el ciclo anterior junto con
+-- su historial de updates. Se invoca desde la app vía supabase.rpc().
+create or replace function create_next_cycle(
+  p_name text,
+  p_start_date date,
+  p_end_date date,
+  p_cooldown_start date,
+  p_cooldown_end date,
+  p_total_weeks int,
+  p_previous_cycle_id uuid,
+  p_move_bet_ids uuid[]
+) returns uuid
+language plpgsql
+as $$
+declare
+  v_id uuid;
+  v_weeks int := coalesce(p_total_weeks, 6);
+begin
+  update cycles set is_active = false where is_active;
+
+  insert into cycles (name, start_date, end_date, cooldown_start, cooldown_end, total_weeks, is_active)
+  values (p_name, p_start_date, p_end_date, p_cooldown_start, p_cooldown_end, v_weeks, true)
+  returning id into v_id;
+
+  if p_previous_cycle_id is not null and coalesce(array_length(p_move_bet_ids, 1), 0) > 0 then
+    update bets set
+      cycle_id = v_id,
+      carried_from_cycle_id = p_previous_cycle_id,
+      -- arranca en S1 conservando la duración original (acotada al nuevo ciclo)
+      week_start = 1,
+      week_end = greatest(1, least(v_weeks, week_end - week_start + 1)),
+      -- "Pushed" describía el empuje al siguiente ciclo; ya llegó.
+      status = case when status = 'Pushed' then 'Not started' else status end
+    where id = any(p_move_bet_ids)
+      and cycle_id = p_previous_cycle_id;
+  end if;
+
+  return v_id;
+end;
+$$;
+
 -- ── bet_updates (project update history + weekly log) ──────
 -- bet_id null = general cycle note (shows only in the weekly log)
 create table if not exists bet_updates (
