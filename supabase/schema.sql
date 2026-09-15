@@ -232,8 +232,8 @@ where d.obj_num = o.num and o.po = '' and o.designer = '';
 
 -- ── Discovery es independiente del ciclo ───────────────────
 -- El tablero de Discovery (cards de objetivos + tasks) es uno solo y persiste
--- entre ciclos; cycle_id queda como columna legacy nullable y borrar un ciclo
--- ya no arrastra nada de Discovery. Idempotente.
+-- entre ciclos; cycle_id queda como columna legacy nullable (el código nuevo no
+-- filtra por ella) y borrar un ciclo ya no arrastra nada de Discovery. Idempotente.
 alter table discovery_objectives alter column cycle_id drop not null;
 alter table discovery_objectives drop constraint if exists discovery_objectives_cycle_id_fkey;
 alter table discovery_objectives add constraint discovery_objectives_cycle_id_fkey
@@ -272,8 +272,17 @@ where id in (
   ) r where r.rn > 1
 );
 
-update discovery_objectives set cycle_id = null where cycle_id is not null;
-update discovery_tasks set cycle_id = null where cycle_id is not null;
+-- Una sola card por objetivo: evita que un deploy viejo (que filtraba por
+-- ciclo) vuelva a crear duplicados.
+create unique index if not exists discovery_objectives_obj_num_key on discovery_objectives (obj_num);
+
+-- Compatibilidad: la columna legacy apunta al ciclo activo para que el deploy
+-- anterior (filtrado por ciclo) siga mostrando el tablero hasta que salga este
+-- cambio. El código nuevo la ignora.
+update discovery_objectives o set cycle_id = c.id from cycles c
+  where c.is_active and o.cycle_id is distinct from c.id;
+update discovery_tasks t set cycle_id = c.id from cycles c
+  where c.is_active and t.cycle_id is distinct from c.id;
 
 -- ── backlog_ideas (Backlog tab — schema matches existing UI) ──
 create table if not exists backlog_ideas (
