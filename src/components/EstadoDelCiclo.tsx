@@ -5,6 +5,7 @@ import type { BetRow, BetStatus, BetUpdateRow, CycleRow } from "@/lib/types";
 import { BET_STATUSES } from "@/lib/types";
 import {
   currentWeekOf,
+  cycleDatesLabel,
   daysElapsedOf,
   statusToken,
   totalDays,
@@ -15,10 +16,13 @@ import { useObjectives } from "@/lib/objectives-context";
 import {
   deleteBet,
   deleteBetUpdate,
+  fetchArchive,
   fetchCycleData,
+  fetchCycles,
   insertBet,
   insertBetUpdate,
   updateBet,
+  type ArchiveData,
 } from "@/lib/db";
 import {
   DangerConfirmButton,
@@ -38,6 +42,9 @@ import {
   labelStyle,
 } from "./ui";
 
+// "Ciclo 5 — 2026" → "Ciclo 5"
+const shortCycleName = (name: string) => name.split(" — ")[0];
+
 const parseTeam = (raw: string): string[] =>
   raw
     .split(/[,·\s]+/)
@@ -47,6 +54,7 @@ const parseTeam = (raw: string): string[] =>
 export default function EstadoDelCiclo({ cycle }: { cycle: CycleRow }) {
   const [bets, setBets] = useState<BetRow[]>([]);
   const [updates, setUpdates] = useState<BetUpdateRow[]>([]);
+  const [cycles, setCycles] = useState<CycleRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -56,9 +64,10 @@ export default function EstadoDelCiclo({ cycle }: { cycle: CycleRow }) {
 
   const load = useCallback(async () => {
     try {
-      const data = await fetchCycleData(cycle.id);
+      const [data, all] = await Promise.all([fetchCycleData(cycle.id), fetchCycles()]);
       setBets(data.bets);
       setUpdates(data.updates);
+      setCycles(all);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -121,6 +130,7 @@ export default function EstadoDelCiclo({ cycle }: { cycle: CycleRow }) {
       const position = bets.length ? Math.max(...bets.map((b) => b.position)) + 1 : 0;
       const { data, error: err } = await insertBet({
         cycle_id: cycle.id,
+        carried_from_cycle_id: null,
         ...draft,
         last_update: draft.last_update ?? "",
         dropped: false,
@@ -137,6 +147,16 @@ export default function EstadoDelCiclo({ cycle }: { cycle: CycleRow }) {
   );
 
   const selected = selectedId ? bets.find((b) => b.id === selectedId) ?? null : null;
+  const cycleNameOf = useCallback(
+    (id: string) => {
+      const c = cycles.find((x) => x.id === id);
+      return c ? shortCycleName(c.name) : null;
+    },
+    [cycles]
+  );
+  // El weekly log muestra solo lo de este ciclo; el historial de una bet movida
+  // (en el detalle) incluye también sus updates de ciclos anteriores.
+  const cycleUpdates = useMemo(() => updates.filter((u) => u.cycle_id === cycle.id), [updates, cycle.id]);
 
   if (loading) return <LoadingState label="Cargando bets…" />;
 
@@ -156,21 +176,24 @@ export default function EstadoDelCiclo({ cycle }: { cycle: CycleRow }) {
         <Gantt
           bets={bets}
           cycle={cycle}
+          cycleNameOf={cycleNameOf}
           onSelect={(b) => setSelectedId(b.id)}
           onNew={() => setFormBet("new")}
         />
         <WeeklyLog
-          updates={updates}
+          updates={cycleUpdates}
           bets={bets}
           cycle={cycle}
           currentWeek={currentWeek}
           onAdd={(note, week) => addUpdate(null, note, week)}
           onDelete={removeUpdate}
         />
+        <ArchivePanel key={cycle.id} />
         {selected && (
           <ProjectDetail
             bet={selected}
             cycle={cycle}
+            cycleNameOf={cycleNameOf}
             updates={updates.filter((u) => u.bet_id === selected.id)}
             currentWeek={currentWeek}
             onClose={() => setSelectedId(null)}
@@ -273,11 +296,13 @@ function KPIStrip({
 function Gantt({
   bets,
   cycle,
+  cycleNameOf,
   onSelect,
   onNew,
 }: {
   bets: BetRow[];
   cycle: CycleRow;
+  cycleNameOf: (id: string) => string | null;
   onSelect: (b: BetRow) => void;
   onNew: () => void;
 }) {
@@ -420,6 +445,7 @@ function Gantt({
             cycle={cycle}
             leftW={leftW}
             isLast={i === bets.length - 1}
+            carriedFrom={bet.carried_from_cycle_id ? cycleNameOf(bet.carried_from_cycle_id) ?? "ciclo anterior" : null}
             onSelect={onSelect}
           />
         ))}
@@ -448,12 +474,14 @@ function GanttRow({
   cycle,
   leftW,
   isLast,
+  carriedFrom,
   onSelect,
 }: {
   bet: BetRow;
   cycle: CycleRow;
   leftW: number;
   isLast: boolean;
+  carriedFrom: string | null; // nombre corto del ciclo del que vino, si fue movida
   onSelect: (b: BetRow) => void;
 }) {
   const { colorOf } = useObjectives();
@@ -522,10 +550,12 @@ function GanttRow({
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
+              minWidth: 0,
             }}
           >
             {bet.name}
           </span>
+          {carriedFrom && <CarriedChip from={carriedFrom} />}
         </div>
         <div
           style={{
@@ -899,6 +929,7 @@ function WeeklyLog({
 function ProjectDetail({
   bet,
   cycle,
+  cycleNameOf,
   updates,
   currentWeek,
   onClose,
@@ -910,6 +941,7 @@ function ProjectDetail({
 }: {
   bet: BetRow;
   cycle: CycleRow;
+  cycleNameOf: (id: string) => string | null;
   updates: BetUpdateRow[];
   currentWeek: number;
   onClose: () => void;
@@ -1048,6 +1080,11 @@ function ProjectDetail({
           <div style={{ fontSize: 11.5, color: "rgb(var(--fg-3))", marginTop: 4 }}>
             {bet.objective}
           </div>
+          {bet.carried_from_cycle_id && (
+            <div style={{ marginTop: 8 }}>
+              <CarriedChip from={cycleNameOf(bet.carried_from_cycle_id) ?? "ciclo anterior"} />
+            </div>
+          )}
         </div>
 
         <div style={{ padding: "16px 22px", borderBottom: "1px solid rgb(var(--surface-2))" }}>
@@ -1256,7 +1293,9 @@ function ProjectDetail({
                   />
                   <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 3 }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: "rgb(var(--fg))" }}>
-                      Semana {u.week}
+                      {u.cycle_id === cycle.id
+                        ? `Semana ${u.week}`
+                        : `${cycleNameOf(u.cycle_id) ?? "Ciclo anterior"} · S${u.week}`}
                     </div>
                     <div
                       style={{
@@ -1265,7 +1304,7 @@ function ProjectDetail({
                         fontVariantNumeric: "tabular-nums",
                       }}
                     >
-                      {weekLabel(cycle, u.week)}
+                      {u.cycle_id === cycle.id ? weekLabel(cycle, u.week) : "ciclo anterior"}
                       {u.progress !== null && ` · ${Math.round(u.progress * 100)}%`}
                     </div>
                     <div style={{ flex: 1 }} />
@@ -1338,6 +1377,237 @@ function ProjectDetail({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Bet movida de un ciclo anterior ────────────────────────
+
+function CarriedChip({ from }: { from: string }) {
+  return (
+    <span
+      title={`Movida desde ${from} al crear este ciclo`}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 4,
+        fontSize: 9.5,
+        fontWeight: 600,
+        letterSpacing: "0.03em",
+        color: "rgb(var(--blue))",
+        background: "rgb(var(--blue) / 0.12)",
+        borderRadius: 3,
+        padding: "1px 6px",
+        whiteSpace: "nowrap",
+        flexShrink: 0,
+      }}
+    >
+      ↩ {from}
+    </span>
+  );
+}
+
+// ── Archivo: bets que quedaron en ciclos cerrados ──────────
+
+function ArchivePanel() {
+  const [data, setData] = useState<ArchiveData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [openCycle, setOpenCycle] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchArchive()
+      .then((d) => {
+        if (cancelled) return;
+        setData(d);
+        setOpenCycle(d.cycles[0]?.id ?? null);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : String(e));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (error) return <ErrorBanner message={`No se pudo cargar el archivo: ${error}`} />;
+  if (!data || data.cycles.length === 0) return null;
+
+  const listoTotal = data.bets.filter((b) => b.status === "Listo" && !b.dropped).length;
+
+  return (
+    <div
+      style={{
+        background: "rgb(var(--surface-1))",
+        borderRadius: 10,
+        border: "1px solid rgb(var(--surface-2))",
+        overflow: "hidden",
+      }}
+    >
+      <button
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          width: "100%",
+          background: "transparent",
+          border: "none",
+          padding: "12px 18px",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          cursor: "pointer",
+          color: "inherit",
+          fontFamily: "inherit",
+          textAlign: "left",
+        }}
+      >
+        <div style={{ fontSize: 13, fontWeight: 700 }}>Archivo</div>
+        <div style={{ fontSize: 11, color: "rgb(var(--fg-3))" }}>
+          {data.cycles.length} ciclo{data.cycles.length === 1 ? "" : "s"} cerrado
+          {data.cycles.length === 1 ? "" : "s"} · {listoTotal} bet{listoTotal === 1 ? "" : "s"} completada
+          {listoTotal === 1 ? "" : "s"}
+        </div>
+        <div style={{ flex: 1 }} />
+        <span
+          style={{
+            fontSize: 14,
+            color: "rgb(var(--fg-3))",
+            transform: open ? "rotate(90deg)" : "rotate(0)",
+            transition: "transform 0.15s",
+            width: 14,
+            textAlign: "center",
+          }}
+        >
+          ›
+        </span>
+      </button>
+
+      {open &&
+        data.cycles.map((c) => {
+          const bets = data.bets.filter((b) => b.cycle_id === c.id);
+          const listo = bets.filter((b) => b.status === "Listo" && !b.dropped).length;
+          const dropped = bets.filter((b) => b.dropped).length;
+          const other = bets.length - listo - dropped;
+          const isOpen = openCycle === c.id;
+          return (
+            <div key={c.id} style={{ borderTop: "1px solid rgb(var(--surface-2))" }}>
+              <button
+                onClick={() => setOpenCycle(isOpen ? null : c.id)}
+                style={{
+                  width: "100%",
+                  background: "rgb(var(--surface-0))",
+                  border: "none",
+                  padding: "10px 18px",
+                  display: "grid",
+                  gridTemplateColumns: "auto 1fr auto",
+                  gap: 14,
+                  alignItems: "center",
+                  cursor: "pointer",
+                  color: "inherit",
+                  fontFamily: "inherit",
+                  textAlign: "left",
+                }}
+              >
+                <span style={{ fontSize: 12, fontWeight: 700 }}>{c.name}</span>
+                <span style={{ fontSize: 11, color: "rgb(var(--fg-3))", fontVariantNumeric: "tabular-nums" }}>
+                  {cycleDatesLabel(c)} ·{" "}
+                  <span style={{ color: "rgb(var(--primary))" }}>{listo} Listo</span>
+                  {dropped > 0 && <span style={{ color: "rgb(var(--fg-4))" }}> · {dropped} descartada{dropped === 1 ? "" : "s"}</span>}
+                  {other > 0 && <span style={{ color: "rgb(var(--fg-4))" }}> · {other} sin cerrar</span>}
+                </span>
+                <span
+                  style={{
+                    fontSize: 14,
+                    color: "rgb(var(--fg-3))",
+                    transform: isOpen ? "rotate(90deg)" : "rotate(0)",
+                    transition: "transform 0.15s",
+                    width: 14,
+                    textAlign: "center",
+                  }}
+                >
+                  ›
+                </span>
+              </button>
+              {isOpen &&
+                (bets.length === 0 ? (
+                  <div style={{ padding: "14px 18px", fontSize: 11.5, color: "rgb(var(--fg-4))" }}>
+                    Sin bets archivadas en este ciclo.
+                  </div>
+                ) : (
+                  bets.map((b) => <ArchivedBetRow key={b.id} bet={b} cycle={c} />)
+                ))}
+            </div>
+          );
+        })}
+    </div>
+  );
+}
+
+function ArchivedBetRow({ bet, cycle }: { bet: BetRow; cycle: CycleRow }) {
+  const { colorOf } = useObjectives();
+  const t = statusToken(bet.status, bet.dropped);
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "minmax(220px, 1fr) auto auto 2fr",
+        gap: 16,
+        alignItems: "center",
+        padding: "8px 18px 8px 14px",
+        borderTop: "1px solid rgb(var(--surface-2) / 0.6)",
+        borderLeft: `3px solid ${colorOf(bet.objective_num)}`,
+      }}
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: bet.dropped ? "rgb(var(--fg-4))" : "rgb(var(--fg))",
+            textDecoration: bet.dropped ? "line-through" : "none",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {bet.name}
+        </span>
+        <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 10.5 }}>
+          <ObjChip num={bet.objective_num} />
+          <span style={{ color: "rgb(var(--fg-4))" }}>·</span>
+          <TeamStack team={bet.team} />
+        </span>
+      </div>
+      <span
+        style={{
+          fontSize: 10.5,
+          fontWeight: 700,
+          color: t.fg,
+          background: t.bg,
+          borderRadius: 4,
+          padding: "3px 8px",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {bet.dropped ? "Descartada" : bet.status}
+      </span>
+      <span style={{ fontSize: 10.5, color: "rgb(var(--fg-4))", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+        S{bet.week_start}
+        {bet.week_end !== bet.week_start ? `→S${bet.week_end}` : ""} de {cycle.total_weeks}
+      </span>
+      <span
+        style={{
+          fontSize: 11,
+          color: "rgb(var(--fg-3))",
+          lineHeight: 1.4,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+        title={bet.last_update}
+      >
+        {bet.last_update || "—"}
+      </span>
     </div>
   );
 }

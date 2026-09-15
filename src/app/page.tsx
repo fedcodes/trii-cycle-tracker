@@ -34,7 +34,8 @@ export default function Home() {
     loadCycle();
   }, [loadCycle]);
 
-  const needsCycle = active === "Estado del ciclo" || active === "Discovery";
+  // Solo Estado del ciclo depende del ciclo activo; Discovery y Backlog son globales.
+  const needsCycle = active === "Estado del ciclo";
 
   return (
     <ObjectivesProvider>
@@ -54,10 +55,10 @@ export default function Home() {
         </div>
       )}
       {active === "Estado del ciclo" && cycle && <EstadoDelCiclo cycle={cycle} />}
-      {active === "Discovery" && cycle && <DiscoveryTab cycle={cycle} />}
+      {active === "Discovery" && <DiscoveryTab />}
       {active === "Releases" && <ReleasesTab />}
       {active === "Cooldown" && <CooldownTab />}
-      {active === "Backlog" && <BacklogTab cycle={cycle} />}
+      {active === "Backlog" && <BacklogTab />}
       {active === "Admin" && <AdminTab />}
     </Shell>
     </ObjectivesProvider>

@@ -59,15 +59,84 @@ export async function fetchActiveCycle(): Promise<CycleRow | null> {
   return (data?.[0] as CycleRow) ?? null;
 }
 
+export async function fetchCycles(): Promise<CycleRow[]> {
+  const { data, error } = await getSupabase()
+    .from("cycles")
+    .select("*")
+    .order("start_date", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as CycleRow[];
+}
+
 export async function fetchCycleData(cycleId: string): Promise<Omit<CycleData, "cycle">> {
   const sb = getSupabase();
-  const [bets, updates] = await Promise.all([
-    sb.from("bets").select("*").eq("cycle_id", cycleId).order("position", { ascending: true }),
-    sb.from("bet_updates").select("*").eq("cycle_id", cycleId).order("created_at", { ascending: false }),
-  ]);
+  const bets = await sb
+    .from("bets")
+    .select("*")
+    .eq("cycle_id", cycleId)
+    .order("position", { ascending: true });
   if (bets.error) throw new Error(bets.error.message);
+  const rows = (bets.data ?? []) as BetRow[];
+
+  // Updates del ciclo + historial completo de las bets que vinieron de ciclos
+  // anteriores (sus updates viejos conservan el cycle_id original).
+  const carried = rows.filter((b) => b.carried_from_cycle_id).map((b) => b.id);
+  const base = sb.from("bet_updates").select("*").order("created_at", { ascending: false });
+  const updates = await (carried.length
+    ? base.or(`cycle_id.eq.${cycleId},bet_id.in.(${carried.join(",")})`)
+    : base.eq("cycle_id", cycleId));
   if (updates.error) throw new Error(updates.error.message);
-  return { bets: (bets.data ?? []) as BetRow[], updates: (updates.data ?? []) as BetUpdateRow[] };
+  return { bets: rows, updates: (updates.data ?? []) as BetUpdateRow[] };
+}
+
+// Ciclos cerrados con las bets que quedaron en ellos (Listo, descartadas o no movidas).
+export interface ArchiveData {
+  cycles: CycleRow[];
+  bets: BetRow[];
+}
+
+export async function fetchArchive(): Promise<ArchiveData> {
+  const sb = getSupabase();
+  const cycles = await sb
+    .from("cycles")
+    .select("*")
+    .eq("is_active", false)
+    .order("start_date", { ascending: false });
+  if (cycles.error) throw new Error(cycles.error.message);
+  const rows = (cycles.data ?? []) as CycleRow[];
+  if (rows.length === 0) return { cycles: [], bets: [] };
+  const bets = await sb
+    .from("bets")
+    .select("*")
+    .in("cycle_id", rows.map((c) => c.id))
+    .order("position", { ascending: true });
+  if (bets.error) throw new Error(bets.error.message);
+  return { cycles: rows, bets: (bets.data ?? []) as BetRow[] };
+}
+
+export type NewCycleInput = Pick<
+  CycleRow,
+  "name" | "start_date" | "end_date" | "cooldown_start" | "cooldown_end" | "total_weeks"
+>;
+
+// Transición de ciclo en una sola transacción (función create_next_cycle en schema.sql):
+// desactiva el ciclo activo, crea el nuevo y mueve las bets indicadas.
+export async function createNextCycle(
+  input: NewCycleInput,
+  previousCycleId: string | null,
+  moveBetIds: string[]
+): Promise<{ id: string | null; error: string | null }> {
+  const { data, error } = await getSupabase().rpc("create_next_cycle", {
+    p_name: input.name,
+    p_start_date: input.start_date,
+    p_end_date: input.end_date,
+    p_cooldown_start: input.cooldown_start,
+    p_cooldown_end: input.cooldown_end,
+    p_total_weeks: input.total_weeks,
+    p_previous_cycle_id: previousCycleId,
+    p_move_bet_ids: moveBetIds,
+  });
+  return { id: (data as string | null) ?? null, error: error?.message ?? null };
 }
 
 export async function updateCycle(id: string, patch: Partial<CycleRow>): Promise<string | null> {
@@ -111,19 +180,12 @@ export interface DiscoveryData {
   tasks: DiscoveryTaskRow[];
 }
 
-export async function fetchDiscovery(cycleId: string): Promise<DiscoveryData> {
+// Tablero único, independiente del ciclo.
+export async function fetchDiscovery(): Promise<DiscoveryData> {
   const sb = getSupabase();
   const [objectives, tasks] = await Promise.all([
-    sb
-      .from("discovery_objectives")
-      .select("*")
-      .eq("cycle_id", cycleId)
-      .order("position", { ascending: true }),
-    sb
-      .from("discovery_tasks")
-      .select("*")
-      .eq("cycle_id", cycleId)
-      .order("position", { ascending: true }),
+    sb.from("discovery_objectives").select("*").order("position", { ascending: true }),
+    sb.from("discovery_tasks").select("*").order("position", { ascending: true }),
   ]);
   if (objectives.error) throw new Error(objectives.error.message);
   if (tasks.error) throw new Error(tasks.error.message);
@@ -133,19 +195,11 @@ export async function fetchDiscovery(cycleId: string): Promise<DiscoveryData> {
   };
 }
 
-// Des-asigna las tasks de un objetivo (por num) en el ciclo activo.
+// Des-asigna las tasks de un objetivo (por num).
 // Se usa al desactivar un objetivo desde Admin.
 export async function unassignObjectiveTasks(objNum: number): Promise<string | null> {
   const sb = getSupabase();
-  const cycles = await sb.from("cycles").select("id").eq("is_active", true);
-  if (cycles.error) return cycles.error.message;
-  const cycleIds = (cycles.data ?? []).map((c) => c.id);
-  if (cycleIds.length === 0) return null;
-  const objs = await sb
-    .from("discovery_objectives")
-    .select("id")
-    .in("cycle_id", cycleIds)
-    .eq("obj_num", objNum);
+  const objs = await sb.from("discovery_objectives").select("id").eq("obj_num", objNum);
   if (objs.error) return objs.error.message;
   const objIds = (objs.data ?? []).map((o) => o.id);
   if (objIds.length === 0) return null;

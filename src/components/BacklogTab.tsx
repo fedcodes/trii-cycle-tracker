@@ -24,7 +24,6 @@ import {
   type BacklogStatus,
 } from "@/lib/supabase";
 import { importBacklogIdeaToDiscovery } from "@/lib/backlog-discovery";
-import type { CycleRow } from "@/lib/types";
 
 const COUNTRIES = ["CO", "CL", "PE", "Backend", "CX"] as const;
 const SIZES: BacklogSize[] = ["S", "M", "L", "XL"];
@@ -86,7 +85,7 @@ function calcPrio(impact: BacklogSize, effort: BacklogSize): PrioCode | null {
   return row[col];
 }
 
-export default function BacklogTab({ cycle }: { cycle: CycleRow | null }) {
+export default function BacklogTab() {
   const [items, setItems] = useState<BacklogIdeaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,18 +95,16 @@ export default function BacklogTab({ cycle }: { cycle: CycleRow | null }) {
   const [countryFilter, setCountryFilter] = useState<"All" | (typeof COUNTRIES)[number]>("All");
   const [hideDone, setHideDone] = useState(true);
   const [newRowIds, setNewRowIds] = useState<Set<string>>(new Set());
-  // Ideas ya linkeadas al tablero de discovery del ciclo activo.
+  // Ideas ya linkeadas al tablero de discovery (único, independiente del ciclo).
   const [discoveryIds, setDiscoveryIds] = useState<Set<string>>(new Set());
   const [movingId, setMovingId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!cycle) return;
     let cancelled = false;
     (async () => {
       const { data, error } = await getSupabase()
         .from("discovery_tasks")
         .select("backlog_id")
-        .eq("cycle_id", cycle.id)
         .not("backlog_id", "is", null);
       if (cancelled || error) return;
       setDiscoveryIds(new Set((data ?? []).map((d) => d.backlog_id as string)));
@@ -115,13 +112,13 @@ export default function BacklogTab({ cycle }: { cycle: CycleRow | null }) {
     return () => {
       cancelled = true;
     };
-  }, [cycle]);
+  }, []);
 
-  // Mueve una idea al tablero de discovery del ciclo activo (linkeada por backlog_id).
+  // Mueve una idea al tablero de discovery (linkeada por backlog_id).
   const moveToDiscovery = async (idea: BacklogIdeaRow) => {
-    if (!cycle || movingId) return;
+    if (movingId) return;
     setMovingId(idea.id);
-    const { task, syncedStatus, error: err } = await importBacklogIdeaToDiscovery(cycle.id, idea);
+    const { task, syncedStatus, error: err } = await importBacklogIdeaToDiscovery(idea);
     setMovingId(null);
     if (err || !task) {
       setError(err ?? "No se pudo mover la idea a discovery");
@@ -429,7 +426,7 @@ export default function BacklogTab({ cycle }: { cycle: CycleRow | null }) {
                           onDelete={del}
                           isNew={newRowIds.has(it.id)}
                           inDiscovery={discoveryIds.has(it.id)}
-                          canMove={!!cycle}
+                          canMove
                           moving={movingId === it.id}
                           onMoveToDiscovery={moveToDiscovery}
                         />
@@ -949,7 +946,7 @@ function BacklogRow({
       >
         {inDiscovery ? (
           <span
-            title="Ya está en el tablero de discovery del ciclo activo"
+            title="Ya está en el tablero de discovery"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -977,7 +974,7 @@ function BacklogRow({
             disabled={!canMove || moving}
             title={
               canMove
-                ? "Mover al tablero de discovery del ciclo activo"
+                ? "Mover al tablero de discovery"
                 : "No hay un ciclo activo"
             }
             style={{
