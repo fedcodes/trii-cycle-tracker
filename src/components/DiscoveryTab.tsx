@@ -12,7 +12,6 @@ import {
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import type {
-  CycleRow,
   DiscoveryObjectiveRow,
   DiscoveryPriority,
   DiscoveryStage,
@@ -71,7 +70,8 @@ const BACKLOG_STATUSES: BacklogStatus[] = [
 
 type TaskFormTarget = { task: DiscoveryTaskRow | null; stage: DiscoveryStageId };
 
-export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
+// Tablero único de Discovery: persiste entre ciclos (no depende del ciclo activo).
+export default function DiscoveryTab() {
   const {
     activeObjectives,
     colorOf,
@@ -106,7 +106,7 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
     syncedRef.current = false;
     (async () => {
       try {
-        const data = await fetchDiscovery(cycle.id);
+        const data = await fetchDiscovery();
         if (cancelled) return;
         setObjectives(data.objectives);
         setTasks(data.tasks);
@@ -120,10 +120,10 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
     return () => {
       cancelled = true;
     };
-  }, [cycle.id]);
+  }, []);
 
   // Los objetivos del catálogo (Admin) aparecen acá automáticamente:
-  // al cargar, se crea la card del ciclo para cada objetivo activo que falte.
+  // al cargar, se crea la card para cada objetivo activo que falte.
   useEffect(() => {
     if (loading || syncedRef.current || activeObjectives.length === 0) return;
     syncedRef.current = true;
@@ -137,7 +137,7 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
       const created: DiscoveryObjectiveRow[] = [];
       for (const cat of missing) {
         const { data, error: err } = await insertDiscoveryObjective({
-          cycle_id: cycle.id,
+          cycle_id: null,
           obj_num: cat.num,
           name: cat.label,
           short_name: cat.short_name,
@@ -157,7 +157,7 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
       }
       if (created.length) setObjectives((prev) => [...prev, ...created]);
     })();
-  }, [loading, activeObjectives, objectives, cycle.id]);
+  }, [loading, activeObjectives, objectives]);
 
   const patchTask = useCallback(
     async (id: string, patch: Partial<DiscoveryTaskRow>) => {
@@ -195,7 +195,7 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
       const position = tasks.length ? Math.max(...tasks.map((t) => t.position)) + 1 : 0;
       const { data, error: err } = await insertDiscoveryTask({
         ...draft,
-        cycle_id: cycle.id,
+        cycle_id: null,
         position,
       });
       if (err || !data) {
@@ -211,10 +211,7 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
   // Importa una idea del backlog como task del tablero (queda linkeada por backlog_id).
   const importFromBacklog = useCallback(
     async (idea: BacklogIdeaRow) => {
-      const { task, syncedStatus, error: err } = await importBacklogIdeaToDiscovery(
-        cycle.id,
-        idea
-      );
+      const { task, syncedStatus, error: err } = await importBacklogIdeaToDiscovery(idea);
       if (err || !task) {
         setError(err ?? "No se pudo importar la idea");
         return false;
@@ -226,7 +223,7 @@ export default function DiscoveryTab({ cycle }: { cycle: CycleRow }) {
         );
       return true;
     },
-    [cycle.id]
+    []
   );
 
   const patchObjective = useCallback(
@@ -755,7 +752,7 @@ function ObjectivesOverview({
   return (
     <div style={{ padding: "18px 28px 0" }}>
       <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 13, fontWeight: 700 }}>Objetivos del ciclo</div>
+        <div style={{ fontSize: 13, fontWeight: 700 }}>Objetivos estratégicos</div>
         <div style={{ fontSize: 11, color: "rgb(var(--fg-3))", marginTop: 2 }}>
           Desde el catálogo del tab Admin · click en PO / Design para reasignar
         </div>
@@ -1384,7 +1381,7 @@ function TaskFormModal({
   return (
     <Modal
       title={task ? "Editar item" : "Nuevo item de discovery"}
-      subtitle={task ? task.name : "Se agrega al tablero del ciclo activo"}
+      subtitle={task ? task.name : "Se agrega al tablero de discovery"}
       onClose={onClose}
       width={540}
     >

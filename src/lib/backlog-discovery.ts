@@ -37,16 +37,12 @@ export interface ImportResult {
   error: string | null;
 }
 
-export async function importBacklogIdeaToDiscovery(
-  cycleId: string,
-  idea: BacklogIdeaRow
-): Promise<ImportResult> {
+export async function importBacklogIdeaToDiscovery(idea: BacklogIdeaRow): Promise<ImportResult> {
   const sb = getSupabase();
 
   const existing = await sb
     .from("discovery_tasks")
     .select("id")
-    .eq("cycle_id", cycleId)
     .eq("backlog_id", idea.id)
     .limit(1);
   if (existing.error) return { task: null, syncedStatus: null, error: existing.error.message };
@@ -60,7 +56,6 @@ export async function importBacklogIdeaToDiscovery(
     const objs = await sb
       .from("discovery_objectives")
       .select("id")
-      .eq("cycle_id", cycleId)
       .eq("obj_num", objNum)
       .limit(1);
     if (!objs.error && objs.data?.length) objective_id = objs.data[0].id;
@@ -69,7 +64,6 @@ export async function importBacklogIdeaToDiscovery(
   const pos = await sb
     .from("discovery_tasks")
     .select("position")
-    .eq("cycle_id", cycleId)
     .order("position", { ascending: false })
     .limit(1);
   const position = pos.data?.length ? pos.data[0].position + 1 : 0;
@@ -78,7 +72,7 @@ export async function importBacklogIdeaToDiscovery(
   const ins = await sb
     .from("discovery_tasks")
     .insert({
-      cycle_id: cycleId,
+      cycle_id: null,
       objective_id,
       backlog_id: idea.id,
       name: idea.idea,

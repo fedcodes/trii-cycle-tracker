@@ -82,9 +82,10 @@ export interface BetUpdateRow {
 export type DiscoveryStageId = "backlog" | "research" | "design" | "ready";
 export type DiscoveryPriority = "high" | "med" | "low";
 
+// Discovery es un tablero único que persiste entre ciclos; cycle_id es legacy (null).
 export interface DiscoveryObjectiveRow {
   id: string;
-  cycle_id: string;
+  cycle_id: string | null;
   obj_num: number;
   name: string;
   short_name: string;
@@ -99,7 +100,7 @@ export interface DiscoveryObjectiveRow {
 
 export interface DiscoveryTaskRow {
   id: string;
-  cycle_id: string;
+  cycle_id: string | null;
   objective_id: string | null; // null = sin objetivo (p. ej. objetivo desactivado)
   backlog_id: string | null; // idea del backlog de la que nació esta task
   name: string;

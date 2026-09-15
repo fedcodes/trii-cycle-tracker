@@ -211,8 +211,8 @@ drop trigger if exists discovery_tasks_updated_at on discovery_tasks;
 create trigger discovery_tasks_updated_at before update on discovery_tasks
   for each row execute function set_updated_at();
 
--- Migración: tasks referencian su ciclo directamente y el objetivo es opcional
--- (desactivar un objetivo en Admin des-asigna sus tasks). Idempotente.
+-- Migración: el objetivo de una task es opcional (desactivar un objetivo en
+-- Admin des-asigna sus tasks). Idempotente.
 alter table discovery_tasks add column if not exists cycle_id uuid references cycles(id) on delete cascade;
 update discovery_tasks t set cycle_id = o.cycle_id
   from discovery_objectives o
@@ -222,14 +222,58 @@ alter table discovery_tasks drop constraint if exists discovery_tasks_objective_
 alter table discovery_tasks add constraint discovery_tasks_objective_id_fkey
   foreign key (objective_id) references discovery_objectives(id) on delete set null;
 
--- Backfill de PO/diseño del catálogo desde las cards del ciclo activo
+-- Backfill de PO/diseño del catálogo desde las cards de Discovery
 -- (solo llena vacíos; va después de crear discovery_objectives).
 update objectives o set
   po = coalesce(d.po, ''),
   designer = coalesce(d.designer, '')
 from discovery_objectives d
-join cycles c on c.id = d.cycle_id and c.is_active
 where d.obj_num = o.num and o.po = '' and o.designer = '';
+
+-- ── Discovery es independiente del ciclo ───────────────────
+-- El tablero de Discovery (cards de objetivos + tasks) es uno solo y persiste
+-- entre ciclos; cycle_id queda como columna legacy nullable y borrar un ciclo
+-- ya no arrastra nada de Discovery. Idempotente.
+alter table discovery_objectives alter column cycle_id drop not null;
+alter table discovery_objectives drop constraint if exists discovery_objectives_cycle_id_fkey;
+alter table discovery_objectives add constraint discovery_objectives_cycle_id_fkey
+  foreign key (cycle_id) references cycles(id) on delete set null;
+alter table discovery_tasks drop constraint if exists discovery_tasks_cycle_id_fkey;
+alter table discovery_tasks add constraint discovery_tasks_cycle_id_fkey
+  foreign key (cycle_id) references cycles(id) on delete set null;
+
+-- Consolidar cards duplicadas por objetivo (una por ciclo hasta ahora): se
+-- conserva la que tiene tasks (luego la que tiene PO), y las tasks de las
+-- demás se re-apuntan a ella antes de borrarlas.
+update discovery_tasks t set objective_id = r.keep_id
+from (
+  select o.id,
+         first_value(o.id) over (
+           partition by o.obj_num
+           order by (select count(*) from discovery_tasks x where x.objective_id = o.id) desc,
+                    (coalesce(o.po, '') <> '') desc,
+                    o.position, o.id
+         ) as keep_id
+  from discovery_objectives o
+) r
+where t.objective_id = r.id and r.id <> r.keep_id;
+
+delete from discovery_objectives
+where id in (
+  select id from (
+    select o.id,
+           row_number() over (
+             partition by o.obj_num
+             order by (select count(*) from discovery_tasks x where x.objective_id = o.id) desc,
+                      (coalesce(o.po, '') <> '') desc,
+                      o.position, o.id
+           ) as rn
+    from discovery_objectives o
+  ) r where r.rn > 1
+);
+
+update discovery_objectives set cycle_id = null where cycle_id is not null;
+update discovery_tasks set cycle_id = null where cycle_id is not null;
 
 -- ── backlog_ideas (Backlog tab — schema matches existing UI) ──
 create table if not exists backlog_ideas (

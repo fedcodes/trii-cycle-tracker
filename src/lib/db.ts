@@ -180,19 +180,12 @@ export interface DiscoveryData {
   tasks: DiscoveryTaskRow[];
 }
 
-export async function fetchDiscovery(cycleId: string): Promise<DiscoveryData> {
+// Tablero único, independiente del ciclo.
+export async function fetchDiscovery(): Promise<DiscoveryData> {
   const sb = getSupabase();
   const [objectives, tasks] = await Promise.all([
-    sb
-      .from("discovery_objectives")
-      .select("*")
-      .eq("cycle_id", cycleId)
-      .order("position", { ascending: true }),
-    sb
-      .from("discovery_tasks")
-      .select("*")
-      .eq("cycle_id", cycleId)
-      .order("position", { ascending: true }),
+    sb.from("discovery_objectives").select("*").order("position", { ascending: true }),
+    sb.from("discovery_tasks").select("*").order("position", { ascending: true }),
   ]);
   if (objectives.error) throw new Error(objectives.error.message);
   if (tasks.error) throw new Error(tasks.error.message);
@@ -202,19 +195,11 @@ export async function fetchDiscovery(cycleId: string): Promise<DiscoveryData> {
   };
 }
 
-// Des-asigna las tasks de un objetivo (por num) en el ciclo activo.
+// Des-asigna las tasks de un objetivo (por num).
 // Se usa al desactivar un objetivo desde Admin.
 export async function unassignObjectiveTasks(objNum: number): Promise<string | null> {
   const sb = getSupabase();
-  const cycles = await sb.from("cycles").select("id").eq("is_active", true);
-  if (cycles.error) return cycles.error.message;
-  const cycleIds = (cycles.data ?? []).map((c) => c.id);
-  if (cycleIds.length === 0) return null;
-  const objs = await sb
-    .from("discovery_objectives")
-    .select("id")
-    .in("cycle_id", cycleIds)
-    .eq("obj_num", objNum);
+  const objs = await sb.from("discovery_objectives").select("id").eq("obj_num", objNum);
   if (objs.error) return objs.error.message;
   const objIds = (objs.data ?? []).map((o) => o.id);
   if (objIds.length === 0) return null;
