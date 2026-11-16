@@ -200,7 +200,7 @@ export default function EstadoDelCiclo({ cycle }: { cycle: CycleRow }) {
             onPatch={(patch) => patchBet(selected.id, patch)}
             onEdit={() => setFormBet(selected)}
             onDelete={() => removeBet(selected.id)}
-            onAddUpdate={(note) => addUpdate(selected.id, note, currentWeek)}
+            onAddUpdate={(note, week) => addUpdate(selected.id, note, week)}
             onDeleteUpdate={removeUpdate}
           />
         )}
@@ -948,7 +948,7 @@ function ProjectDetail({
   onPatch: (patch: Partial<BetRow>) => void;
   onEdit: () => void;
   onDelete: () => void;
-  onAddUpdate: (note: string) => void;
+  onAddUpdate: (note: string, week: number) => void;
   onDeleteUpdate: (id: string) => void;
 }) {
   const { colorOf } = useObjectives();
@@ -956,6 +956,11 @@ function ProjectDetail({
   const t = statusToken(bet.status, bet.dropped);
   const [progressPct, setProgressPct] = useState(Math.round((bet.progress || 0) * 100));
   const [note, setNote] = useState("");
+  const [week, setWeek] = useState(currentWeek);
+
+  useEffect(() => {
+    setWeek(currentWeek);
+  }, [bet.id, currentWeek]);
 
   useEffect(() => {
     setProgressPct(Math.round((bet.progress || 0) * 100));
@@ -976,7 +981,7 @@ function ProjectDetail({
 
   const submitUpdate = () => {
     if (!note.trim()) return;
-    onAddUpdate(note.trim());
+    onAddUpdate(note.trim(), week);
     setNote("");
   };
 
@@ -1218,8 +1223,20 @@ function ProjectDetail({
         </div>
 
         <div style={{ padding: "16px 22px 24px", flex: 1 }}>
-          <div style={{ ...labelStyle, marginBottom: 7 }}>
-            Agregar update · Semana {currentWeek}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 7 }}>
+            <div style={labelStyle}>Agregar update</div>
+            <Select
+              aria-label="Semana del update"
+              value={week}
+              onChange={(e) => setWeek(Number(e.target.value))}
+              style={{ width: 110, padding: "4px 18px 4px 8px", fontSize: 11 }}
+            >
+              {Array.from({ length: cycle.total_weeks }, (_, i) => i + 1).map((w) => (
+                <option key={w} value={w}>
+                  Semana {w}
+                </option>
+              ))}
+            </Select>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 18 }}>
             <TextArea
